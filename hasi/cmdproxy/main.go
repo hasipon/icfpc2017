@@ -28,7 +28,8 @@ func run(cmd string) {
 			if err == io.EOF {
 				break
 			} else if err != nil {
-				panic(err)
+				log.Printf("stdout read Error: %v ; %s\n", err, cmd)
+				continue
 			}
 			log.Println("> " + string(line))
 		}
@@ -40,7 +41,8 @@ func run(cmd string) {
 			if err == io.EOF {
 				break
 			} else if err != nil {
-				panic(err)
+				log.Printf("stderr read Error: %v ; %s\n", err, cmd)
+				continue
 			}
 			log.Println("# " + string(line))
 		}
