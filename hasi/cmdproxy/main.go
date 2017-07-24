@@ -25,7 +25,7 @@ func run(cmd string) {
 		r := bufio.NewReader(stdoutReader)
 		for {
 			line, _, err := r.ReadLine()
-			if err == io.EOF {
+			if err == io.EOF || err == io.ErrClosedPipe {
 				break
 			} else if err != nil {
 				panic(err)
@@ -37,7 +37,7 @@ func run(cmd string) {
 		r := bufio.NewReader(stderrReader)
 		for {
 			line, _, err := r.ReadLine()
-			if err == io.EOF {
+			if err == io.EOF || err == io.ErrClosedPipe {
 				break
 			} else if err != nil {
 				panic(err)
