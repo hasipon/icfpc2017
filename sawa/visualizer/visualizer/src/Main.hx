@@ -12,17 +12,23 @@ import react.ReactTools;
  * @author shohei909
  */
 class Main 
-{	
+{
+    public static var pixiView:PixiView;
+    
 	static function main() 
     {
+        var rootContext = new RootContext();
+        
 		ReactDOM.render(
             React.createElement(
                 RootView,
                 {
-                    context: new RootContext(),
+                    context: rootContext,
                 }
-            ), 
-            Browser.document.getElementById('application')
+            ),
+            Browser.document.getElementById('control')
         );
-	}	
+        
+        new PixiView(rootContext);
+	}
 }
