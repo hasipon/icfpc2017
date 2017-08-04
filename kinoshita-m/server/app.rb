@@ -3,7 +3,7 @@ require 'json'
 require 'monitor'
 require 'optparse'
 
-require './barrier'
+require_relative 'barrier'
 
 # 12:{"me":"bob"}
 # 44:{"claim":{"punter":0,"source":0,"target":1}}
