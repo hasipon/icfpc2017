@@ -14,8 +14,6 @@
 #include <cstdio>
 #include <cstring>
 
-#include "cmdline.h"
-
 #define each(i, c) for (auto& i : c)
 #define unless(cond) if (!(cond))
 
@@ -35,14 +33,46 @@ ostream& operator << (ostream& os, pair<P, Q> p)
 #include "../../common/include/Graph.hpp"
 #include "../../common/algorithms/BFS.hpp"
 #include "../../common/algorithms/bridge.hpp"
+#include "../../common/algorithms/normalize_graph.hpp"
 
 int main(int argc, char *argv[])
 {
-  cmdline::parser a;
+  Graph g;
+  for (int i = 0; i < 5; ++i) {
+    g.mines.push_back(i * 10);
+  }
+  auto fn = [&] (int a, int b) {
+    g.edges.push_back(make_pair(a, b));
+  };
+  fn(0, 10);
+  fn(10, 20);
+  fn(0, 20);
+  fn(20, 30);
+  fn(40, 00);
 
-  a.add<string>("host", 'h', "host name", true, "");
-  a.parse_check(argc, argv);
-  cout << a.get<string>("host") << endl;
+  _graph y(g.mines.size());
+  each (e, g.edges) {
+    y[e.first / 10].push_back(e.second / 10);
+    y[e.second / 10].push_back(e.first / 10);
+  }
+
+  _graph x = normalize_graph(g).second;
+  _graph z = x;
+
+  auto show = [] (_graph g) {
+    for (int i = 0; i < g.size(); ++i) {
+      cout << i << ": ";
+      each (j, g[i]) {
+        cout << j << ' ' ;
+      }
+      cout << endl;
+    }
+  };
+
+  // show(y);
+  // show(z);
+  assert(z == y);
   
+  puts("OK");
   return 0;
 }

@@ -25,7 +25,7 @@ namespace _diamond_princess {
 
 vector<pair<int, int>> find_bridge(const Graph& g)
 {
-  pair<map<int, int>, vector<vector<int>>> norm = normalize_graph(g);
+  pair<map<int, int>, _graph> norm = normalize_graph(g);
 
   const int N = g.mines.size();
   int d[N], p[N], l[N], time = 0;
@@ -38,6 +38,7 @@ vector<pair<int, int>> find_bridge(const Graph& g)
     if (d[i]) continue;
     _diamond_princess::traverse(norm.second, i, d, p, l, time);
   }
+  
   for (int i = 0; i < N; ++i) {
     if (p[i] != -1 && d[i] == l[i]) {
       const int a = norm.first[p[i]];
