@@ -1,5 +1,6 @@
 require "socket"
 require 'optparse'
+require 'pp'
 
 class Client
   def initialize(port, ai_path)
@@ -15,21 +16,23 @@ class Client
   def next_server_message
     ret = receive_messege(server_socket)
     log "<- #{ret}"
+    ret
   end
 
   def next_ai_message
     ret = receive_messege(ai_socket)
     log "-> #{ret}"
+    ret
   end
 
   def send_msg_to_ai(msg)
     log "<- #{msg}"
-    ai_socket.puts(msg)
+    ai_socket.print(msg)
   end
 
   def send_msg_to_server(msg)
     log "-> #{msg}"
-    server_socket.puts(msg)
+    server_socket.print(msg)
   end
 
   def receive_messege(stream)
@@ -73,7 +76,7 @@ client.handshake
 
 # setup
 setup_msg = client.next_server_message
-client.send_msg_to_ai setup_msg
+client.send_msg_to_ai(setup_msg)
 
 # ready
 # client.send_msg_to_server '11:{"ready":0}'
