@@ -42,8 +42,8 @@ pair<map<int, int>, _graph> normalize_graph(const Graph& g)
 
   _graph h(conv.size());
   for (auto& e: g.edges) {
-    int a = conv[e.first];
-    int b = conv[e.second];
+    const int a = conv[e.first];
+    const int b = conv[e.second];
     h[a].emplace_back(b);
     h[b].emplace_back(a);
   }

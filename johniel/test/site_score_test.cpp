@@ -35,7 +35,7 @@ ostream& operator << (ostream& os, pair<P, Q> p)
 
 int main(int argc, char *argv[])
 {
-  Graph g = random_graph(20, 50, 5);
+  Graph g = random_graph(20, 30, 5);
 
   map<int, int> score = site_score(g, g.mines[0]);
   each (i, score) {
