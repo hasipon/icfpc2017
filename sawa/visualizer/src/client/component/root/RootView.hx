@@ -1,6 +1,8 @@
 package component.root;
 import core.RootContext;
+import haxe.ds.Option;
 import js.html.Event;
+import react.React;
 import react.ReactComponent;
 import react.ReactComponent.ReactComponentOfProps;
 
@@ -24,7 +26,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                                 name: "map",
                                 size: "12",
                                 onChange: onSelect,
-                            },
+                            }   ,
                             [for (mapName in props.context.mapNames){
                                 "option".createElement(
                                     {
@@ -51,10 +53,49 @@ class RootView extends ReactComponentOfProps<RootProps>
                     ", river : " + props.context.game.riverCount +
                     ", 最大スコア : " + props.context.game.maxScore
                 ),
+                "div".createElement(
+                    {},
+                    [
+                        "textarea".createElement(
+                            {
+                                placeholder: "ログ",
+                                onChange: onChangeLog,
+                            },
+                            [ props.context.log ]
+                        ),
+                        "button".createElement(
+                            {
+                                onClick: onClickLog
+                            },
+                            ["ログ再生"]
+                        )
+                    ]
+                ),
                 
                 "div".createElement(
                     {},
-                    "version : 1.2"
+                    switch (props.context.playingState)
+                    {
+                        case Option.None: [];
+                        
+                        case Option.Some(playingState):
+                            [
+                                React.createElement(
+                                    PlayingStateView,
+                                    {
+                                        context: playingState,
+                                    }
+                                )
+                            ];
+                    }
+                ),
+                "div".createElement(
+                    {},
+                    if (props.context.warning == null) "" else "エラー：" + props.context.warning
+                ),
+                "div".createElement(
+                    {},
+                    "version : 1.5"
                 ),
             ]
         );
@@ -70,6 +111,15 @@ class RootView extends ReactComponentOfProps<RootProps>
         props.context.select(untyped e.target.selectedIndex);
     }
     
+    private function onClickLog(e:Event):Void
+    {
+        props.context.execLog();
+    }
+    
+    private function onChangeLog(e:Event):Void
+    {
+        props.context.changeLog(untyped e.target.value);
+    }
 }
 
 typedef RootProps = 
