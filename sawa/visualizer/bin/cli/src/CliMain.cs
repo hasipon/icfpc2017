@@ -28,9 +28,13 @@ public class CliMain : global::haxe.lang.HxObject {
 			global::CliMode mode = null;
 			if (( ( args.length > 0 ) && string.Equals(global::haxe.lang.Runtime.toString(args[0]), "on") )) {
 				string host = "punter.inf.ed.ac.uk";
-				int port = 9008;
+				int port = 9001;
 				if (( args.length > 1 )) {
 					port = (global::Std.parseInt(global::haxe.lang.Runtime.toString(args[1]))).@value;
+				}
+				
+				if (( args.length > 2 )) {
+					host = global::haxe.lang.Runtime.toString(args[2]);
 				}
 				
 				mode = global::CliMode.On(host, port);
@@ -40,9 +44,9 @@ public class CliMain : global::haxe.lang.HxObject {
 			}
 			
 			object io = global::CliMain.getIo(mode);
-			new global::game.GameClient(((global::haxe.io.Input) (global::haxe.lang.Runtime.getField(io, "input", 1042138122, true)) ), ((global::haxe.io.Output) (global::haxe.lang.Runtime.getField(io, "output", 209784577, true)) ));
-			global::System.Console.WriteLine(((object) ("finised") ));
-			global::System.Threading.Thread.Sleep(((int) (5000) ));
+			global::game.GameClient client = new global::game.GameClient(((global::haxe.io.Input) (global::haxe.lang.Runtime.getField(io, "input", 1042138122, true)) ), ((global::haxe.io.Output) (global::haxe.lang.Runtime.getField(io, "output", 209784577, true)) ), new global::search.Searcher(((double) (0.9) )));
+			global::sys.io.File.saveContent("output.txt", global::game.GameClient.result);
+			((global::haxe.io.Output) (new global::cs.io.NativeOutput(((global::System.IO.Stream) (global::System.Console.OpenStandardError()) ))) ).writeString("finised\n");
 		}
 	}
 	
@@ -52,6 +56,11 @@ public class CliMain : global::haxe.lang.HxObject {
 			switch (mode.index) {
 				case 0:
 				{
+					{
+						System.Type __temp_dynop1 = typeof(global::game.GameClient);
+						global::game.GameClient.result = global::haxe.lang.Runtime.concat(global::game.GameClient.result, "{you:\"shohei909\"}\n");
+					}
+					
 					{
 						global::haxe.io.Input __temp_odecl1 = ((global::haxe.io.Input) (new global::cs.io.NativeInput(((global::System.IO.Stream) (global::System.Console.OpenStandardInput()) ))) );
 						global::haxe.io.Output __temp_odecl2 = ((global::haxe.io.Output) (new global::cs.io.NativeOutput(((global::System.IO.Stream) (global::System.Console.OpenStandardOutput()) ))) );

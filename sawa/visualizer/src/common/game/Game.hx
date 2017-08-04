@@ -9,8 +9,6 @@ import game.command.SetupStruct;
 
 class Game 
 {
-    public static var MAX_DISTANCE = 20;
-    public static var MS_TABLE = [for (i in 0...MAX_DISTANCE) 2048 * Math.pow(0.5, i)];
     
     public var sites:Map<SiteId, Site>;
     public var mines:Map<SiteId, Site>;
@@ -144,12 +142,16 @@ class Game
         moves.push(move);
     }
     
+    public function addMoves(moves:Array<MoveStruct>):Void
+    {
+        for (move in moves) addMove(move);
+    }
+    
     public function claim(move:ClaimStruct):Void
     {
         var river = sites[move.source].rivers[move.target];
         river.owner = move.punter;
         punters[move.punter].score = -1;
-        
     }
     
     public function pass(punter:PunterId):Void
@@ -160,5 +162,10 @@ class Game
     public function applyScore(punter:PunterId, score:Int):Void
     {
         punters[punter].score = score;
+    }
+    
+    public function getLivingRivers():Array<River>
+    {
+        return [for (river in rivers) if (river.owner == PunterId.NotFound) river];
     }
 }

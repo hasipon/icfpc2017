@@ -1,10 +1,14 @@
 package game;
+import game.command.MoveOrStopStruct;
+import game.command.MoveStruct;
 import game.command.SetupStruct;
 import haxe.Json;
 import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import haxe.io.Input;
 import haxe.io.Output;
+import search.Searcher;
+import sys.io.File;
 
 class GameClient 
 {
@@ -12,19 +16,47 @@ class GameClient
     public var input:Input;
     public var output:Output;
     public var game:Game;
+    public var searcher:Searcher;
+    public var punter:PunterId;
+    public static var result:String = "";
     
-    public function new(input:Input, output:Output) 
-    {
+    public function new(input:Input, output:Output, searcher:Searcher) 
+    {   
+        this.searcher = searcher;
         this.stderr = Sys.stderr();
         this.input = input;
+        this.output = output;
         this.game = new Game();
+        this.punter = PunterId.NotFound;
         waitSetup();
+        
+        while (waitMove()) {}
     }
     
     private function waitSetup():Void
     {
         var setupData:SetupStruct = waitData(input);
+        
         game.setup(setupData);
+        punter = setupData.punter;
+        writeData(output, { ready: setupData.punter });
+    }
+    
+    private function waitMove():Bool
+    {
+        var moveOrStopData:MoveOrStopStruct = waitData(input);
+        
+        return if (moveOrStopData.stop != null)
+        {
+            game.addMoves(moveOrStopData.stop.moves);
+            false;
+        }
+        else
+        {
+            game.addMoves(moveOrStopData.move.moves);
+            writeData(output, searcher.getMove(game, punter));
+            true;
+        }
     }
     
     public static function debug(string:String):Void
@@ -32,7 +64,15 @@ class GameClient
         Sys.stderr().writeString(string + "\n");
     }
     
+    private static var ereg = ~/(\r|\n)/g;
     public static function waitData(input:Input):Dynamic
+    {
+        var content = waitContent(input);
+        result += ereg.replace(content, "") + "\n";
+        return Json.parse(content);
+    }
+    
+    public static function waitContent(input:Input):String
     {
         var numberOutput = new BytesOutput();
         while (true)
@@ -58,7 +98,7 @@ class GameClient
         
         var content = jsonOutput.getBytes().toString();
         debug("input: " + content);
-        return Json.parse(content);
+        return content;
     }
     
     public static function writeData(output:Output, data:Dynamic):Void

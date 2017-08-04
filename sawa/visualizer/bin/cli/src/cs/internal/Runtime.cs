@@ -106,6 +106,41 @@ namespace haxe.lang {
 					}
 					
 					
+					case global::System.TypeCode.UInt64:
+					case global::System.TypeCode.DateTime:
+					{
+						switch (t2) {
+							case global::System.TypeCode.Int64:
+							{
+								return ( ((long) (v1c.ToInt64(default(global::System.IFormatProvider))) ) == ((long) (v2c.ToInt64(default(global::System.IFormatProvider))) ) );
+							}
+							
+							
+							case global::System.TypeCode.UInt64:
+							case global::System.TypeCode.Single:
+							case global::System.TypeCode.Double:
+							case global::System.TypeCode.DateTime:
+							{
+								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
+							}
+							
+							
+							case global::System.TypeCode.Decimal:
+							{
+								return v1c.ToDecimal(default(global::System.IFormatProvider)).Equals(v2c.ToDecimal(default(global::System.IFormatProvider)));
+							}
+							
+							
+							default:
+							{
+								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
+							}
+							
+						}
+						
+					}
+					
+					
 					case global::System.TypeCode.Single:
 					case global::System.TypeCode.Double:
 					{
@@ -113,6 +148,13 @@ namespace haxe.lang {
 							case global::System.TypeCode.Int64:
 							{
 								return ( ((long) (v1c.ToInt64(default(global::System.IFormatProvider))) ) == ((long) (v2c.ToInt64(default(global::System.IFormatProvider))) ) );
+							}
+							
+							
+							case global::System.TypeCode.UInt64:
+							case global::System.TypeCode.DateTime:
+							{
+								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
 							}
 							
 							
@@ -126,13 +168,6 @@ namespace haxe.lang {
 							case global::System.TypeCode.Decimal:
 							{
 								return v1c.ToDecimal(default(global::System.IFormatProvider)).Equals(v2c.ToDecimal(default(global::System.IFormatProvider)));
-							}
-							
-							
-							case global::System.TypeCode.UInt64:
-							case global::System.TypeCode.DateTime:
-							{
-								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
 							}
 							
 							
@@ -152,47 +187,19 @@ namespace haxe.lang {
 					}
 					
 					
-					case global::System.TypeCode.UInt64:
-					case global::System.TypeCode.DateTime:
-					{
-						switch (t2) {
-							case global::System.TypeCode.Int64:
-							{
-								return ( ((long) (v1c.ToInt64(default(global::System.IFormatProvider))) ) == ((long) (v2c.ToInt64(default(global::System.IFormatProvider))) ) );
-							}
-							
-							
-							case global::System.TypeCode.Decimal:
-							{
-								return v1c.ToDecimal(default(global::System.IFormatProvider)).Equals(v2c.ToDecimal(default(global::System.IFormatProvider)));
-							}
-							
-							
-							case global::System.TypeCode.UInt64:
-							case global::System.TypeCode.Single:
-							case global::System.TypeCode.Double:
-							case global::System.TypeCode.DateTime:
-							{
-								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
-							}
-							
-							
-							default:
-							{
-								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
-							}
-							
-						}
-						
-					}
-					
-					
 					default:
 					{
 						switch (t2) {
 							case global::System.TypeCode.Int64:
 							{
 								return ( ((long) (v1c.ToInt64(default(global::System.IFormatProvider))) ) == ((long) (v2c.ToInt64(default(global::System.IFormatProvider))) ) );
+							}
+							
+							
+							case global::System.TypeCode.UInt64:
+							case global::System.TypeCode.DateTime:
+							{
+								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
 							}
 							
 							
@@ -206,13 +213,6 @@ namespace haxe.lang {
 							case global::System.TypeCode.Decimal:
 							{
 								return v1c.ToDecimal(default(global::System.IFormatProvider)).Equals(v2c.ToDecimal(default(global::System.IFormatProvider)));
-							}
-							
-							
-							case global::System.TypeCode.UInt64:
-							case global::System.TypeCode.DateTime:
-							{
-								return ( v1c.ToUInt64(default(global::System.IFormatProvider)) == v2c.ToUInt64(default(global::System.IFormatProvider)) );
 							}
 							
 							

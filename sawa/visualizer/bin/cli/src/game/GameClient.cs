@@ -4,29 +4,56 @@
 namespace game {
 	public class GameClient : global::haxe.lang.HxObject {
 		
+		static GameClient() {
+			global::game.GameClient.result = "";
+			global::game.GameClient.ereg = new global::EReg("(\r|\n)", "g");
+		}
+		
+		
 		public GameClient(global::haxe.lang.EmptyObject empty) {
 		}
 		
 		
-		public GameClient(global::haxe.io.Input input, global::haxe.io.Output output) {
-			global::game.GameClient.__hx_ctor_game_GameClient(this, input, output);
+		public GameClient(global::haxe.io.Input input, global::haxe.io.Output output, global::search.Searcher searcher) {
+			global::game.GameClient.__hx_ctor_game_GameClient(this, input, output, searcher);
 		}
 		
 		
-		public static void __hx_ctor_game_GameClient(global::game.GameClient __hx_this, global::haxe.io.Input input, global::haxe.io.Output output) {
+		public static void __hx_ctor_game_GameClient(global::game.GameClient __hx_this, global::haxe.io.Input input, global::haxe.io.Output output, global::search.Searcher searcher) {
+			__hx_this.searcher = searcher;
 			__hx_this.stderr = ((global::haxe.io.Output) (new global::cs.io.NativeOutput(((global::System.IO.Stream) (global::System.Console.OpenStandardError()) ))) );
 			__hx_this.input = input;
+			__hx_this.output = output;
 			__hx_this.game = new global::game.Game();
+			__hx_this.punter = global::game._PunterId.PunterId_Impl_.NotFound;
 			__hx_this.waitSetup();
+			while (__hx_this.waitMove()) {
+			}
+			
 		}
 		
+		
+		public static string result;
 		
 		public static void debug(string @string) {
 			((global::haxe.io.Output) (new global::cs.io.NativeOutput(((global::System.IO.Stream) (global::System.Console.OpenStandardError()) ))) ).writeString(global::haxe.lang.Runtime.concat(@string, "\n"));
 		}
 		
 		
+		public static global::EReg ereg;
+		
 		public static object waitData(global::haxe.io.Input input) {
+			string content = global::game.GameClient.waitContent(input);
+			{
+				System.Type __temp_dynop1 = typeof(global::game.GameClient);
+				global::game.GameClient.result = global::haxe.lang.Runtime.concat(global::game.GameClient.result, global::haxe.lang.Runtime.concat(global::game.GameClient.ereg.replace(content, ""), "\n"));
+			}
+			
+			return new global::haxe.format.JsonParser(((string) (content) )).parseRec();
+		}
+		
+		
+		public static string waitContent(global::haxe.io.Input input) {
 			unchecked {
 				global::haxe.io.BytesOutput numberOutput = new global::haxe.io.BytesOutput();
 				while (true) {
@@ -55,7 +82,7 @@ namespace game {
 				
 				string content = jsonOutput.getBytes().toString();
 				global::game.GameClient.debug(global::haxe.lang.Runtime.concat("input: ", content));
-				return new global::haxe.format.JsonParser(((string) (content) )).parseRec();
+				return content;
 			}
 		}
 		
@@ -78,15 +105,77 @@ namespace game {
 		
 		public global::game.Game game;
 		
+		public global::search.Searcher searcher;
+		
+		public int punter;
+		
 		public virtual void waitSetup() {
 			object setupData = global::game.GameClient.waitData(this.input);
 			this.game.setup(setupData);
+			this.punter = ((int) (global::haxe.lang.Runtime.getField_f(setupData, "punter", 1860705976, true)) );
+			object __temp_stmt2 = null;
+			{
+				int __temp_odecl1 = ((int) (global::haxe.lang.Runtime.getField_f(setupData, "punter", 1860705976, true)) );
+				__temp_stmt2 = new global::haxe.lang.DynamicObject(new int[]{}, new object[]{}, new int[]{1723506787}, new double[]{((double) (__temp_odecl1) )});
+			}
+			
+			global::game.GameClient.writeData(this.output, __temp_stmt2);
+		}
+		
+		
+		public virtual bool waitMove() {
+			object moveOrStopData = global::game.GameClient.waitData(this.input);
+			if (( global::haxe.lang.Runtime.getField(moveOrStopData, "stop", 1281093634, true) != null )) {
+				this.game.addMoves(((global::Array<object>) (global::Array<object>.__hx_cast<object>(((global::Array) (global::haxe.lang.Runtime.getField(global::haxe.lang.Runtime.getField(moveOrStopData, "stop", 1281093634, true), "moves", 207998018, true)) ))) ));
+				return false;
+			}
+			else {
+				this.game.addMoves(((global::Array<object>) (global::Array<object>.__hx_cast<object>(((global::Array) (global::haxe.lang.Runtime.getField(global::haxe.lang.Runtime.getField(moveOrStopData, "move", 1214309137, true), "moves", 207998018, true)) ))) ));
+				global::game.GameClient.writeData(this.output, this.searcher.getMove(this.game, this.punter));
+				return true;
+			}
+			
+		}
+		
+		
+		public override double __hx_setField_f(string field, int hash, double @value, bool handleProperties) {
+			unchecked {
+				switch (hash) {
+					case 1860705976:
+					{
+						this.punter = ((int) (@value) );
+						return @value;
+					}
+					
+					
+					default:
+					{
+						return base.__hx_setField_f(field, hash, @value, handleProperties);
+					}
+					
+				}
+				
+			}
 		}
 		
 		
 		public override object __hx_setField(string field, int hash, object @value, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 1860705976:
+					{
+						this.punter = ((int) (global::haxe.lang.Runtime.toInt(@value)) );
+						return @value;
+					}
+					
+					
+					case 1202495957:
+					{
+						this.searcher = ((global::search.Searcher) (@value) );
+						return @value;
+					}
+					
+					
 					case 1147073522:
 					{
 						this.game = ((global::game.Game) (@value) );
@@ -129,9 +218,27 @@ namespace game {
 		public override object __hx_getField(string field, int hash, bool throwErrors, bool isCheck, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 1363363878:
+					{
+						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "waitMove", 1363363878)) );
+					}
+					
+					
 					case 929414088:
 					{
 						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "waitSetup", 929414088)) );
+					}
+					
+					
+					case 1860705976:
+					{
+						return this.punter;
+					}
+					
+					
+					case 1202495957:
+					{
+						return this.searcher;
 					}
 					
 					
@@ -170,9 +277,35 @@ namespace game {
 		}
 		
 		
+		public override double __hx_getField_f(string field, int hash, bool throwErrors, bool handleProperties) {
+			unchecked {
+				switch (hash) {
+					case 1860705976:
+					{
+						return ((double) (this.punter) );
+					}
+					
+					
+					default:
+					{
+						return base.__hx_getField_f(field, hash, throwErrors, handleProperties);
+					}
+					
+				}
+				
+			}
+		}
+		
+		
 		public override object __hx_invokeField(string field, int hash, global::Array dynargs) {
 			unchecked {
 				switch (hash) {
+					case 1363363878:
+					{
+						return this.waitMove();
+					}
+					
+					
 					case 929414088:
 					{
 						this.waitSetup();
@@ -193,6 +326,8 @@ namespace game {
 		
 		
 		public override void __hx_getFields(global::Array<object> baseArr) {
+			baseArr.push("punter");
+			baseArr.push("searcher");
 			baseArr.push("game");
 			baseArr.push("output");
 			baseArr.push("input");

@@ -6,7 +6,7 @@
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace></RootNamespace>
-    <AssemblyName>CliMain</AssemblyName>
+    <AssemblyName>CliMain-Debug</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -85,8 +85,6 @@
 	
     <Compile Include="src\Date.cs"/>
 	
-    <Compile Include="src\sys\io\FileOutput.cs"/>
-	
     <Compile Include="src\haxe\io\Error.cs"/>
 	
     <Compile Include="src\game\Game.cs"/>
@@ -115,8 +113,6 @@
 	
     <Compile Include="src\cs\io\NativeOutput.cs"/>
 	
-    <Compile Include="src\EReg.cs"/>
-	
     <Compile Include="src\game\PunterId.cs"/>
 	
     <Compile Include="src\cs\internal\HxObject.cs"/>
@@ -128,8 +124,6 @@
     <Compile Include="src\game\Site.cs"/>
 	
     <Compile Include="src\cs\internal\FieldLookup.cs"/>
-	
-    <Compile Include="src\sys\io\File.cs"/>
 	
     <Compile Include="src\game\GameClient.cs"/>
 	

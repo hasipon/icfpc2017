@@ -4,6 +4,8 @@ import cs.Lib;
 import game.GameClient;
 import haxe.io.Input;
 import haxe.io.Output;
+import search.Searcher;
+import sys.io.File;
 import sys.net.Host;
 import sys.net.Socket;
 
@@ -15,12 +17,15 @@ class CliMain
 		var mode = if (args.length > 0 && args[0] == "on")
         {
             var host = "punter.inf.ed.ac.uk";
-            var port = 9008;
+            var port = 9001;
             if (args.length > 1)
             {
                 port = Std.parseInt(args[1]);
             }
-            
+            if (args.length > 2)
+            {
+                host = args[2];
+            }
             CliMode.On(host, port);
         }
         else
@@ -29,17 +34,17 @@ class CliMain
         }
         
         var io = getIo(mode);
-        new GameClient(io.input, io.output);
-        
-        Sys.println("finised");
-        Sys.sleep(5.0);
-	}	
+        var client = new GameClient(io.input, io.output, new Searcher(0.9));
+        File.saveContent("output.txt", GameClient.result);
+        Sys.stderr().writeString("finised\n");
+    }	
     
     public static function getIo(mode:CliMode):{input:Input, output:Output}
     {
         return switch (mode)
         {
             case CliMode.Off:
+                GameClient.result += '{you:"shohei909"}\n';
                 {
                     input: Sys.stdin(),
                     output: Sys.stdout(),

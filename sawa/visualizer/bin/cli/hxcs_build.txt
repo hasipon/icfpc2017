@@ -237,6 +237,8 @@ M System.UInt32
 M cs.system.threading.ThreadPriority
 M System.Reflection.Emit.PropertyToken
 M System.Text.RegularExpressions.RegexRunner
+M sys.io.FileOutput
+C sys.io.FileOutput
 M cs.system.net.sockets.SocketAsyncOperation
 M haxe.io.Error
 E haxe.io.Error
@@ -296,6 +298,8 @@ M System.Double
 M cs.system.io.DirectoryInfo
 M haxe.io.Bytes
 C haxe.io.Bytes
+M search.Searcher
+C search.Searcher
 M cs.system.net.sockets.AddressFamily
 M System.Security.AccessControl.EventWaitHandleSecurity
 M System.Security.AccessControl.FileSystemAccessRule
@@ -469,6 +473,8 @@ M game.Set
 M System.Collections.Generic.ICollection`1
 M cs.system.security.policy.TrustManagerUIContext
 M System.Reflection.IReflect
+M EReg
+C EReg
 M System.Reflection.Emit.AssemblyBuilder
 M System.Math
 M cs.system.security.policy.PolicyStatementAttribute
@@ -517,6 +523,8 @@ M System.Object
 M cs.system.diagnostics.ThreadState
 M System.Runtime.Serialization.SerializationInfoEnumerator
 M System.RuntimeTypeHandle
+M sys.io.File
+C sys.io.File
 M cs.system.diagnostics.ProcessWindowStyle
 M cs.system.reflection.MemberFilter
 M System.Reflection.MethodBody
@@ -530,6 +538,7 @@ M game.GameClient
 C game.GameClient
 M System.Runtime.InteropServices._MethodInfo
 M System.ConsoleKeyInfo
+M game.command.ScoreStruct
 M System.Security.SecurityState
 M cs.system.DateTimeKind
 M cs.system.CrossAppDomainDelegate
@@ -592,6 +601,7 @@ M cs.system.globalization.CalendarWeekRule
 M cs.system.reflection.ImageFileMachine
 M System.Reflection.Emit.FieldBuilder
 M System.Text.RegularExpressions.CaptureCollection
+M game.command.MoveOrStopStruct
 M cs.system.runtime.serialization.StreamingContextStates
 M cs.system.reflection.ProcessorArchitecture
 M cs.system.security.accesscontrol.PropagationFlags

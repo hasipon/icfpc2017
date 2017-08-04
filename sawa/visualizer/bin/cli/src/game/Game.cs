@@ -4,31 +4,6 @@
 namespace game {
 	public class Game : global::haxe.lang.HxObject {
 		
-		static Game() {
-			unchecked {
-				global::game.Game.MAX_DISTANCE = 20;
-				object __temp_stmt2 = null;
-				{
-					global::Array<double> _g = new global::Array<double>(new double[]{});
-					{
-						int _g2 = 0;
-						int _g1 = global::game.Game.MAX_DISTANCE;
-						while (( _g2 < _g1 )) {
-							int i = _g2++;
-							_g.push(( 2048 * global::System.Math.Pow(((double) (0.5) ), ((double) (i) )) ));
-						}
-						
-					}
-					
-					__temp_stmt2 = _g;
-				}
-				
-				object __temp_stmt1 = global::Array<object>.__hx_cast<double>(((global::Array) (__temp_stmt2) ));
-				global::game.Game.MS_TABLE = ((global::Array<double>) (__temp_stmt1) );
-			}
-		}
-		
-		
 		public Game(global::haxe.lang.EmptyObject empty) {
 		}
 		
@@ -51,10 +26,6 @@ namespace game {
 			__hx_this.moves = new global::Array<object>(new object[]{});
 		}
 		
-		
-		public static int MAX_DISTANCE;
-		
-		public static global::Array<double> MS_TABLE;
 		
 		public global::haxe.IMap<int, object> sites;
 		
@@ -226,6 +197,17 @@ namespace game {
 		}
 		
 		
+		public virtual void addMoves(global::Array<object> moves) {
+			int _g = 0;
+			while (( _g < moves.length )) {
+				object move = moves[_g];
+				 ++ _g;
+				this.addMove(move);
+			}
+			
+		}
+		
+		
 		public virtual void claim(object move) {
 			unchecked {
 				global::game.River river = ((global::game.River) ((((global::haxe.IMap<int, object>) (((global::game.Site) ((((global::haxe.IMap<int, object>) (this.sites) ).@get(((int) (global::haxe.lang.Runtime.getField_f(move, "source", 842117339, true)) ))).@value) ).rivers) ).@get(((int) (global::haxe.lang.Runtime.getField_f(move, "target", 116192081, true)) ))).@value) );
@@ -241,6 +223,24 @@ namespace game {
 		
 		public virtual void applyScore(int punter, int score) {
 			((global::game.Punter) ((((global::haxe.ds.IntMap<object>) (global::haxe.ds.IntMap<object>.__hx_cast<object>(((global::haxe.ds.IntMap) (((global::haxe.IMap<int, object>) (this.punters) )) ))) ).@get(punter)).@value) ).score = score;
+		}
+		
+		
+		public virtual global::Array<object> getLivingRivers() {
+			global::Array<object> _g = new global::Array<object>(new object[]{});
+			{
+				object river = ((object) (new global::haxe.ds._IntMap.IntMapValueIterator<object>(((global::haxe.ds.IntMap<object>) (global::haxe.ds.IntMap<object>.__hx_cast<object>(((global::haxe.ds.IntMap) (((global::haxe.IMap<int, object>) (this.rivers) )) ))) ))) );
+				while (global::haxe.lang.Runtime.toBool(global::haxe.lang.Runtime.callField(river, "hasNext", 407283053, null))) {
+					global::game.River river1 = ((global::game.River) (global::haxe.lang.Runtime.callField(river, "next", 1224901875, null)) );
+					if (( river1.owner == global::game._PunterId.PunterId_Impl_.NotFound )) {
+						_g.push(river1);
+					}
+					
+				}
+				
+			}
+			
+			return _g;
 		}
 		
 		
@@ -373,6 +373,12 @@ namespace game {
 		public override object __hx_getField(string field, int hash, bool throwErrors, bool isCheck, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 1034971558:
+					{
+						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "getLivingRivers", 1034971558)) );
+					}
+					
+					
 					case 606793476:
 					{
 						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "applyScore", 606793476)) );
@@ -388,6 +394,12 @@ namespace game {
 					case 1213755260:
 					{
 						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "claim", 1213755260)) );
+					}
+					
+					
+					case 96662113:
+					{
+						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "addMoves", 96662113)) );
 					}
 					
 					
@@ -527,6 +539,12 @@ namespace game {
 		public override object __hx_invokeField(string field, int hash, global::Array dynargs) {
 			unchecked {
 				switch (hash) {
+					case 1034971558:
+					{
+						return this.getLivingRivers();
+					}
+					
+					
 					case 606793476:
 					{
 						this.applyScore(((int) (global::haxe.lang.Runtime.toInt(dynargs[0])) ), ((int) (global::haxe.lang.Runtime.toInt(dynargs[1])) ));
@@ -544,6 +562,13 @@ namespace game {
 					case 1213755260:
 					{
 						this.claim(dynargs[0]);
+						break;
+					}
+					
+					
+					case 96662113:
+					{
+						this.addMoves(((global::Array<object>) (global::Array<object>.__hx_cast<object>(((global::Array) (dynargs[0]) ))) ));
 						break;
 					}
 					
