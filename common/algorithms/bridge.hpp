@@ -27,7 +27,7 @@ vector<pair<int, int>> find_bridge(const Graph& g)
 {
   pair<map<int, int>, _graph> norm = normalize_graph(g);
 
-  const int N = g.mines.size();
+  const int N = norm.first.size();
   int d[N], p[N], l[N], time = 0;
   vector<Edge> B;
 

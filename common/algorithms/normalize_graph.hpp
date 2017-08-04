@@ -29,11 +29,14 @@ pair<map<int, int>, _graph> normalize_graph(const Graph& g)
 {
   map<int, int> conv;
   map<int, int> rev;
-  for (auto& i: g.mines) {
-    if (conv.count(i) == 0) {
-      const int n = conv.size();
-      conv[i] = n;
-      rev[n] = i;
+  for (auto& e: g.edges) {
+    vector<int> v({e.first, e.second});
+    for (auto& i: v) {
+      if (conv.count(i) == 0) {
+        const int n = conv.size();
+        conv[i] = n;
+        rev[n] = i;
+      }
     }
   }
 
