@@ -14,24 +14,26 @@ class Client
   end
 
   def next_server_message
+    log "wait server message"
     ret = receive_messege(server_socket)
-    log "<- #{ret}"
+    log "me <- server\n#{ret}"
     ret
   end
 
   def next_ai_message
+    log "wait ai message"
     ret = receive_messege(ai_socket)
-    log "-> #{ret}"
+    log "ai -> me\n#{ret}"
     ret
   end
 
   def send_msg_to_ai(msg)
-    log "<- #{msg}"
+    log "ai <- me\n#{msg}"
     ai_socket.print(msg)
   end
 
   def send_msg_to_server(msg)
-    log "-> #{msg}"
+    log "me -> server\n#{msg}"
     server_socket.print(msg)
   end
 
@@ -87,5 +89,7 @@ client.send_msg_to_server ready_msg
 
 while msg = client.next_server_message
   client.send_msg_to_ai msg
+  msg = client.next_ai_message
+  client.send_msg_to_server msg
 end
 
