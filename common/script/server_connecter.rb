@@ -66,7 +66,7 @@ class Client
   end
 
   def response_log(msg)
-    @log_file.puts(msg)
+    @log_file.puts(msg.gsub(/(\r\n|\r|\n|\f)/,""))
   end
 
   def logfile_name
