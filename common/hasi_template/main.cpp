@@ -238,6 +238,19 @@ struct io_Main {
 					}
 				}
 			} else if (k == "stop") {
+				stop = true;
+				s->start_object();
+				for (; !s->end_object(); s->read_separator()) {
+					auto kk = s->read_key();
+					if (kk == "moves") {
+						s->start_array();
+						for (; !s->end_array(); s->read_separator()) {
+							moves.push_back(read_move(s));
+						}
+					} else {
+						s->read_value();
+					}
+				}
 			} else {
 				s->read_value();
 			}
