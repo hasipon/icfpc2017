@@ -14,7 +14,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 className: "root",
             },
             [
-                "Hello World",
+                "",
             ]
         );
     }
