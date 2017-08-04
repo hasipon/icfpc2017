@@ -7,6 +7,17 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
+var EReg = function(r,opt) {
+	this.r = new RegExp(r,opt.split("u").join(""));
+};
+EReg.__name__ = true;
+EReg.prototype = {
+	split: function(s) {
+		var d = "#__delim__#";
+		return s.replace(this.r,d).split(d);
+	}
+	,__class__: EReg
+};
 var HxOverrides = function() { };
 HxOverrides.__name__ = true;
 HxOverrides.cca = function(s,index) {
@@ -40,6 +51,7 @@ Main.__name__ = true;
 Main.main = function() {
 	Main.rootContext = new core_RootContext();
 	Main.rootPixi = new PixiView(Main.rootContext);
+	Main.rootPixi.onUpdate = ($_=Main.rootContext,$bind($_,$_.onFrame));
 	Main.rootContext.updateUi = Main.render;
 	Main.rootContext.updatePixi = ($_=Main.rootPixi,$bind($_,$_.update));
 	Main.render();
@@ -409,7 +421,6 @@ var PixiView = function(rootContext) {
 	this.backgroundColor = 26214;
 	this.transparent = true;
 	this.antialias = false;
-	this.onUpdate = $bind(this,this.updateHandler);
 	pixi_plugins_app_Application.prototype.start.call(this,"auto",window.document.getElementById("pixi"));
 	this._graphic = new PIXI.Graphics();
 	this.drawBackground();
@@ -430,18 +441,16 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 		this._graphic.drawRect(0,0,PixiView.WIDTH,PixiView.HEIGHT);
 		this._graphic.endFill();
 	}
-	,updateHandler: function(t) {
-	}
 	,update: function() {
 		this.drawBackground();
-		var game = this.rootContext.game;
+		var game1 = this.rootContext.game;
 		var viewWidth = 600;
 		var viewHeight = 600;
 		var top = Infinity;
 		var bottom = -Infinity;
 		var left = Infinity;
 		var right = -Infinity;
-		var site = game.sites.iterator();
+		var site = game1.sites.iterator();
 		while(site.hasNext()) {
 			var site1 = site.next();
 			if(top > site1.y) {
@@ -457,23 +466,40 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 				right = site1.x;
 			}
 		}
-		this._graphic.lineStyle(1,2228428,0.3);
-		var river = game.rivers.iterator();
+		var you;
+		var _g = this.rootContext.playingState;
+		switch(_g[1]) {
+		case 0:
+			var _playingState = _g[2];
+			you = _playingState.you;
+			break;
+		case 1:
+			you = game__$PunterId_PunterId_$Impl_$.NotFound;
+			break;
+		}
+		var river = game1.rivers.iterator();
 		while(river.hasNext()) {
 			var river1 = river.next();
-			var rate = (game.sites.get(river1.a).x - left) / (right - left);
+			var rate = (game1.sites.get(river1.a).x - left) / (right - left);
 			var ax = 20 * (1 - rate) + (PixiView.WIDTH - 20) * rate;
-			var rate1 = (game.sites.get(river1.a).y - top) / (bottom - top);
+			var rate1 = (game1.sites.get(river1.a).y - top) / (bottom - top);
 			var ay = 20 * (1 - rate1) + (PixiView.HEIGHT - 20) * rate1;
-			var rate2 = (game.sites.get(river1.b).x - left) / (right - left);
+			var rate2 = (game1.sites.get(river1.b).x - left) / (right - left);
 			var bx = 20 * (1 - rate2) + (PixiView.WIDTH - 20) * rate2;
-			var rate3 = (game.sites.get(river1.b).y - top) / (bottom - top);
+			var rate3 = (game1.sites.get(river1.b).y - top) / (bottom - top);
 			var by = 20 * (1 - rate3) + (PixiView.HEIGHT - 20) * rate3;
+			if(river1.owner == game__$PunterId_PunterId_$Impl_$.NotFound) {
+				this._graphic.lineStyle(1,6710886,0.1);
+			} else if(river1.owner == you) {
+				this._graphic.lineStyle(1,16711680,0.6);
+			} else {
+				this._graphic.lineStyle(1,PixiView.COLORS[river1.owner % PixiView.COLORS.length],0.6);
+			}
 			this._graphic.moveTo(ax,ay);
 			this._graphic.lineTo(bx,by);
 		}
 		this._graphic.lineStyle(1,52258,0.8);
-		var site2 = game.sites.iterator();
+		var site2 = game1.sites.iterator();
 		while(site2.hasNext()) {
 			var site3 = site2.next();
 			var rate4 = (site3.x - left) / (right - left);
@@ -483,7 +509,7 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 			this._graphic.drawCircle(x,y,5);
 		}
 		this._graphic.lineStyle(1,13369378,0.8);
-		var site4 = game.mines.iterator();
+		var site4 = game1.mines.iterator();
 		while(site4.hasNext()) {
 			var site5 = site4.next();
 			var rate6 = (site5.x - left) / (right - left);
@@ -510,6 +536,32 @@ Std.__name__ = true;
 Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
+var component_root_PlayingStateView = function(props) {
+	React.Component.call(this,props);
+};
+component_root_PlayingStateView.__name__ = true;
+component_root_PlayingStateView.__super__ = React.Component;
+component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
+	render: function() {
+		var context = this.props.context;
+		var data = "スコア：";
+		var _g = 0;
+		var _g1 = this.props.context.scores;
+		while(_g < _g1.length) {
+			var scoreStruct = _g1[_g];
+			++_g;
+			data += scoreStruct.punter + "番";
+			if(context.you == scoreStruct.punter) {
+				data += "(あなた)";
+			}
+			data += ":";
+			data += scoreStruct.score;
+			data += ", ";
+		}
+		return react_ReactStringTools.createElement("div",{ className : "result"},[data]);
+	}
+	,__class__: component_root_PlayingStateView
+});
 var component_root_RootView = function(props) {
 	React.Component.call(this,props);
 };
@@ -530,8 +582,24 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClick)},["表示"]);
 		var tmp2 = react_ReactStringTools.createElement("div",{ },[tmp,tmp1]);
 		var tmp3 = react_ReactStringTools.createElement("div",{ },"site : " + this.props.context.game.siteCount + ", mine : " + this.props.context.game.mineCount + ", river : " + this.props.context.game.riverCount + ", 最大スコア : " + this.props.context.game.maxScore);
-		var tmp4 = react_ReactStringTools.createElement("div",{ },"version : 1.1");
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp4]);
+		var tmp4 = react_ReactStringTools.createElement("textarea",{ placeholder : "ログ", onChange : $bind(this,this.onChangeLog)},[this.props.context.log]);
+		var tmp5 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClickLog)},["ログ再生"]);
+		var tmp6 = react_ReactStringTools.createElement("div",{ },[tmp4,tmp5]);
+		var _g11 = this.props.context.playingState;
+		var tmp7;
+		switch(_g11[1]) {
+		case 0:
+			var playingState = _g11[2];
+			tmp7 = [React.createElement(component_root_PlayingStateView,{ context : playingState})];
+			break;
+		case 1:
+			tmp7 = [];
+			break;
+		}
+		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
+		var tmp9 = react_ReactStringTools.createElement("div",{ },this.props.context.warning == null ? "" : "エラー：" + this.props.context.warning);
+		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 1.3");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp6,tmp8,tmp9,tmp10]);
 	}
 	,onClick: function(e) {
 		this.props.context.exec();
@@ -539,12 +607,44 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 	,onSelect: function(e) {
 		this.props.context.select(e.target.selectedIndex);
 	}
+	,onClickLog: function(e) {
+		this.props.context.execLog();
+	}
+	,onChangeLog: function(e) {
+		this.props.context.changeLog(e.target.value);
+	}
 	,__class__: component_root_RootView
 });
+var core_PlayingState = function(parent,you,moves,scores) {
+	this.currentIndex = 0;
+	this.parent = parent;
+	this.you = you;
+	this.moves = moves;
+	this.scores = scores;
+	this.playing = true;
+};
+core_PlayingState.__name__ = true;
+core_PlayingState.prototype = {
+	update: function() {
+		console.log(this.playing);
+		if(this.playing) {
+			if(this.moves.length <= this.currentIndex) {
+				this.playing = false;
+				return;
+			}
+			this.parent.game.addMove(this.moves[this.currentIndex]);
+			this.currentIndex += 1;
+			this.parent.updatePixi();
+		}
+	}
+	,__class__: core_PlayingState
+};
 var core_RootContext = function() {
 	this.mapNames = haxe_Resource.listNames();
 	this.selectedIndex = 0;
 	this.game = new game_Game();
+	this.playingState = haxe_ds_Option.None;
+	this.log = "{\"you\":\"shiota_ai@1501872522\"}\r\n{\"punter\":2,\"punters\":3,\"map\":{\"sites\":[{\"id\":18,\"x\":0.75,\"y\":0.0},{\"id\":25,\"x\":0.9375,\"y\":-0.10825317547305482},{\"id\":4,\"x\":0.75,\"y\":-0.4330127018922193},{\"id\":30,\"x\":0.5,\"y\":-0.4330127018922193},{\"id\":14,\"x\":0.3125,\"y\":-0.10825317547305482},{\"id\":15,\"x\":0.25,\"y\":-0.21650635094610965},{\"id\":31,\"x\":0.625,\"y\":-0.649519052838329},{\"id\":12,\"x\":0.375,\"y\":0.0},{\"id\":8,\"x\":0.125,\"y\":-0.21650635094610965},{\"id\":1,\"x\":1.0,\"y\":0.0},{\"id\":23,\"x\":0.5625,\"y\":-0.10825317547305482},{\"id\":3,\"x\":0.5,\"y\":0.0},{\"id\":16,\"x\":0.3125,\"y\":-0.3247595264191645},{\"id\":24,\"x\":0.875,\"y\":0.0},{\"id\":21,\"x\":0.625,\"y\":0.0},{\"id\":36,\"x\":0.625,\"y\":-0.4330127018922193},{\"id\":26,\"x\":0.8125,\"y\":-0.10825317547305482},{\"id\":11,\"x\":0.0625,\"y\":-0.10825317547305482},{\"id\":9,\"x\":0.125,\"y\":0.0},{\"id\":13,\"x\":0.4375,\"y\":-0.10825317547305482},{\"id\":19,\"x\":0.875,\"y\":-0.21650635094610965},{\"id\":32,\"x\":0.375,\"y\":-0.649519052838329},{\"id\":17,\"x\":0.1875,\"y\":-0.3247595264191645},{\"id\":40,\"x\":0.5625,\"y\":-0.7577722283113838},{\"id\":6,\"x\":0.25,\"y\":0.0},{\"id\":27,\"x\":0.75,\"y\":-0.21650635094610965},{\"id\":38,\"x\":0.5625,\"y\":-0.5412658773652741},{\"id\":34,\"x\":0.4375,\"y\":-0.5412658773652741},{\"id\":22,\"x\":0.6875,\"y\":-0.10825317547305482},{\"id\":28,\"x\":0.8125,\"y\":-0.3247595264191645},{\"id\":5,\"x\":0.25,\"y\":-0.4330127018922193},{\"id\":33,\"x\":0.375,\"y\":-0.4330127018922193},{\"id\":37,\"x\":0.6875,\"y\":-0.5412658773652741},{\"id\":41,\"x\":0.4375,\"y\":-0.7577722283113838},{\"id\":10,\"x\":0.1875,\"y\":-0.10825317547305482},{\"id\":0,\"x\":0.0,\"y\":0.0},{\"id\":39,\"x\":0.5,\"y\":-0.649519052838329},{\"id\":7,\"x\":0.375,\"y\":-0.21650635094610965},{\"id\":35,\"x\":0.3125,\"y\":-0.5412658773652741},{\"id\":29,\"x\":0.6875,\"y\":-0.3247595264191645},{\"id\":2,\"x\":0.5,\"y\":-0.8660254037844386},{\"id\":20,\"x\":0.625,\"y\":-0.21650635094610965}],\"rivers\":[{\"source\":24,\"target\":25},{\"source\":19,\"target\":25},{\"source\":1,\"target\":25},{\"source\":13,\"target\":14},{\"source\":12,\"target\":14},{\"source\":7,\"target\":14},{\"source\":6,\"target\":14},{\"source\":8,\"target\":15},{\"source\":7,\"target\":15},{\"source\":6,\"target\":12},{\"source\":3,\"target\":12},{\"source\":22,\"target\":23},{\"source\":21,\"target\":23},{\"source\":20,\"target\":23},{\"source\":3,\"target\":23},{\"source\":15,\"target\":16},{\"source\":7,\"target\":16},{\"source\":5,\"target\":16},{\"source\":18,\"target\":24},{\"source\":1,\"target\":24},{\"source\":18,\"target\":21},{\"source\":3,\"target\":21},{\"source\":30,\"target\":36},{\"source\":4,\"target\":36},{\"source\":25,\"target\":26},{\"source\":24,\"target\":26},{\"source\":19,\"target\":26},{\"source\":18,\"target\":26},{\"source\":10,\"target\":11},{\"source\":9,\"target\":11},{\"source\":8,\"target\":11},{\"source\":0,\"target\":11},{\"source\":6,\"target\":9},{\"source\":0,\"target\":9},{\"source\":12,\"target\":13},{\"source\":7,\"target\":13},{\"source\":3,\"target\":13},{\"source\":16,\"target\":17},{\"source\":15,\"target\":17},{\"source\":8,\"target\":17},{\"source\":5,\"target\":17},{\"source\":39,\"target\":40},{\"source\":31,\"target\":40},{\"source\":2,\"target\":40},{\"source\":20,\"target\":27},{\"source\":19,\"target\":27},{\"source\":37,\"target\":38},{\"source\":36,\"target\":38},{\"source\":31,\"target\":38},{\"source\":30,\"target\":38},{\"source\":33,\"target\":34},{\"source\":32,\"target\":34},{\"source\":30,\"target\":34},{\"source\":21,\"target\":22},{\"source\":20,\"target\":22},{\"source\":18,\"target\":22},{\"source\":27,\"target\":28},{\"source\":19,\"target\":28},{\"source\":4,\"target\":28},{\"source\":30,\"target\":33},{\"source\":5,\"target\":33},{\"source\":36,\"target\":37},{\"source\":31,\"target\":37},{\"source\":4,\"target\":37},{\"source\":40,\"target\":41},{\"source\":39,\"target\":41},{\"source\":32,\"target\":41},{\"source\":2,\"target\":41},{\"source\":9,\"target\":10},{\"source\":8,\"target\":10},{\"source\":6,\"target\":10},{\"source\":32,\"target\":39},{\"source\":31,\"target\":39},{\"source\":34,\"target\":35},{\"source\":33,\"target\":35},{\"source\":32,\"target\":35},{\"source\":5,\"target\":35},{\"source\":28,\"target\":29},{\"source\":27,\"target\":29},{\"source\":20,\"target\":29},{\"source\":4,\"target\":29}],\"mines\":[3,4,5]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":34,\"target\":35}},{\"claim\":{\"punter\":1,\"source\":30,\"target\":33}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":3,\"target\":23}},{\"claim\":{\"punter\":1,\"source\":28,\"target\":29}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":33,\"target\":35}},{\"claim\":{\"punter\":1,\"source\":32,\"target\":41}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":6,\"target\":12}},{\"claim\":{\"punter\":1,\"source\":7,\"target\":13}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":12,\"target\":14}},{\"claim\":{\"punter\":1,\"source\":32,\"target\":34}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":15,\"target\":16}},{\"claim\":{\"punter\":1,\"source\":4,\"target\":37}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":15,\"target\":17}},{\"claim\":{\"punter\":1,\"source\":5,\"target\":17}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":0,\"target\":11}},{\"claim\":{\"punter\":1,\"source\":40,\"target\":41}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":31,\"target\":37}},{\"claim\":{\"punter\":1,\"source\":6,\"target\":14}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":24,\"target\":25}},{\"claim\":{\"punter\":1,\"source\":24,\"target\":26}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":9,\"target\":10}},{\"claim\":{\"punter\":1,\"source\":22,\"target\":23}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":5,\"target\":35}},{\"claim\":{\"punter\":1,\"source\":31,\"target\":38}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":21,\"target\":23}},{\"claim\":{\"punter\":1,\"source\":9,\"target\":11}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":8,\"target\":11}},{\"claim\":{\"punter\":1,\"source\":37,\"target\":38}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":36,\"target\":38}},{\"claim\":{\"punter\":1,\"source\":18,\"target\":24}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":30,\"target\":36}},{\"claim\":{\"punter\":1,\"source\":8,\"target\":10}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":27,\"target\":29}},{\"claim\":{\"punter\":1,\"source\":4,\"target\":29}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":20,\"target\":27}},{\"claim\":{\"punter\":1,\"source\":31,\"target\":40}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":16,\"target\":17}},{\"claim\":{\"punter\":1,\"source\":20,\"target\":29}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":31,\"target\":39}},{\"claim\":{\"punter\":1,\"source\":6,\"target\":9}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":2,\"target\":40}},{\"claim\":{\"punter\":1,\"source\":4,\"target\":28}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":1,\"target\":24}},{\"claim\":{\"punter\":1,\"source\":19,\"target\":26}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":10,\"target\":11}},{\"claim\":{\"punter\":1,\"source\":32,\"target\":35}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":2,\"target\":41}},{\"claim\":{\"punter\":1,\"source\":20,\"target\":22}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":7,\"target\":16}},{\"claim\":{\"punter\":1,\"source\":18,\"target\":22}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":33,\"target\":34}},{\"claim\":{\"punter\":1,\"source\":4,\"target\":36}},{\"pass\":{\"punter\":2}}]}}\r\n{\"move\":{\"moves\":[{\"claim\":{\"punter\":0,\"source\":7,\"target\":15}},{\"claim\":{\"punter\":1,\"source\":25,\"target\":26}},{\"pass\":{\"punter\":2}}]}}\r\n{\"stop\":{\"moves\":[{\"pass\":{\"punter\":0}}, {\"pass\":{\"punter\":1}}, {\"pass\":{\"punter\":2}}], \"scores\":[{\"punter\":0, \"score\":8}, {\"punter\":1, \"score\":155}, {\"punter\":2, \"score\":0}]}}\r\n";
 };
 core_RootContext.__name__ = true;
 core_RootContext.prototype = {
@@ -554,12 +654,87 @@ core_RootContext.prototype = {
 	}
 	,exec: function() {
 		this.game = new game_Game();
+		this.playingState = haxe_ds_Option.None;
 		var name = this.mapNames[this.selectedIndex];
 		var content = haxe_Resource.getString(name);
 		var map = JSON.parse(content);
-		this.game.setup(map);
+		this.game.setupMap(map);
 		this.updatePixi();
 		this.updateUi();
+	}
+	,changeLog: function(text) {
+		this.log = text;
+		this.updateUi();
+	}
+	,execLog: function() {
+		console.log(this.log);
+		this.game = new game_Game();
+		this.playingState = haxe_ds_Option.None;
+		this.warning = null;
+		try {
+			var allMoves = [];
+			var data = new EReg("(\r\n|\n|\r)","g").split(this.log);
+			window.console.log(data);
+			var handshake = JSON.parse(data[0]);
+			var setupData = JSON.parse(data[1]);
+			this.game.setup(setupData);
+			var you = setupData.punter;
+			var first = true;
+			var scores = null;
+			var _g = 0;
+			var _g1 = data.slice(2,data.length);
+			while(_g < _g1.length) {
+				var content = _g1[_g];
+				++_g;
+				console.log(content);
+				var data1 = JSON.parse(content);
+				if(data1.stop != null) {
+					var moves = data1.stop.moves;
+					var start = first ? moves.length - you : 0;
+					var _g3 = start;
+					var _g2 = moves.length;
+					while(_g3 < _g2) {
+						var count = _g3++;
+						var index = (count + you) % moves.length;
+						var move = moves[index];
+						allMoves.push(move);
+					}
+					scores = data1.stop.scores;
+					break;
+				} else {
+					var moves1 = data1.move.moves;
+					var start1 = first ? moves1.length - you : 0;
+					var _g31 = start1;
+					var _g21 = moves1.length;
+					while(_g31 < _g21) {
+						var count1 = _g31++;
+						var index1 = (count1 + you) % moves1.length;
+						var move1 = moves1[index1];
+						allMoves.push(move1);
+					}
+				}
+			}
+			if(scores == null) {
+				throw new js__$Boot_HaxeError("stopがありません");
+			}
+			this.playingState = haxe_ds_Option.Some(new core_PlayingState(this,you,allMoves,scores));
+		} catch( e ) {
+			if (e instanceof js__$Boot_HaxeError) e = e.val;
+			this.warning = Std.string(e);
+		}
+		this.updatePixi();
+		this.updateUi();
+	}
+	,onFrame: function(time) {
+		var _g = this.playingState;
+		switch(_g[1]) {
+		case 0:
+			var _playingState = _g[2];
+			_playingState.update();
+			break;
+		case 1:
+			break;
+		}
 	}
 	,__class__: core_RootContext
 };
@@ -572,10 +747,27 @@ var game_Game = function() {
 	this.mineCount = 0;
 	this.siteCount = 0;
 	this.riverCount = 0;
+	this.maxScore = 0;
+	this.moves = [];
 };
 game_Game.__name__ = true;
 game_Game.prototype = {
-	setup: function(map) {
+	setup: function(setupStruct) {
+		this.setupMap(setupStruct.map);
+		this.setupPanters(setupStruct.punters);
+	}
+	,setupPanters: function(punterIds) {
+		var _g1 = 0;
+		var _g = punterIds;
+		while(_g1 < _g) {
+			var i = _g1++;
+			var id = game__$PunterId_PunterId_$Impl_$._new(i);
+			var this1 = this.punters;
+			var v = new game_Punter(this,id);
+			this1.h[id] = v;
+		}
+	}
+	,setupMap: function(map) {
 		var _g = 0;
 		var _g1 = map.sites;
 		while(_g < _g1.length) {
@@ -650,13 +842,30 @@ game_Game.prototype = {
 			}
 		}
 	}
+	,addMove: function(move) {
+		if(move.pass != null) {
+			this.pass(move.pass.punter);
+		} else {
+			this.claim(move.claim);
+		}
+		this.moves.push(move);
+	}
+	,claim: function(move) {
+		var river = this.sites.get(move.source).rivers.get(move.target);
+		river.owner = move.punter;
+		this.punters.h[move.punter].score = -1;
+	}
+	,pass: function(punter) {
+	}
+	,applyScore: function(punter,score) {
+		this.punters.h[punter].score = score;
+	}
 	,__class__: game_Game
 };
 var game_Punter = function(game1,id) {
 	this.game = game1;
 	this.id = id;
-	this.score = 0;
-	this.rivers = new haxe_ds_IntMap();
+	this.score = -1;
 	this.accessableSites = new haxe_ds_IntMap();
 };
 game_Punter.__name__ = true;
@@ -674,6 +883,7 @@ var game_River = function(game1,id,a,b) {
 	this.game = game1;
 	this.a = a;
 	this.b = b;
+	this.owner = game__$PunterId_PunterId_$Impl_$.NotFound;
 };
 game_River.__name__ = true;
 game_River.prototype = {
@@ -699,7 +909,6 @@ var game_Site = function(game1,id,x,y) {
 	this.game = game1;
 	this.isMine = false;
 	this.rivers = new haxe_ds_IntMap();
-	this.owner = game__$PunterId_PunterId_$Impl_$.NotFound;
 };
 game_Site.__name__ = true;
 game_Site.prototype = {
@@ -916,6 +1125,11 @@ haxe_ds_IntMap.prototype = {
 	}
 	,__class__: haxe_ds_IntMap
 };
+var haxe_ds_Option = { __ename__ : true, __constructs__ : ["Some","None"] };
+haxe_ds_Option.Some = function(v) { var $x = ["Some",0,v]; $x.__enum__ = haxe_ds_Option; $x.toString = $estr; return $x; };
+haxe_ds_Option.None = ["None",1];
+haxe_ds_Option.None.toString = $estr;
+haxe_ds_Option.None.__enum__ = haxe_ds_Option;
 var haxe_io_Error = { __ename__ : true, __constructs__ : ["Blocked","Overflow","OutsideBounds","Custom"] };
 haxe_io_Error.Blocked = ["Blocked",0];
 haxe_io_Error.Blocked.toString = $estr;
@@ -1301,6 +1515,8 @@ pixi_plugins_app_Application.POSITION_INITIAL = "initial";
 pixi_plugins_app_Application.POSITION_INHERIT = "inherit";
 PixiView.WIDTH = 900;
 PixiView.HEIGHT = 650;
+PixiView.COLORS = [8930321,4460936,1148996,4491281,8917316,1131656,14492177,1170722,1123037,10031513,10066193,1153433,6702097,4460902,1140292,6689041,1140241,1118566];
+component_root_PlayingStateView.displayName = "PlayingStateView";
 component_root_RootView.displayName = "RootView";
 game_Game.MAX_DISTANCE = 20;
 game_Game.MS_TABLE = (function($this) {
