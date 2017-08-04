@@ -4,7 +4,9 @@ import component.root.RootView;
 import core.RootContext;
 import js.Browser;
 import react.React;
+import react.ReactComponent.ReactElement;
 import react.ReactDOM;
+import react.ReactEvent;
 import react.ReactTools;
 
 /**
@@ -13,13 +15,23 @@ import react.ReactTools;
  */
 class Main 
 {
-    public static var pixiView:PixiView;
+    private static var rootPixi:PixiView;
+    private static var rootContext:RootContext;
     
 	static function main() 
     {
-        var rootContext = new RootContext();
+        rootContext = new RootContext();
+        rootPixi = new PixiView(rootContext);
         
-		ReactDOM.render(
+        rootContext.updateUi = render;
+        rootContext.updatePixi = rootPixi.update;
+        
+        render();
+	}
+    
+    public static function render():Void
+    {
+        ReactDOM.render(
             React.createElement(
                 RootView,
                 {
@@ -28,7 +40,5 @@ class Main
             ),
             Browser.document.getElementById('control')
         );
-        
-        new PixiView(rootContext);
-	}
+    }
 }
