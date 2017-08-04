@@ -3,8 +3,8 @@ require 'json'
 require 'monitor'
 require 'optparse'
 
-require_relative 'lib/barrier'
-require_relative 'lib/score'
+require_relative 'libs/barrier'
+require_relative 'libs/score'
 
 # 12:{"me":"bob"}
 # 44:{"claim":{"punter":0,"source":0,"target":1}}
