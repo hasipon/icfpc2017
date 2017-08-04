@@ -4,7 +4,8 @@ import glob
 import os
 import subprocess
 import pathlib
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, abort
+from werkzeug.utils import secure_filename
 
 static_path = pathlib.Path(__file__).resolve().parent / 'static'
 repo_path = pathlib.Path(__file__).resolve().parent.parent
@@ -36,6 +37,19 @@ def git_pull():
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
+
+@app.route('/uploadlog', methods=['POST'])
+def upload_log():
+    # check if the post request has the file part
+    if 'file' not in request.files:
+        return abort(403)
+    f = request.files['file']
+    if f.filename == '':
+        return abort(403)
+    if f:
+        filename = secure_filename(f.filename)
+        f.save(str(static_path / 'logs' / f.filename))
+        return ('', 204)
 
 """
 @route('/submit-solution', method='POST')
