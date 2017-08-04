@@ -3,7 +3,7 @@ require 'json'
 require 'monitor'
 require 'optparse'
 
-require_relative 'barrier'
+require_relative 'lib/barrier'
 
 # 12:{"me":"bob"}
 # 44:{"claim":{"punter":0,"source":0,"target":1}}
@@ -103,6 +103,7 @@ num_of_punters.times do
 
         @barrier.sync
 
+        # TODO: timeout
         play = socket.read_message
 
         @semaphore.synchronize do
@@ -112,10 +113,10 @@ num_of_punters.times do
         @barrier.sync
       end
 
-      stop ={
+      stop = {
         "stop" => {
           "moves" => @moves,
-          "scores" => []
+          "scores" => [] # TODO: calculate score
         }
       }
       socket.send_message stop
