@@ -45,6 +45,8 @@ end
 
 @map = JSON.load(File.read(map_file))
 @score = Score.new(@map, num_of_punters)
+@result = nil
+@moves_last = nil
 
 server = TCPServer.open(port)
 puts "Start server with num_of_punters = #{num_of_punters}"
@@ -118,10 +120,24 @@ num_of_punters.times do
         @barrier.sync
       end
 
+      @semaphore.synchronize do
+        unless @moves.empty?
+          @score.update(@moves)
+          @moves_last = @moves
+          @moves = []
+        end
+      end
+
+      @semaphore.synchronize do
+        unless @result
+          @result = @score.calc
+        end
+      end
+
       stop = {
         "stop" => {
-          "moves" => @moves,
-          "scores" => @score.calc
+          "moves" => @moves_last,
+          "scores" => @result
         }
       }
       socket.send_message stop
