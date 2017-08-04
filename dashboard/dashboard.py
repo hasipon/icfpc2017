@@ -8,18 +8,7 @@ from flask import Flask, request, render_template
 
 static_path = pathlib.Path(__file__).resolve().parent / 'static'
 repo_path = pathlib.Path(__file__).resolve().parent.parent
-
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
-
-"""
-@route('/problems/<file_name>')
-def route_problems(file_name):
-    return static_file(file_name, problems)
-
-@route('/visualizer/<file_name>')
-def route_problems(file_name):
-    return static_file(file_name, visualizer)
-"""
 
 @app.route('/')
 def index():
@@ -45,11 +34,17 @@ def pull():
         output = subprocess.check_output(["git", "pull", "origin", "master"]).decode('utf-8').strip()
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
-    return render_template('output', output=output)
+    return render_template('output.html', output=output)
 
-@app.route('/submit-solution')
-def solution_submit_get():
-    return render_template('submit')
+"""
+@route('/problems/<file_name>')
+def route_problems(file_name):
+    return static_file(file_name, problems)
+
+@route('/visualizer/<file_name>')
+def route_problems(file_name):
+    return static_file(file_name, visualizer)
+"""
 
 """
 @route('/submit-solution', method='POST')
@@ -64,7 +59,6 @@ def solution_submit_post():
     os.remove(filename)
     return template('output', output=output)
 
-
 @route('/submit-problem/<publish_time>', method='POST')
 def problem_submit_post(publish_time):
     solution = request.forms.get('solution')
@@ -78,5 +72,5 @@ def problem_submit_post(publish_time):
 """
 
 if __name__ == "__main__":
-    app.run(port=8080, debug=True)
+    app.run(port=5000, debug=True)
 
