@@ -28,24 +28,6 @@ def git_status():
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
 
-@app.route('/pull')
-def pull():
-    try:
-        output = subprocess.check_output(["git", "pull", "origin", "master"]).decode('utf-8').strip()
-    except subprocess.CalledProcessError as e:
-        output += "Error:" + str(e)
-    return render_template('output.html', output=output)
-
-"""
-@route('/problems/<file_name>')
-def route_problems(file_name):
-    return static_file(file_name, problems)
-
-@route('/visualizer/<file_name>')
-def route_problems(file_name):
-    return static_file(file_name, visualizer)
-"""
-
 """
 @route('/submit-solution', method='POST')
 def solution_submit_post():
