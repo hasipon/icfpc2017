@@ -32,6 +32,9 @@ ostream& operator << (ostream& os, pair<P, Q> p)
   return os;
 }
 
+#include "../../common/include/Graph.hpp"
+#include "../../common/algorithms/BFS.hpp"
+
 int main(int argc, char *argv[])
 {
   cmdline::parser a;
