@@ -2,6 +2,6 @@ package game.command;
 
 typedef SiteStruct ={
     id : SiteId,
-    x?: Float,
-    y?: Float
+    ?x: Float,
+    ?y: Float
 }

@@ -7,7 +7,7 @@ class Punter
     public var id:PunterId;
     public var score:Int;
     public var rivers:Set<RiverId>;
-    public var accessableSites:Map<MineId, Set<SiteId>>
+    public var accessableSites:Map<SiteId /* for Mine */, Set<SiteId>>;
     
     public function new (
         game:Game, 
@@ -18,6 +18,6 @@ class Punter
         this.id = id;
         score = 0;
         rivers = new Set();
-        accessableSites = new Map<MineId, Set<SiteId>>();
+        accessableSites = new Map<SiteId, Set<SiteId>>();
     }
 }
