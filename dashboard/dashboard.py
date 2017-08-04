@@ -1,63 +1,32 @@
-#!/usr/bin/env python3
 import json
 import time
 import glob
 import os
 import subprocess
-from bottle import route, template, request, static_file, redirect, auth_basic, error, response, get, abort, run, debug, default_app
+import pathlib
+from flask import Flask, request, render_template
 
-repo = os.path.dirname((os.path.dirname(os.path.abspath(__file__))))
-www = repo + '/cms/static'
+static_path = pathlib.Path(__file__).resolve().parent / 'static'
+repo_path = pathlib.Path(__file__).resolve().parent.parent
+app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 
-"""
-Static Routing
-"""
-@route('/static/<path:path>')
-def img(file_name):
-    return static_file(path, root=www)
-
-"""
-@route('/problems/<file_name>')
-def route_problems(file_name):
-    return static_file(file_name, problems)
-
-@route('/visualizer/<file_name>')
-def route_problems(file_name):
-    return static_file(file_name, visualizer)
-"""
-
-"""
-Public Page Routing
-"""
-@route('/')
-def title():
+@app.route('/')
+def index():
     json_data = ''
-    with open(repo + "/problems.json") as f:
+    with open(str(repo_path / 'problems.json')) as f:
         json_data = f.read()
     data = json.loads(json_data)
     probs = data['problems']
-    return template('problems', problems=probs)
+    return render_template('index.html', problems=probs)
 
-@route('/gitstatus')
+@app.route('/gitstatus')
 def git_status():
     output = ""
     try:
         output += subprocess.check_output(["git", "status"]).decode('utf-8').strip()
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
-    return template('output', output=output)
-
-@route('/pull')
-def pull():
-    try:
-        output = subprocess.check_output(["git", "pull", "origin", "master"]).decode('utf-8').strip()
-    except subprocess.CalledProcessError as e:
-        output += "Error:" + str(e)
-    return template('output', output=output)
-
-@route('/submit-solution')
-def solution_submit_get():
-    return template('submit')
+    return render_template('output.html', output=output)
 
 """
 @route('/submit-solution', method='POST')
@@ -72,7 +41,6 @@ def solution_submit_post():
     os.remove(filename)
     return template('output', output=output)
 
-
 @route('/submit-problem/<publish_time>', method='POST')
 def problem_submit_post(publish_time):
     solution = request.forms.get('solution')
@@ -85,5 +53,6 @@ def problem_submit_post(publish_time):
     return template('output', output=output)
 """
 
-run(default_app(), host='0.0.0.0', port=5000, debug=True, reloader=True, server='cheroot')
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)
 

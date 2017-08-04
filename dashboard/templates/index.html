@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+  <table class="table table-condensed table-striped">
+  <tr>
+    <th class="text-center">problem_id</th>
+    <th class="text-center">problem_size</th>
+    <th class="text-center">owner</th>
+    <th class="text-center">solution_size</th>
+    <th class="text-center">image</th>
+    <th class="text-center">official</th>
+  </tr>
+
+  {% for p in problems %}
+  <tr>
+      <td class="text-center">{{p.problem_id}}</td>
+      <td class="text-center">{{p.problem_size}}</td>
+      <td class="text-center">{{p.owner}}</td>
+      <td class="text-center">{{p.solution_size}}</td>
+      <td class="text-center"><a href="/problems/{{p.problem_id}}.png">image</a></td>
+      <td class="text-center"><a href="http://2016sv.icfpcontest.org/problem/view/{{p.problem_id}}">detail</a></td>
+  </tr>
+  {% endfor %}
+</div>
+
+{% endblock %}
+
