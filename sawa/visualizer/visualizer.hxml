@@ -6,3 +6,4 @@
 -cp src/common
 -D react_global
 -main Main
+--macro MacroMain.main()
