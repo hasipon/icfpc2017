@@ -39,8 +39,8 @@ class Client
       len *= 10
       len += c.to_i
     end
-    puts "len #{len}"
-    stream.read(len)
+    msg = stream.read(len)
+    "#{len}:#{msg}"
   end
 
   def server_socket
@@ -76,7 +76,9 @@ setup_msg = client.next_server_message
 client.send_msg_to_ai setup_msg
 
 # ready
-client.send_msg_to_server '11:{"ready":0}'
+# client.send_msg_to_server '11:{"ready":0}'
+ready_msg = client.next_ai_message
+client.send_msg_to_server ready_msg
 
 while msg = client.next_server_message
   ai.send_msg_to_ai msg
