@@ -3,13 +3,15 @@ require 'optparse'
 require 'pp'
 
 class Client
-  def initialize(host, port, ai_path)
+  def initialize(host, port, ai_path, name)
+    @name = "#{name}@#{Time.now.to_i}"
+    @log_file = open(logfile_name, mode = "w")
     exit 1 unless @server_socket = TCPSocket.new(host, port)
     exit 1 unless @ai_socket = IO.popen(ai_path, "r+")
   end
 
-  def handshake(name)
-    msg = '{"me":"'+ "#{name}@#{Time.now.to_i}" + '"}'
+  def handshake
+    msg = '{"me":"'+ @name + '"}'
     send_msg_to_server("#{msg.length}:#{msg}")
     next_server_message
   end
@@ -18,6 +20,7 @@ class Client
     log "wait server message"
     ret = receive_messege(server_socket)
     log "me <- server\n#{ret}"
+    response_log ret.split(':', 2)[1]
     ret
   end
 
@@ -59,9 +62,16 @@ class Client
   end
 
   def log(msg)
-    STDERR.puts(msg)
+    STDOUT.puts(msg)
   end
 
+  def response_log(msg)
+    @log_file.puts(msg)
+  end
+
+  def logfile_name
+    "#{@name}.log"
+  end
 end
 
 
@@ -77,10 +87,10 @@ opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
 opt.on('-n', '--name NAME') {|v| name =  v }
 opt.parse(ARGV)
 
-client = Client.new(host, port.to_i, ai_path)
+client = Client.new(host, port.to_i, ai_path, name)
 
 # handshake
-client.handshake name
+client.handshake
 
 # setup
 setup_msg = client.next_server_message
@@ -97,4 +107,6 @@ while msg = client.next_server_message
   break unless msg
   client.send_msg_to_server msg
 end
+
+puts "logfile: #{client.logfile_name}"
 
