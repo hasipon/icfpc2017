@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+  <div>
+    {{ message }}
+  </div>
+  <form method="POST" action="run_server">
+    <p>
+      <label>
+        port<br>
+        <input type="text" name="port" size="40">
+      </label>
+    </p>
+    <p>
+      <label>
+        num_of_punters<br>
+        <input type="text" name="num_of_punters" size="40">
+      </label>
+    </p>
+    <p>
+      <label>
+        map<br>
+        <textarea name="map_json" rows="2" cols="40"></textarea>
+      </label>
+    </p>
+    <p><input type="submit" value="run"></p>
+  </form>
+</div>
+
+{% endblock %}
+

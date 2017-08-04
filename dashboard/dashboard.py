@@ -4,6 +4,7 @@ import glob
 import os
 import subprocess
 import pathlib
+import threading
 from flask import Flask, request, render_template
 
 static_path = pathlib.Path(__file__).resolve().parent / 'static'
@@ -36,6 +37,41 @@ def git_pull():
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
+
+def invoke_server(port, num_of_punters, map_json):
+    print("invoke server")
+    subprocess.run([
+        "ruby",
+        "../common/server/app.rb",
+        "-p", port,
+        "-n", num_of_punters,
+        "-j", map_json
+    ])
+
+@app.route('/run_server', methods=['GET', 'POST'])
+def run_server():
+    if request.method == 'GET':
+        return render_template('run_server.html')
+    else:
+        port = request.form.get('port')
+        num_of_punters = request.form.get('num_of_punters')
+        map_json = request.form.get('map_json')
+
+        args = (port, num_of_punters, map_json)
+
+        subprocess.Popen([
+            "ruby",
+            "../common/server/app.rb",
+            "-p", port,
+            "-n", num_of_punters,
+            "-j", map_json
+        ])
+
+        message = "server started with port = {0}, num_of_punters = {1}, map_json = {2}".format(port, num_of_punters, map_json)
+
+        # threading.Thread(target=invoke_server, args=args)
+        
+        return render_template('run_server.html', message=message)
 
 """
 @route('/submit-solution', method='POST')
