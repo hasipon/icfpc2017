@@ -14,11 +14,12 @@ namespace game {
 		
 		
 		public static void __hx_ctor_game_Punter(global::game.Punter __hx_this, global::game.Game game1, int id) {
-			__hx_this.game = game1;
-			__hx_this.id = id;
-			__hx_this.score = 0;
-			__hx_this.rivers = new global::haxe.ds.IntMap<bool>();
-			__hx_this.accessableSites = new global::haxe.ds.IntMap<object>();
+			unchecked {
+				__hx_this.game = game1;
+				__hx_this.id = id;
+				__hx_this.score = -1;
+				__hx_this.accessableSites = new global::haxe.ds.IntMap<object>();
+			}
 		}
 		
 		
@@ -27,8 +28,6 @@ namespace game {
 		public int id;
 		
 		public int score;
-		
-		public global::haxe.ds.IntMap<bool> rivers;
 		
 		public global::haxe.IMap<int, object> accessableSites;
 		
@@ -66,13 +65,6 @@ namespace game {
 					case 999785710:
 					{
 						this.accessableSites = ((global::haxe.IMap<int, object>) (global::haxe.IMap__Statics_.__hx_cast<int, object>(((global::haxe.IMap) (@value) ))) );
-						return @value;
-					}
-					
-					
-					case 1477328871:
-					{
-						this.rivers = ((global::haxe.ds.IntMap<bool>) (global::haxe.ds.IntMap<object>.__hx_cast<bool>(((global::haxe.ds.IntMap) (@value) ))) );
 						return @value;
 					}
 					
@@ -115,12 +107,6 @@ namespace game {
 					case 999785710:
 					{
 						return this.accessableSites;
-					}
-					
-					
-					case 1477328871:
-					{
-						return this.rivers;
 					}
 					
 					
@@ -181,7 +167,6 @@ namespace game {
 		
 		public override void __hx_getFields(global::Array<object> baseArr) {
 			baseArr.push("accessableSites");
-			baseArr.push("rivers");
 			baseArr.push("score");
 			baseArr.push("id");
 			baseArr.push("game");

@@ -177,6 +177,7 @@ M System.Runtime.Serialization.IFormatterConverter
 M haxe.io.BytesData
 M System.ValueType
 M cs.system.reflection.CallingConventions
+M game.command.ClaimStruct
 M cs.system.globalization.CultureTypes
 M System.Reflection.Emit.TypeBuilder
 M cs.system.configuration.assemblies.AssemblyHashAlgorithm
@@ -404,6 +405,7 @@ M System.Security.Policy.IIdentityPermissionFactory
 M System.Security.PermissionSet
 M System.Text.RegularExpressions.GroupCollection
 M cs.system.reflection.emit.SignatureHelper
+M game.command.MoveStruct
 M System.TypedReference
 M System.TimeZone
 M System.Threading.CompressedStack

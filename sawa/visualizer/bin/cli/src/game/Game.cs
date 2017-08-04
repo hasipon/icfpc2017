@@ -48,6 +48,7 @@ namespace game {
 			__hx_this.siteCount = 0;
 			__hx_this.riverCount = 0;
 			__hx_this.maxScore = 0;
+			__hx_this.moves = new global::Array<object>(new object[]{});
 		}
 		
 		
@@ -72,6 +73,8 @@ namespace game {
 		public int riverCount;
 		
 		public int maxScore;
+		
+		public global::Array<object> moves;
 		
 		public virtual void setup(object setupStruct) {
 			this.setupMap(global::haxe.lang.Runtime.getField(setupStruct, "map", 5442204, true));
@@ -211,6 +214,36 @@ namespace game {
 		}
 		
 		
+		public virtual void addMove(object move) {
+			if (( global::haxe.lang.Runtime.getField(move, "pass", 1246880977, true) != null )) {
+				this.pass(((int) (global::haxe.lang.Runtime.getField_f(global::haxe.lang.Runtime.getField(move, "pass", 1246880977, true), "punter", 1860705976, true)) ));
+			}
+			else {
+				this.claim(global::haxe.lang.Runtime.getField(move, "claim", 1213755260, true));
+			}
+			
+			this.moves.push(move);
+		}
+		
+		
+		public virtual void claim(object move) {
+			unchecked {
+				global::game.River river = ((global::game.River) ((((global::haxe.IMap<int, object>) (((global::game.Site) ((((global::haxe.IMap<int, object>) (this.sites) ).@get(((int) (global::haxe.lang.Runtime.getField_f(move, "source", 842117339, true)) ))).@value) ).rivers) ).@get(((int) (global::haxe.lang.Runtime.getField_f(move, "target", 116192081, true)) ))).@value) );
+				river.owner = ((int) (global::haxe.lang.Runtime.getField_f(move, "punter", 1860705976, true)) );
+				((global::game.Punter) ((((global::haxe.ds.IntMap<object>) (global::haxe.ds.IntMap<object>.__hx_cast<object>(((global::haxe.ds.IntMap) (((global::haxe.IMap<int, object>) (this.punters) )) ))) ).@get(((int) (global::haxe.lang.Runtime.getField_f(move, "punter", 1860705976, true)) ))).@value) ).score = -1;
+			}
+		}
+		
+		
+		public virtual void pass(int punter) {
+		}
+		
+		
+		public virtual void applyScore(int punter, int score) {
+			((global::game.Punter) ((((global::haxe.ds.IntMap<object>) (global::haxe.ds.IntMap<object>.__hx_cast<object>(((global::haxe.ds.IntMap) (((global::haxe.IMap<int, object>) (this.punters) )) ))) ).@get(punter)).@value) ).score = score;
+		}
+		
+		
 		public override double __hx_setField_f(string field, int hash, double @value, bool handleProperties) {
 			unchecked {
 				switch (hash) {
@@ -256,6 +289,13 @@ namespace game {
 		public override object __hx_setField(string field, int hash, object @value, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 207998018:
+					{
+						this.moves = ((global::Array<object>) (global::Array<object>.__hx_cast<object>(((global::Array) (@value) ))) );
+						return @value;
+					}
+					
+					
 					case 586597902:
 					{
 						this.maxScore = ((int) (global::haxe.lang.Runtime.toInt(@value)) );
@@ -333,6 +373,30 @@ namespace game {
 		public override object __hx_getField(string field, int hash, bool throwErrors, bool isCheck, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 606793476:
+					{
+						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "applyScore", 606793476)) );
+					}
+					
+					
+					case 1246880977:
+					{
+						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "pass", 1246880977)) );
+					}
+					
+					
+					case 1213755260:
+					{
+						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "claim", 1213755260)) );
+					}
+					
+					
+					case 77473234:
+					{
+						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "addMove", 77473234)) );
+					}
+					
+					
 					case 590053407:
 					{
 						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "setupMap", 590053407)) );
@@ -348,6 +412,12 @@ namespace game {
 					case 2049945213:
 					{
 						return ((global::haxe.lang.Function) (new global::haxe.lang.Closure(this, "setup", 2049945213)) );
+					}
+					
+					
+					case 207998018:
+					{
+						return this.moves;
 					}
 					
 					
@@ -457,6 +527,34 @@ namespace game {
 		public override object __hx_invokeField(string field, int hash, global::Array dynargs) {
 			unchecked {
 				switch (hash) {
+					case 606793476:
+					{
+						this.applyScore(((int) (global::haxe.lang.Runtime.toInt(dynargs[0])) ), ((int) (global::haxe.lang.Runtime.toInt(dynargs[1])) ));
+						break;
+					}
+					
+					
+					case 1246880977:
+					{
+						this.pass(((int) (global::haxe.lang.Runtime.toInt(dynargs[0])) ));
+						break;
+					}
+					
+					
+					case 1213755260:
+					{
+						this.claim(dynargs[0]);
+						break;
+					}
+					
+					
+					case 77473234:
+					{
+						this.addMove(dynargs[0]);
+						break;
+					}
+					
+					
 					case 590053407:
 					{
 						this.setupMap(dynargs[0]);
@@ -491,6 +589,7 @@ namespace game {
 		
 		
 		public override void __hx_getFields(global::Array<object> baseArr) {
+			baseArr.push("moves");
 			baseArr.push("maxScore");
 			baseArr.push("riverCount");
 			baseArr.push("siteCount");

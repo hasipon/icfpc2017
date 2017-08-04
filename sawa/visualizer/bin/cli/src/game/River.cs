@@ -18,6 +18,7 @@ namespace game {
 			__hx_this.game = game1;
 			__hx_this.a = a;
 			__hx_this.b = b;
+			__hx_this.owner = global::game._PunterId.PunterId_Impl_.NotFound;
 		}
 		
 		
@@ -28,6 +29,8 @@ namespace game {
 		public int a;
 		
 		public int b;
+		
+		public int owner;
 		
 		public virtual int getAnother(int source) {
 			if (( this.a == source )) {
@@ -43,6 +46,13 @@ namespace game {
 		public override double __hx_setField_f(string field, int hash, double @value, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 947296307:
+					{
+						this.owner = ((int) (@value) );
+						return @value;
+					}
+					
+					
 					case 98:
 					{
 						this.b = ((int) (@value) );
@@ -78,6 +88,13 @@ namespace game {
 		public override object __hx_setField(string field, int hash, object @value, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 947296307:
+					{
+						this.owner = ((int) (global::haxe.lang.Runtime.toInt(@value)) );
+						return @value;
+					}
+					
+					
 					case 98:
 					{
 						this.b = ((int) (global::haxe.lang.Runtime.toInt(@value)) );
@@ -126,6 +143,12 @@ namespace game {
 					}
 					
 					
+					case 947296307:
+					{
+						return this.owner;
+					}
+					
+					
 					case 98:
 					{
 						return this.b;
@@ -164,6 +187,12 @@ namespace game {
 		public override double __hx_getField_f(string field, int hash, bool throwErrors, bool handleProperties) {
 			unchecked {
 				switch (hash) {
+					case 947296307:
+					{
+						return ((double) (this.owner) );
+					}
+					
+					
 					case 98:
 					{
 						return ((double) (this.b) );
@@ -214,6 +243,7 @@ namespace game {
 		
 		
 		public override void __hx_getFields(global::Array<object> baseArr) {
+			baseArr.push("owner");
 			baseArr.push("b");
 			baseArr.push("a");
 			baseArr.push("game");

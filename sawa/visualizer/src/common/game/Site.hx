@@ -8,7 +8,6 @@ class Site
     public var rivers:Map<SiteId, River>;
     public var x:Float;
     public var y:Float;
-    public var owner:PunterId;
     
     public function new (game:Game, id:SiteId, x:Float, y:Float)
     {
@@ -18,6 +17,5 @@ class Site
         this.game = game;
         isMine = false;
         rivers = new Map();
-        owner = PunterId.NotFound;
     }
 }

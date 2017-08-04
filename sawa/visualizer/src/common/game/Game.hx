@@ -1,7 +1,9 @@
 package game;
 import game.PunterId;
 import game.River;
+import game.command.ClaimStruct;
 import game.command.MapStruct;
+import game.command.MoveStruct;
 import game.command.SetupStruct;
 
 
@@ -19,6 +21,7 @@ class Game
     public var siteCount:Int;
     public var riverCount:Int;
     public var maxScore:Int;
+    public var moves:Array<MoveStruct>;
     
     public function new() 
     {
@@ -32,6 +35,8 @@ class Game
         siteCount  = 0;
         riverCount = 0;
         maxScore   = 0;
+        
+        moves = [];
     }
     
     public function setup(setupStruct:SetupStruct):Void
@@ -123,5 +128,37 @@ class Game
                 maxScore += score;
             }
         }
+    }
+    
+    public function addMove(move:MoveStruct):Void
+    {
+        if (move.pass != null)
+        {
+            pass(move.pass.punter);
+        }
+        else
+        {
+            claim(move.claim);
+        }
+        
+        moves.push(move);
+    }
+    
+    public function claim(move:ClaimStruct):Void
+    {
+        var river = sites[move.source].rivers[move.target];
+        river.owner = move.punter;
+        punters[move.punter].score = -1;
+        
+    }
+    
+    public function pass(punter:PunterId):Void
+    {
+        // 終了
+    }
+    
+    public function applyScore(punter:PunterId, score:Int):Void
+    {
+        punters[punter].score = score;
     }
 }
