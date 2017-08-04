@@ -528,7 +528,8 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp = react_ReactStringTools.createElement("select",{ name : "map", size : "12", onChange : $bind(this,this.onSelect)},_g);
 		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClick)},["表示"]);
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp,tmp1]);
+		var tmp2 = react_ReactStringTools.createElement("div",{ },[tmp,tmp1]);
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,"version : 1.0.0"]);
 	}
 	,onClick: function(e) {
 		this.props.context.exec();

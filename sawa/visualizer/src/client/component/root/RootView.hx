@@ -16,28 +16,34 @@ class RootView extends ReactComponentOfProps<RootProps>
                 className: "root",
             },
             [
-                "select".createElement(
-                    {
-                        name: "map",
-                        size: "12",
-                        onChange: onSelect,
-                    },
-                    [for (mapName in props.context.mapNames){
-                        "option".createElement(
+                "div".createElement(
+                    {},
+                    [
+                        "select".createElement(
                             {
-                                value: mapName,
-                                selected: (i++ == props.context.selectedIndex)
+                                name: "map",
+                                size: "12",
+                                onChange: onSelect,
                             },
-                            mapName
-                        );
-                    }]
+                            [for (mapName in props.context.mapNames){
+                                "option".createElement(
+                                    {
+                                        value: mapName,
+                                        selected: (i++ == props.context.selectedIndex)
+                                    },
+                                    mapName
+                                );
+                            }]
+                        ),
+                        "button".createElement(
+                            {
+                                onClick: onClick
+                            },
+                            ["表示"]
+                        ), 
+                    ]
                 ),
-                "button".createElement(
-                    {
-                        onClick: onClick
-                    },
-                    ["表示"]
-                )
+                "version : 1.0.0"
             ]
         );
     }
