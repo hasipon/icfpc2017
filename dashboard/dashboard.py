@@ -23,7 +23,7 @@ def index():
 def git_status():
     output = ""
     try:
-        output += subprocess.check_output(["git", "status"]).decode('utf-8').strip()
+        output += subprocess.check_output(["git", "status"], stderr=subprocess.STDOUT).decode('utf-8').strip()
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
@@ -32,7 +32,7 @@ def git_status():
 def git_pull():
     output = ""
     try:
-        output += subprocess.check_output(["git", "pull", "origin", "master"]).decode('utf-8').strip()
+        output += subprocess.check_output(["git", "pull", "origin", "master"], stderr=subprocess.STDOUT).decode('utf-8').strip()
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
