@@ -1,6 +1,8 @@
 package game;
+import game.PunterId;
 import game.River;
 import game.command.MapStruct;
+import game.command.SetupStruct;
 
 
 class Game 
@@ -32,7 +34,22 @@ class Game
         maxScore   = 0;
     }
     
-    public function setup(map:MapStruct) 
+    public function setup(setupStruct:SetupStruct):Void
+    {
+        setupMap(setupStruct.map);
+        setupPanters(setupStruct.punters);
+    }
+    
+    private function setupPanters(punterIds:Int) 
+    {
+        for (i in 0...punterIds)
+        {
+            var id = new PunterId(i);
+            punters[id] = new Punter(this, id);
+        }
+    }
+    
+    public function setupMap(map:MapStruct) 
     {
         for (data in map.sites)
         {

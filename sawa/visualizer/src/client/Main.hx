@@ -1,5 +1,6 @@
 package;
 
+import cli.Main;
 import component.root.RootView;
 import core.RootContext;
 import js.Browser;
@@ -13,7 +14,7 @@ import react.ReactTools;
  * ...
  * @author shohei909
  */
-class Main 
+class cli.Main 
 {
     private static var rootPixi:PixiView;
     private static var rootContext:RootContext;
