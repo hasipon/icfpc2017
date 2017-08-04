@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-#include "../include/Graph.hpp"
+#include "../hasi_template/common.hpp"
 
 typedef vector<vector<int>> _graph;
 
