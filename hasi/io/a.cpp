@@ -45,7 +45,7 @@ struct io_Json {
 	io_Json() {
 		n = io_get_n();
 		buf = new char[n+1];
-		if (fread(buf, 1, n, stdin) != n) throw 1;
+		if (fread(buf, 1, n, stdin) != n) { cerr << "io_Json" << endl; throw 1; }
 		buf[n] = 0;
 
 		p = 0;
@@ -68,7 +68,7 @@ struct io_Json {
 		read_ws();
 		{
 			auto c = peek();
-			if (!('0' <= c && c <= '9')) throw 1;
+			if (!('0' <= c && c <= '9')) { cerr << "read_number" << endl; throw 1; }
 		}
 		int r = 0;
 		for (;;) {
@@ -84,12 +84,12 @@ struct io_Json {
 	}
 	string read_string() {
 		read_ws();
-		if (peek() != '"') throw 1;
+		if (peek() != '"') { cerr << "read_string 1" << endl; throw 1; }
 		++p;
 		int s = p;
 		for (;;) {
 			auto c = peek(); ++p;
-			if (c == -1) throw 1;
+			if (c == -1) { cerr << "read_string 2" << endl; throw 1; }
 			if (c == '"') break;
 			if (c == '\\') {
 				auto cc = peek(); ++p;
@@ -120,13 +120,13 @@ struct io_Json {
 					read_value();
 				}
 			} else {
-				throw 1; // not implemented
+				cerr << "read_value" << endl; throw 1;
 			}
 		}
 	}
 	void start_object() {
 		read_ws();
-		if (peek() != '{') throw 1;
+		if (peek() != '{') { cerr << "start_object" << endl; throw 1; }
 		++p;
 	}
 	bool end_object() {
@@ -140,7 +140,7 @@ struct io_Json {
 	}
 	void start_array() {
 		read_ws();
-		if (peek() != '[') throw 1;
+		if (peek() != '[') { cerr << "start_array" << endl; throw 1; }
 		++p;
 	}
 	bool end_array() {
@@ -161,7 +161,7 @@ struct io_Json {
 	string read_key() {
 		string r = read_string();
 		read_ws();
-		if (peek() != ':') throw 1;
+		if (peek() != ':') { cerr << "read_key" << endl; throw 1; }
 		++p;
 		return r;
 	}
@@ -273,7 +273,7 @@ struct io_Main {
 							s->read_value();
 						}
 					}
-					if (c != 3) throw 1;
+					if (c != 3) { cerr << "read_map" << endl; throw 1; }
 					g.edges.push_back({source, target});
 				}
 			} else if (k == "mines") {
@@ -307,7 +307,7 @@ struct io_Main {
 					s->read_value();
 				}
 			}
-			if (c != 7) throw 1;
+			if (c != 7) { cerr << "run" << endl; throw 1; }
 			ai.Init(punter_id, num_of_punters, g);
 			delete s;
 		}
