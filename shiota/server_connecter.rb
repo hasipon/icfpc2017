@@ -24,12 +24,12 @@ class Client
   def next_ai_message
     log "wait ai message"
     ret = receive_messege(ai_socket)
-    log "ai -> me\n#{ret}"
+    # log "ai -> me\n#{ret}"
     ret
   end
 
   def send_msg_to_ai(msg)
-    log "ai <- me\n#{msg}"
+    # log "ai <- me\n#{msg}"
     ai_socket.print(msg)
   end
 
@@ -45,6 +45,7 @@ class Client
       len *= 10
       len += c.to_i
     end
+    return nil if len == 0
     msg = stream.read(len)
     "#{len}:#{msg}"
   end
@@ -93,6 +94,7 @@ client.send_msg_to_server ready_msg
 while msg = client.next_server_message
   client.send_msg_to_ai msg
   msg = client.next_ai_message
+  break unless msg
   client.send_msg_to_server msg
 end
 
