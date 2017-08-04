@@ -128,7 +128,7 @@ struct io_Json {
 		read_ws();
 		{
 			auto c = peek();
-			if ('0' <= c && c <= '9') {
+			if (('0' <= c && c <= '9') || c == '-') {
 				read_number();
 			} else if (c == '"') {
 				read_string();
@@ -143,6 +143,10 @@ struct io_Json {
 					read_key();
 					read_value();
 				}
+			} else if (c == 't' || c == 'n') {
+				p += 4;
+			} else if (c == 'f') {
+				p += 5;
 			} else {
 				cerr << "read_value" << c << endl; throw 1;
 			}
