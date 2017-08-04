@@ -15,9 +15,9 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="lib\react\src\lib" />
-    <class path="lib\perf,js\1,1,8\src" />
-    <class path="lib\pixijs\4,5,3\src" />
+    <class path="third\react\src\lib" />
+    <class path="third\perf,js\1,1,8\src" />
+    <class path="third\pixijs\4,5,3\src" />
     <class path="src\client" />
     <class path="src\common" />
   </classpaths>
@@ -28,7 +28,7 @@
     <option noInlineOnDebug="False" />
     <option mainClass="Main" />
     <option enabledebug="False" />
-    <option additional="" />
+    <option additional="--macro MacroMain.main()" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
@@ -50,8 +50,8 @@
   <!-- Other project options -->
   <options>
     <option showHiddenPaths="False" />
-    <option testMovie="Custom" />
-    <option testMovieCommand="start_client.bat" />
+    <option testMovie="Webserver" />
+    <option testMovieCommand="../../dashboard/static/visualizer/" />
   </options>
   <!-- Plugin storage -->
   <storage />
