@@ -1,4 +1,4 @@
--js site/visualizer.js
+-js ../../dashboard/static/visualizer/visualizer.js
 -cp third/react/src/lib
 -cp third/perf,js/1,1,8/src
 -cp third/pixijs/4,5,3/src
