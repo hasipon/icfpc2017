@@ -37,5 +37,6 @@ class RootContext
         game.setup(map);
         
         updatePixi();
+        updateUi();
     }
 }

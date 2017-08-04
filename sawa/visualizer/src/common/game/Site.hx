@@ -5,9 +5,10 @@ class Site
     public var game:Game;
     public var id:SiteId;
     public var isMine:Bool;
-    public var rivers:Array<RiverId>;
+    public var rivers:Map<SiteId, River>;
     public var x:Float;
     public var y:Float;
+    public var owner:PunterId;
     
     public function new (game:Game, id:SiteId, x:Float, y:Float)
     {
@@ -16,6 +17,7 @@ class Site
         this.id = id;
         this.game = game;
         isMine = false;
-        rivers = [];
+        rivers = new Map();
+        owner = PunterId.NotFound;
     }
 }
