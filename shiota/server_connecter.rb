@@ -8,8 +8,9 @@ class Client
     exit 1 unless @ai_socket = IO.popen(ai_path, "r+")
   end
 
-  def handshake
-    send_msg_to_server('12:{"me":"bob"}')
+  def handshake(name)
+    msg = '{"me":"'+ "#{name}@#{Time.now.to_i}" + '"}'
+    send_msg_to_server("#{msg.length}:#{msg}")
     next_server_message
   end
 
@@ -67,16 +68,18 @@ end
 port =  nil
 ai_path = nil
 host = nil
+name = "bob"
 opt = OptionParser.new
 opt.on('-p', '--port PORT') {|v| port =  v }
 opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
+opt.on('-n', '--name NAME') {|v| name =  v }
 opt.parse(ARGV)
 
 client = Client.new(host, port.to_i, ai_path)
 
 # handshake
-client.handshake
+client.handshake name
 
 # setup
 setup_msg = client.next_server_message
