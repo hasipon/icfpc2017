@@ -148,7 +148,6 @@ class PixiView extends Application
             _graphic.drawCircle(x, y, 10);
         }
         
-        trace("draw");
     }
     
     public static inline function lerp(rate:Float, from:Float, to:Float):Float

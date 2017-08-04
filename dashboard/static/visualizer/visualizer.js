@@ -518,7 +518,6 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 			var y1 = 20 * (1 - rate7) + (PixiView.HEIGHT - 20) * rate7;
 			this._graphic.drawCircle(x1,y1,10);
 		}
-		console.log("draw");
 	}
 	,__class__: PixiView
 });
