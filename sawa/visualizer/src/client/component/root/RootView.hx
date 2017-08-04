@@ -48,7 +48,8 @@ class RootView extends ReactComponentOfProps<RootProps>
                     {},
                     "site : " + props.context.game.siteCount +
                     ", mine : " + props.context.game.mineCount +
-                    ", river : " + props.context.game.riverCount
+                    ", river : " + props.context.game.riverCount +
+                    ", 最大スコア : " + props.context.game.maxScore
                 ),
                 
                 "div".createElement(
