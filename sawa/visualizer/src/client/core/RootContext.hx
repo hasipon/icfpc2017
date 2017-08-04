@@ -122,6 +122,8 @@ class RootContext
                         var move = moves[index];
                         allMoves.push(move);
                     }
+                    
+                    first = false;
                 }
                 
                 if (data.stop != null)

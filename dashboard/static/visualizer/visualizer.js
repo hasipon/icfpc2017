@@ -698,6 +698,7 @@ core_RootContext.prototype = {
 						var move = moves[index];
 						allMoves.push(move);
 					}
+					first = false;
 					scores = data1.stop.scores;
 					break;
 				} else {
@@ -711,6 +712,7 @@ core_RootContext.prototype = {
 						var move1 = moves1[index1];
 						allMoves.push(move1);
 					}
+					first = false;
 				}
 			}
 			if(scores == null) {
