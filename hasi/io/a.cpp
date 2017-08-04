@@ -33,7 +33,7 @@ int io_get_n() {
 	for (;;) {
 		int c = getchar();
 		if (c == ':') break;
-		if (!('0' <= c && c <= '9')) throw 1;
+		if (!('0' <= c && c <= '9')) { cerr << "io_get_n " << c << " " << n << endl; throw 1; }
 		n = n * 10 + (c - '0');
 	}
 	return n;
