@@ -1,0 +1,6 @@
+--next
+-js bin/server.js
+-lib hxnodejs
+-main ServerMain
+-cp src/server
+-cp src/common
