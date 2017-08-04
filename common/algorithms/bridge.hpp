@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 
-#include "../include/Graph.hpp"
 #include "./normalize_graph.hpp"
 
 namespace _diamond_princess {
@@ -23,11 +22,13 @@ namespace _diamond_princess {
   }
 };
 
-vector<pair<int, int>> find_bridge(const Graph& g)
+vector<pair<int, int>> find_bridge(const Graph& _g)
 {
-  pair<map<int, int>, _graph> norm = normalize_graph(g);
+  auto norm = normalize_graph(_g);
+  _graph& g = get<2>(norm);
+  map<int, int>& rev = get<1>(norm);
 
-  const int N = norm.first.size();
+  const int N = g.size();
   int d[N], p[N], l[N], time = 0;
   vector<Edge> B;
 
@@ -36,13 +37,13 @@ vector<pair<int, int>> find_bridge(const Graph& g)
 
   for (int i = 0; i < N; ++i) {
     if (d[i]) continue;
-    _diamond_princess::traverse(norm.second, i, d, p, l, time);
+    _diamond_princess::traverse(g, i, d, p, l, time);
   }
   
   for (int i = 0; i < N; ++i) {
     if (p[i] != -1 && d[i] == l[i]) {
-      const int a = norm.first[p[i]];
-      const int b = norm.first[i];
+      const int a = rev[p[i]];
+      const int b = rev[i];
       B.emplace_back(make_pair(a, b));
     }
   }

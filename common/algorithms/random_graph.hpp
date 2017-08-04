@@ -7,7 +7,7 @@
 
 #include <cassert>
 
-#include "../include/Graph.hpp"
+#include "../hasi_template/common.hpp"
 
 Graph random_graph(int v, int e, int m)
 {

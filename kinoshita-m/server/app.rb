@@ -3,13 +3,11 @@ require 'json'
 require 'monitor'
 require 'optparse'
 
-require_relative 'barrier'
+require_relative 'lib/barrier'
 
 # 12:{"me":"bob"}
 # 44:{"claim":{"punter":0,"source":0,"target":1}}
 # 44:{"claim":{"punter":1,"source":1,"target":2}}
-
-sample_map = JSON.load('{   "sites": [     {"id": 0, "x": 0.0, "y": 0.0},     {"id": 1, "x": 1.0, "y": 0.0},     {"id": 2, "x": 2.0, "y": 0.0},     {"id": 3, "x": 2.0, "y": -1.0},     {"id": 4, "x": 2.0, "y": -2.0},     {"id": 5, "x": 1.0, "y": -2.0},     {"id": 6, "x": 0.0, "y": -2.0},     {"id": 7, "x": 0.0, "y": -1.0}   ],   "rivers": [     { "source": 0, "target": 1},     { "source": 1, "target": 2},     { "source": 0, "target": 7},     { "source": 7, "target": 6},     { "source": 6, "target": 5},     { "source": 5, "target": 4},     { "source": 4, "target": 3},     { "source": 3, "target": 2},     { "source": 1, "target": 7},     { "source": 1, "target": 3},     { "source": 7, "target": 5},     { "source": 5, "target": 3}   ],   "mines": [1, 5] }')
 
 class IO
   def read_message
@@ -20,20 +18,31 @@ class IO
     end
     JSON.load(self.read(len))
   end
+
+  def send_message(obj)
+    message = JSON.generate(obj)
+    self.puts "#{message.length}:#{message}"
+  end
 end
 
-def encode(obj)
-  message = JSON.generate(obj)
-  "#{message.length}:#{message}"
-end
+opt = OptionParser.new
 
-if ARGV.length != 2
-  $stderr.puts "Usage: ruby app.rb [port] [num_of_punters]"
+num_of_punters = nil
+port = nil
+map_file = nil
+
+opt.on('-n', '--num-of-punters NUM') { |v| num_of_punters = v.to_i }
+opt.on('-p', '--port PORT') { |v| port = v.to_i }
+opt.on('-m', '--map-file FILENAME') { |v| map_file = v }
+
+opt.parse!(ARGV)
+
+if !num_of_punters || !port || !map_file
+  $stderr.puts "Usage: ruby app.rb -n NUM_OF_PUNTERS -p PORT -m MAP_FILE"
   exit 1
 end
 
-num_of_punters = ARGV[1].to_i
-port = ARGV[0].to_i
+@map = JSON.load(File.read(map_file))
 
 server = TCPServer.open(port)
 puts "Start server with num_of_punters = #{num_of_punters}"
@@ -66,7 +75,7 @@ num_of_punters.times do
         punter_id = @punters.length - 1
       end
 
-      socket.puts encode({"you" => name})
+      socket.send_message({"you" => name})
 
       @barrier.sync
 
@@ -74,14 +83,17 @@ num_of_punters.times do
       setup = {
         "punter" => punter_id,
         "punters" => num_of_punters,
-        "map" => sample_map
+        "map" => @map
       }
-      socket.puts encode(setup)
+      socket.send_message(setup)
+
+      # read ready
+      socket.read_message
 
       # GAMEPLAY
       play = nil
-      (sample_map["rivers"].length / @punters.length).times do
-        socket.puts encode({"move" => {"moves" => @moves}})
+      (@map["rivers"].length / @punters.length).times do
+        socket.send_message({"move" => {"moves" => @moves}})
 
         @barrier.sync
 
@@ -91,6 +103,7 @@ num_of_punters.times do
 
         @barrier.sync
 
+        # TODO: timeout
         play = socket.read_message
 
         @semaphore.synchronize do
@@ -100,7 +113,14 @@ num_of_punters.times do
         @barrier.sync
       end
 
-      socket.puts "-- END --"
+      stop = {
+        "stop" => {
+          "moves" => @moves,
+          "scores" => [] # TODO: calculate score
+        }
+      }
+      socket.send_message stop
+
       socket.close
     end
   )

@@ -128,7 +128,7 @@ struct io_Json {
 		read_ws();
 		{
 			auto c = peek();
-			if ('0' <= c && c <= '9') {
+			if (('0' <= c && c <= '9') || c == '-') {
 				read_number();
 			} else if (c == '"') {
 				read_string();
@@ -143,6 +143,10 @@ struct io_Json {
 					read_key();
 					read_value();
 				}
+			} else if (c == 't' || c == 'n') {
+				p += 4;
+			} else if (c == 'f') {
+				p += 5;
 			} else {
 				cerr << "read_value" << c << endl; throw 1;
 			}
@@ -257,6 +261,19 @@ struct io_Main {
 					}
 				}
 			} else if (k == "stop") {
+				stop = true;
+				s->start_object();
+				for (; !s->end_object(); s->read_separator()) {
+					auto kk = s->read_key();
+					if (kk == "moves") {
+						s->start_array();
+						for (; !s->end_array(); s->read_separator()) {
+							moves.push_back(read_move(s));
+						}
+					} else {
+						s->read_value();
+					}
+				}
 			} else {
 				s->read_value();
 			}

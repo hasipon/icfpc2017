@@ -2,7 +2,7 @@
 
 #include <map>
 #include <queue>
-#include "../include/Graph.hpp"
+#include "../hasi_template/common.hpp"
 
 std::map<int, int> bfs(const Graph& g, int source)
 {

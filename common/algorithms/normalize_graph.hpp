@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-#include "../include/Graph.hpp"
+#include "../hasi_template/common.hpp"
 
 typedef vector<vector<int>> _graph;
 
@@ -25,7 +25,7 @@ typedef vector<vector<int>> _graph;
 //   }
 // };
 
-pair<map<int, int>, _graph> normalize_graph(const Graph& g)
+tuple<map<int, int>, map<int, int>, _graph> normalize_graph(const Graph& g)
 {
   map<int, int> conv;
   map<int, int> rev;
@@ -48,5 +48,5 @@ pair<map<int, int>, _graph> normalize_graph(const Graph& g)
     h[b].emplace_back(a);
   }
 
-  return make_pair(rev, h);
+  return make_tuple(conv, rev, h);
 }
