@@ -5,8 +5,10 @@
 
 using namespace std;
 
+typedef pair<int, int> Edge;
+
 typedef struct {
-    vector<pair<int, int> > edges;
+    vector<Edge> edges;
     vector<int> mines;
 } Graph;
 #endif
