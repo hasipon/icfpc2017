@@ -1,5 +1,6 @@
 require "socket"
 require 'optparse'
+require 'pp'
 
 class Client
   def initialize(port, ai_path)
@@ -15,21 +16,23 @@ class Client
   def next_server_message
     ret = receive_messege(server_socket)
     log "<- #{ret}"
+    ret
   end
 
   def next_ai_message
     ret = receive_messege(ai_socket)
     log "-> #{ret}"
+    ret
   end
 
   def send_msg_to_ai(msg)
     log "<- #{msg}"
-    ai_socket.puts(msg)
+    ai_socket.print(msg)
   end
 
   def send_msg_to_server(msg)
     log "-> #{msg}"
-    server_socket.puts(msg)
+    server_socket.print(msg)
   end
 
   def receive_messege(stream)
@@ -61,8 +64,10 @@ end
 
 port =  nil
 ai_path = nil
+host = nil
 opt = OptionParser.new
 opt.on('-p', '--port PORT') {|v| port =  v }
+opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
 opt.parse(ARGV)
 
@@ -73,7 +78,7 @@ client.handshake
 
 # setup
 setup_msg = client.next_server_message
-client.send_msg_to_ai setup_msg
+client.send_msg_to_ai(setup_msg)
 
 # ready
 # client.send_msg_to_server '11:{"ready":0}'
@@ -81,6 +86,6 @@ ready_msg = client.next_ai_message
 client.send_msg_to_server ready_msg
 
 while msg = client.next_server_message
-  ai.send_msg_to_ai msg
+  client.send_msg_to_ai msg
 end
 
