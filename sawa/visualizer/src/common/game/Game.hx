@@ -10,6 +10,9 @@ class Game
     public var rivers:Map<RiverId, River>;
     public var punters:Map<PunterId, Punter>;
     public var scoreDictionary:Map<SiteId, Map<SiteId, Int>>;
+    public var mineCount:Int;
+    public var siteCount:Int;
+    public var riverCount:Int;
     
     public function new() 
     {
@@ -18,6 +21,10 @@ class Game
         rivers = new Map();
         punters = new Map();
         scoreDictionary = new Map();
+        
+        mineCount  = 0;
+        siteCount  = 0;
+        riverCount = 0;
     }
     
     public function setup(map:MapStruct) 
@@ -49,5 +56,9 @@ class Game
             rivers[id] = river;
             i++;
         }
+        
+        mineCount = map.mines.length;
+        siteCount = map.sites.length;
+        riverCount = map.rivers.length;
     }
 }

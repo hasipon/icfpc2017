@@ -43,7 +43,18 @@ class RootView extends ReactComponentOfProps<RootProps>
                         ), 
                     ]
                 ),
-                "version : 1.0.0"
+                
+                "div".createElement(
+                    {},
+                    "site : " + props.context.game.siteCount +
+                    ", mine : " + props.context.game.mineCount +
+                    ", river : " + props.context.game.riverCount
+                ),
+                
+                "div".createElement(
+                    {},
+                    "version : 1.1"
+                ),
             ]
         );
     }
