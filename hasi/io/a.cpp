@@ -66,9 +66,14 @@ struct io_Json {
 	}
 	int read_number() {
 		read_ws();
+		bool minus = false;
 		{
 			auto c = peek();
-			if (!('0' <= c && c <= '9')) { cerr << "read_number" << endl; throw 1; }
+			if (!(('0' <= c && c <= '9') || c == '-')) { cerr << "read_number 1" << endl; throw 1; }
+			if (c == '-') {
+				minus = true;
+				++p;
+			}
 		}
 		int r = 0;
 		for (;;) {
@@ -80,7 +85,26 @@ struct io_Json {
 				break;
 			}
 		}
-		return r;
+		if (peek() == '.') {
+			++p;
+			for (;;) {
+				auto c = peek();
+				if ('0' <= c && c <= '9') ++p;
+				else if (c == -1) { cerr << "read_number 2" << endl; throw 1; }
+				else break;
+			}
+		}
+		if (peek() == 'e') {
+			++p;
+			if (peek() == '+' || peek() == '-') ++p;
+			for (;;) {
+				auto c = peek();
+				if ('0' <= c && c <= '9') ++p;
+				else if (c == -1) { cerr << "read_number 3" << endl; throw 1; }
+				else break;
+			}
+		}
+		return minus ? -r : r;
 	}
 	string read_string() {
 		read_ws();
@@ -120,7 +144,7 @@ struct io_Json {
 					read_value();
 				}
 			} else {
-				cerr << "read_value" << endl; throw 1;
+				cerr << "read_value" << c << endl; throw 1;
 			}
 		}
 	}
