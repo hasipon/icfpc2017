@@ -3,13 +3,15 @@
 ## Dashboard
 初回のみ
 ```
-cd dashboard
-./setup.sh
+$cd dashboard
+$./setup.sh
 ```
 
 立ち上げ
 ```
-cd dashboard
-./venv/bin/python3 dashboard.py
+$cd dashboard
+$export FLASK_APP=dashboard.py
+$export FLASK_DEBUG=1
+$./venv/bin/python3 -m flask run
 ```
 

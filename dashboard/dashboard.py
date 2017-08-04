@@ -23,7 +23,16 @@ def index():
 def git_status():
     output = ""
     try:
-        output += subprocess.check_output(["git", "status"]).decode('utf-8').strip()
+        output += subprocess.check_output(["git", "status"], stderr=subprocess.STDOUT).decode('utf-8').strip()
+    except subprocess.CalledProcessError as e:
+        output += "Error:" + str(e)
+    return render_template('output.html', output=output)
+
+@app.route('/update')
+def git_pull():
+    output = ""
+    try:
+        output += subprocess.check_output(["git", "pull", "origin", "master"], stderr=subprocess.STDOUT).decode('utf-8').strip()
     except subprocess.CalledProcessError as e:
         output += "Error:" + str(e)
     return render_template('output.html', output=output)
@@ -54,5 +63,5 @@ def problem_submit_post(publish_time):
 """
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, threaded=True, debug=True)
 
