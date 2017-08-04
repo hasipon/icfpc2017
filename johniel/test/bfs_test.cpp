@@ -14,8 +14,6 @@
 #include <cstdio>
 #include <cstring>
 
-#include "cmdline.h"
-
 #define each(i, c) for (auto& i : c)
 #define unless(cond) if (!(cond))
 
@@ -38,11 +36,23 @@ ostream& operator << (ostream& os, pair<P, Q> p)
 
 int main(int argc, char *argv[])
 {
-  cmdline::parser a;
+  Graph g;
+  for (int i = 0; i < 5; ++i) {
+    g.mines.push_back(i);
+  }
+  g.edges.push_back(make_pair(0, 1));
+  g.edges.push_back(make_pair(1, 2));
+  g.edges.push_back(make_pair(0, 2));
+  g.edges.push_back(make_pair(2, 3));
+  g.edges.push_back(make_pair(4, 0));
 
-  a.add<string>("host", 'h', "host name", true, "");
-  a.parse_check(argc, argv);
-  cout << a.get<string>("host") << endl;
-  
+  map<int, int> cost = bfs(g, 0);
+  assert(cost[0] == 0);
+  assert(cost[1] == 1);
+  assert(cost[2] == 1);
+  assert(cost[3] == 2);
+  assert(cost[4] == 1);
+
+  puts("OK");
   return 0;
 }

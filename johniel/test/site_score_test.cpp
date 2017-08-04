@@ -14,8 +14,6 @@
 #include <cstdio>
 #include <cstring>
 
-#include "cmdline.h"
-
 #define each(i, c) for (auto& i : c)
 #define unless(cond) if (!(cond))
 
@@ -32,17 +30,18 @@ ostream& operator << (ostream& os, pair<P, Q> p)
   return os;
 }
 
-#include "../../common/include/Graph.hpp"
-#include "../../common/algorithms/BFS.hpp"
-#include "../../common/algorithms/bridge.hpp"
+#include "../../common/algorithms/random_graph.hpp"
+#include "../../common/algorithms/site_score.hpp"
 
 int main(int argc, char *argv[])
 {
-  cmdline::parser a;
+  Graph g = random_graph(20, 30, 5);
 
-  a.add<string>("host", 'h', "host name", true, "");
-  a.parse_check(argc, argv);
-  cout << a.get<string>("host") << endl;
-  
+  map<int, int> score = site_score(g, g.mines[0]);
+  each (i, score) {
+    cout << i << endl;
+  }
+
+  puts("OK");
   return 0;
 }

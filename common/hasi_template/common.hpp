@@ -1,9 +1,4 @@
-#ifndef INCLUDED_MOVE
-#define INCLUDED_MOVE
-
-
-#include<vector>
-
+#include <vector>
 using namespace std;
 
 struct Move {
@@ -16,4 +11,9 @@ struct Move {
 };
 using Moves = vector<Move>;
 
-#endif
+typedef pair<int, int> Edge;
+
+typedef struct {
+    vector<Edge> edges;
+    vector<int> mines;
+} Graph;
