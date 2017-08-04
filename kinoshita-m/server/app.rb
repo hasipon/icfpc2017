@@ -4,6 +4,7 @@ require 'monitor'
 require 'optparse'
 
 require_relative 'lib/barrier'
+require_relative 'lib/score'
 
 # 12:{"me":"bob"}
 # 44:{"claim":{"punter":0,"source":0,"target":1}}
@@ -43,6 +44,7 @@ if !num_of_punters || !port || !map_file
 end
 
 @map = JSON.load(File.read(map_file))
+@score = Score.new(@map, num_of_punters)
 
 server = TCPServer.open(port)
 puts "Start server with num_of_punters = #{num_of_punters}"
@@ -98,7 +100,10 @@ num_of_punters.times do
         @barrier.sync
 
         @semaphore.synchronize do
-          @moves = [] unless @moves.empty?
+          unless @moves.empty?
+            @score.update(@moves)
+            @moves = []
+          end
         end
 
         @barrier.sync
@@ -116,7 +121,7 @@ num_of_punters.times do
       stop = {
         "stop" => {
           "moves" => @moves,
-          "scores" => [] # TODO: calculate score
+          "scores" => @score.calc
         }
       }
       socket.send_message stop
