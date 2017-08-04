@@ -1,4 +1,3 @@
---next
 -js bin/server.js
 -lib hxnodejs
 -main ServerMain

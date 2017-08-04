@@ -2,9 +2,9 @@
   "name": "visualizer",
   "version": "1.0.0",
   "scripts": {
-    "start": "node bin/server.js",
+    "start": "node bin/server.js"
   },
   "dependencies": {
-    "http-server": "^0.7.4"
+    "http-server": "0.10.0"
   }
 }

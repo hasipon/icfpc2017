@@ -1,4 +1,4 @@
--js bin/visualizer.js
+-js site/visualizer.js
 -cp lib/react/src/lib
 -cp lib/perf,js/1,1,8/src
 -cp lib/pixijs/4,5,3/src
@@ -6,4 +6,3 @@
 -cp src/common
 -D react_global
 -main Main
--cmd start http://localhost:8080

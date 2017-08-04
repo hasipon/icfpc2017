@@ -3,6 +3,19 @@ if (process.version < "v4.0.0") console.warn("Module " + (typeof(module) == "und
 (function () { "use strict";
 var ServerMain = function() { };
 ServerMain.main = function() {
+	ServerMain.startHttpServer();
 };
+ServerMain.startHttpServer = function() {
+	var options = { root : "site"};
+	var server = require("http-server").createServer(options);
+	var host = "127.0.0.1";
+	var port = 8080;
+	server.listen(port,host,function() {
+		console.log(["Starting up http-server, serving ",server.root,"\nAvailable on:",host + ":" + port].join(""));
+		console.log("Hit CTRL-C to stop the server");
+	});
+};
+var haxe_io_Bytes = function() { };
+var js_node_buffer_Buffer = require("buffer").Buffer;
 ServerMain.main();
 })();
