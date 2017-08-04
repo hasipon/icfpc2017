@@ -1,20 +1,15 @@
 package;
 
-import cli.Main;
 import component.root.RootView;
 import core.RootContext;
 import js.Browser;
 import react.React;
-import react.ReactComponent.ReactElement;
 import react.ReactDOM;
-import react.ReactEvent;
-import react.ReactTools;
-
 /**
  * ...
  * @author shohei909
  */
-class cli.Main 
+class Main 
 {
     private static var rootPixi:PixiView;
     private static var rootContext:RootContext;
@@ -23,6 +18,7 @@ class cli.Main
     {
         rootContext = new RootContext();
         rootPixi = new PixiView(rootContext);
+        rootPixi.onUpdate = rootContext.onFrame;
         
         rootContext.updateUi = render;
         rootContext.updatePixi = rootPixi.update;
