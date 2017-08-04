@@ -1,7 +1,0 @@
-result:true
-count:74
-pass:74
-fail:0
-error:0
-ignore:0
-time:0.034999847412109375
