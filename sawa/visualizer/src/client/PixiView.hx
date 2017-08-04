@@ -15,12 +15,12 @@ class PixiView extends Application
     static var WIDTH = 900;
     static var HEIGHT = 650;
     static var COLORS = [
-        0x884411,
-        0x441188,
-        0x118844,
-        0x448811,
-        0x881144,
-        0x114488,
+        0xFF8811,
+        0x8811FF,
+        0x11FF88,
+        0x88FF11,
+        0xFF1188,
+        0x1188FF,
         0xDD2211,
         0x11DD22,
         0x1122DD,
