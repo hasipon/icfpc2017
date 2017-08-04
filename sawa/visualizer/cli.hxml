@@ -1,0 +1,4 @@
+-main CliMain
+-cp src/cli
+-cp src/common
+-cs bin/cli
