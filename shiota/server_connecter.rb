@@ -3,13 +3,14 @@ require 'optparse'
 require 'pp'
 
 class Client
-  def initialize(port, ai_path)
-    exit 1 unless @server_socket = TCPSocket.new("punter.inf.ed.ac.uk", port)
+  def initialize(host, port, ai_path)
+    exit 1 unless @server_socket = TCPSocket.new(host, port)
     exit 1 unless @ai_socket = IO.popen(ai_path, "r+")
   end
 
-  def handshake
-    send_msg_to_server('12:{"me":"bob"}')
+  def handshake(name)
+    msg = '{"me":"'+ "#{name}@#{Time.now.to_i}" + '"}'
+    send_msg_to_server("#{msg.length}:#{msg}")
     next_server_message
   end
 
@@ -23,12 +24,12 @@ class Client
   def next_ai_message
     log "wait ai message"
     ret = receive_messege(ai_socket)
-    log "ai -> me\n#{ret}"
+    # log "ai -> me\n#{ret}"
     ret
   end
 
   def send_msg_to_ai(msg)
-    log "ai <- me\n#{msg}"
+    # log "ai <- me\n#{msg}"
     ai_socket.print(msg)
   end
 
@@ -44,6 +45,7 @@ class Client
       len *= 10
       len += c.to_i
     end
+    return nil if len == 0
     msg = stream.read(len)
     "#{len}:#{msg}"
   end
@@ -67,16 +69,18 @@ end
 port =  nil
 ai_path = nil
 host = nil
+name = "bob"
 opt = OptionParser.new
 opt.on('-p', '--port PORT') {|v| port =  v }
 opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
+opt.on('-n', '--name NAME') {|v| name =  v }
 opt.parse(ARGV)
 
-client = Client.new(port.to_i, ai_path)
+client = Client.new(host, port.to_i, ai_path)
 
 # handshake
-client.handshake
+client.handshake name
 
 # setup
 setup_msg = client.next_server_message
@@ -90,6 +94,7 @@ client.send_msg_to_server ready_msg
 while msg = client.next_server_message
   client.send_msg_to_ai msg
   msg = client.next_ai_message
+  break unless msg
   client.send_msg_to_server msg
 end
 
