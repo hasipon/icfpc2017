@@ -64,8 +64,10 @@ end
 
 port =  nil
 ai_path = nil
+host = nil
 opt = OptionParser.new
 opt.on('-p', '--port PORT') {|v| port =  v }
+opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
 opt.parse(ARGV)
 
@@ -84,6 +86,6 @@ ready_msg = client.next_ai_message
 client.send_msg_to_server ready_msg
 
 while msg = client.next_server_message
-  ai.send_msg_to_ai msg
+  client.send_msg_to_ai msg
 end
 
