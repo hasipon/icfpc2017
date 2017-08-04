@@ -5,20 +5,21 @@
 using namespace std;
 
 struct Move {
-	int punter;
-	int source;
-	int target;
-	bool is_pass;
-	Move() : is_pass(true) {}
-	Move(int source, int target) : is_pass(false), source(source), target(target) {}
+    int punter_id;
+    int source;
+    int target;
+    bool is_pass;
+    Move() : is_pass(true) {}
+    Move(int source, int target) : is_pass(false), source(source), target(target) {}
 };
-
 using Moves = vector<Move>;
 
-struct Graph {
-	vector<pair<int, int> > edges;
-	vector<int> mines;
-};
+typedef pair<int, int> Edge;
+
+typedef struct {
+    vector<Edge> edges;
+    vector<int> mines;
+} Graph;
 
 struct AI {
 	void Init(int punter_id, int num_of_punters, const Graph& g) {}
@@ -185,7 +186,7 @@ struct io_Main {
 				for (; !s->end_object(); s->read_separator()) {
 					auto kk = s->read_key();
 					if (kk == "punter") {
-						r.punter = s->read_number();
+						r.punter_id = s->read_number();
 					} else if (kk == "source") {
 						r.source = s->read_number();
 					} else if (kk == "target") {
@@ -200,7 +201,7 @@ struct io_Main {
 				for (; !s->end_object(); s->read_separator()) {
 					auto kk = s->read_key();
 					if (kk == "punter") {
-						r.punter = s->read_number();
+						r.punter_id = s->read_number();
 					} else {
 						s->read_value();
 					}
