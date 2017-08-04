@@ -3,8 +3,8 @@ require 'optparse'
 require 'pp'
 
 class Client
-  def initialize(port, ai_path)
-    exit 1 unless @server_socket = TCPSocket.new("punter.inf.ed.ac.uk", port)
+  def initialize(host, port, ai_path)
+    exit 1 unless @server_socket = TCPSocket.new(host, port)
     exit 1 unless @ai_socket = IO.popen(ai_path, "r+")
   end
 
@@ -73,7 +73,7 @@ opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
 opt.parse(ARGV)
 
-client = Client.new(port.to_i, ai_path)
+client = Client.new(host, port.to_i, ai_path)
 
 # handshake
 client.handshake
