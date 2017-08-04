@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     y[e.second / 10].push_back(e.first / 10);
   }
 
-  _graph x = normalize_graph(g).second;
+  _graph x = get<2>(normalize_graph(g));
   _graph z = x;
 
   auto show = [] (_graph g) {
