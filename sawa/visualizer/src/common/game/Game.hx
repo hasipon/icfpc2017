@@ -5,11 +5,18 @@ import game.command.MapStruct;
 
 class Game 
 {
+    public static var MAX_DISTANCE = 20;
+    public static var MS_TABLE = [for (i in 0...MAX_DISTANCE) 2048 * Math.pow(0.5, i)];
+    
     public var sites:Map<SiteId, Site>;
     public var mines:Map<SiteId, Site>;
     public var rivers:Map<RiverId, River>;
     public var punters:Map<PunterId, Punter>;
     public var scoreDictionary:Map<SiteId, Map<SiteId, Int>>;
+    public var mineCount:Int;
+    public var siteCount:Int;
+    public var riverCount:Int;
+    public var maxScore:Int;
     
     public function new() 
     {
@@ -18,6 +25,11 @@ class Game
         rivers = new Map();
         punters = new Map();
         scoreDictionary = new Map();
+        
+        mineCount  = 0;
+        siteCount  = 0;
+        riverCount = 0;
+        maxScore   = 0;
     }
     
     public function setup(map:MapStruct) 
@@ -47,7 +59,52 @@ class Game
             var id = new RiverId(i);
             var river = new River(this, id, data.source, data.target);
             rivers[id] = river;
+            
+            sites[river.a].rivers[river.getAnother(river.a)] = river;
+            sites[river.b].rivers[river.getAnother(river.b)] = river;
             i++;
+        }
+        
+        mineCount = map.mines.length;
+        siteCount = map.sites.length;
+        riverCount = map.rivers.length;
+        maxScore = 0;
+        
+        // 
+        for (mine in mines)
+        {
+            var localScores = new Map();
+            scoreDictionary[mine.id] = localScores;
+            
+            var currentSites = [mine];
+            var distances = new Map<SiteId, Int>();
+            distances[mine.id] = 0;
+            
+            for (i in 0...siteCount)
+            {
+                var nextSites = [];
+                for (site in currentSites)
+                {
+                    for (river in site.rivers)
+                    {
+                        var another = river.getAnother(site.id); 
+                        if (!distances.exists(another))
+                        {
+                            distances[another] = i + 1;
+                            nextSites.push(sites[another]);
+                        }
+                    }
+                }
+                currentSites = nextSites;
+            }
+            
+            for (siteId in distances.keys())
+            {
+                var distance = distances[siteId];
+                var score = distance * distance;
+                localScores[siteId] = score;
+                maxScore += score;
+            }
         }
     }
 }

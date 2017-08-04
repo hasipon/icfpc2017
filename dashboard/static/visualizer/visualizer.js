@@ -529,7 +529,9 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp = react_ReactStringTools.createElement("select",{ name : "map", size : "12", onChange : $bind(this,this.onSelect)},_g);
 		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClick)},["表示"]);
 		var tmp2 = react_ReactStringTools.createElement("div",{ },[tmp,tmp1]);
-		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,"version : 1.0.0"]);
+		var tmp3 = react_ReactStringTools.createElement("div",{ },"site : " + this.props.context.game.siteCount + ", mine : " + this.props.context.game.mineCount + ", river : " + this.props.context.game.riverCount + ", 最大スコア : " + this.props.context.game.maxScore);
+		var tmp4 = react_ReactStringTools.createElement("div",{ },"version : 1.1");
+		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp4]);
 	}
 	,onClick: function(e) {
 		this.props.context.exec();
@@ -557,6 +559,7 @@ core_RootContext.prototype = {
 		var map = JSON.parse(content);
 		this.game.setup(map);
 		this.updatePixi();
+		this.updateUi();
 	}
 	,__class__: core_RootContext
 };
@@ -566,6 +569,9 @@ var game_Game = function() {
 	this.rivers = new haxe_ds_IntMap();
 	this.punters = new haxe_ds_IntMap();
 	this.scoreDictionary = new haxe_ds_IntMap();
+	this.mineCount = 0;
+	this.siteCount = 0;
+	this.riverCount = 0;
 };
 game_Game.__name__ = true;
 game_Game.prototype = {
@@ -596,7 +602,52 @@ game_Game.prototype = {
 			var id = game__$RiverId_RiverId_$Impl_$._new(i);
 			var river = new game_River(this,id,data1.source,data1.target);
 			this.rivers.h[id] = river;
+			this.sites.get(river.a).rivers.set(river.getAnother(river.a),river);
+			this.sites.get(river.b).rivers.set(river.getAnother(river.b),river);
 			++i;
+		}
+		this.mineCount = map.mines.length;
+		this.siteCount = map.sites.length;
+		this.riverCount = map.rivers.length;
+		this.maxScore = 0;
+		var mine = this.mines.iterator();
+		while(mine.hasNext()) {
+			var mine1 = mine.next();
+			var localScores = new haxe_ds_IntMap();
+			this.scoreDictionary.set(mine1.id,localScores);
+			var currentSites = [mine1];
+			var distances = new haxe_ds_IntMap();
+			distances.set(mine1.id,0);
+			var _g13 = 0;
+			var _g4 = this.siteCount;
+			while(_g13 < _g4) {
+				var i1 = _g13++;
+				var nextSites = [];
+				var _g21 = 0;
+				while(_g21 < currentSites.length) {
+					var site2 = currentSites[_g21];
+					++_g21;
+					var river1 = site2.rivers.iterator();
+					while(river1.hasNext()) {
+						var river2 = river1.next();
+						var another = river2.getAnother(site2.id);
+						if(!distances.exists(another)) {
+							var v = i1 + 1;
+							distances.set(another,v);
+							nextSites.push(this.sites.get(another));
+						}
+					}
+				}
+				currentSites = nextSites;
+			}
+			var siteId1 = distances.keys();
+			while(siteId1.hasNext()) {
+				var siteId2 = siteId1.next();
+				var distance = distances.get(siteId2);
+				var score = distance * distance;
+				localScores.set(siteId2,score);
+				this.maxScore += score;
+			}
 		}
 	}
 	,__class__: game_Game
@@ -626,7 +677,14 @@ var game_River = function(game1,id,a,b) {
 };
 game_River.__name__ = true;
 game_River.prototype = {
-	__class__: game_River
+	getAnother: function(source) {
+		if(this.a == source) {
+			return this.b;
+		} else {
+			return this.a;
+		}
+	}
+	,__class__: game_River
 };
 var game__$RiverId_RiverId_$Impl_$ = {};
 game__$RiverId_RiverId_$Impl_$.__name__ = true;
@@ -640,7 +698,8 @@ var game_Site = function(game1,id,x,y) {
 	this.id = id;
 	this.game = game1;
 	this.isMine = false;
-	this.rivers = [];
+	this.rivers = new haxe_ds_IntMap();
+	this.owner = game__$PunterId_PunterId_$Impl_$.NotFound;
 };
 game_Site.__name__ = true;
 game_Site.prototype = {
@@ -836,6 +895,9 @@ haxe_ds_IntMap.prototype = {
 	}
 	,get: function(key) {
 		return this.h[key];
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty(key);
 	}
 	,keys: function() {
 		var a = [];
@@ -1240,6 +1302,22 @@ pixi_plugins_app_Application.POSITION_INHERIT = "inherit";
 PixiView.WIDTH = 900;
 PixiView.HEIGHT = 650;
 component_root_RootView.displayName = "RootView";
+game_Game.MAX_DISTANCE = 20;
+game_Game.MS_TABLE = (function($this) {
+	var $r;
+	var _g = [];
+	{
+		var _g2 = 0;
+		var _g1 = game_Game.MAX_DISTANCE;
+		while(_g2 < _g1) {
+			var i = _g2++;
+			_g.push(2048 * Math.pow(0.5,i));
+		}
+	}
+	$r = _g;
+	return $r;
+}(this));
+game__$PunterId_PunterId_$Impl_$.NotFound = game__$PunterId_PunterId_$Impl_$._new(-1);
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 js_Boot.__toStr = ({ }).toString;

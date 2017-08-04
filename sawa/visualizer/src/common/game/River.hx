@@ -1,4 +1,5 @@
 package game;
+import game.SiteId;
 
 
 class River
@@ -14,5 +15,10 @@ class River
         this.game = game;
         this.a = a;
         this.b = b;
+    }
+    
+    public function getAnother(source:SiteId):SiteId
+    {
+        return if (a == source) b else a;
     }
 }
