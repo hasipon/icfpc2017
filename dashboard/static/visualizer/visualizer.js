@@ -12,7 +12,15 @@ var EReg = function(r,opt) {
 };
 EReg.__name__ = true;
 EReg.prototype = {
-	split: function(s) {
+	match: function(s) {
+		if(this.r.global) {
+			this.r.lastIndex = 0;
+		}
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,split: function(s) {
 		var d = "#__delim__#";
 		return s.replace(this.r,d).split(d);
 	}
@@ -45,6 +53,48 @@ HxOverrides.iter = function(a) {
 	}, next : function() {
 		return this.arr[this.cur++];
 	}};
+};
+var Lambda = function() { };
+Lambda.__name__ = true;
+Lambda.exists = function(it,f) {
+	var x = $iterator(it)();
+	while(x.hasNext()) {
+		var x1 = x.next();
+		if(f(x1)) {
+			return true;
+		}
+	}
+	return false;
+};
+var List = function() {
+	this.length = 0;
+};
+List.__name__ = true;
+List.prototype = {
+	iterator: function() {
+		return new _$List_ListIterator(this.h);
+	}
+	,__class__: List
+};
+var _$List_ListNode = function() { };
+_$List_ListNode.__name__ = true;
+_$List_ListNode.prototype = {
+	__class__: _$List_ListNode
+};
+var _$List_ListIterator = function(head) {
+	this.head = head;
+};
+_$List_ListIterator.__name__ = true;
+_$List_ListIterator.prototype = {
+	hasNext: function() {
+		return this.head != null;
+	}
+	,next: function() {
+		var val = this.head.item;
+		this.head = this.head.next;
+		return val;
+	}
+	,__class__: _$List_ListIterator
 };
 var Main = function() { };
 Main.__name__ = true;
@@ -597,7 +647,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
 		var tmp9 = react_ReactStringTools.createElement("div",{ },this.props.context.warning == null ? "" : "エラー：" + this.props.context.warning);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 1.3");
+		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 1.5");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp6,tmp8,tmp9,tmp10]);
 	}
 	,onClick: function(e) {
@@ -639,6 +689,7 @@ core_PlayingState.prototype = {
 	,__class__: core_PlayingState
 };
 var core_RootContext = function() {
+	this.hash = "";
 	this.mapNames = haxe_Resource.listNames();
 	this.selectedIndex = 0;
 	this.game = new game_Game();
@@ -666,7 +717,6 @@ core_RootContext.prototype = {
 		this.updateUi();
 	}
 	,execLog: function() {
-		console.log(this.log);
 		this.game = new game_Game();
 		this.playingState = haxe_ds_Option.None;
 		this.warning = null;
@@ -736,6 +786,23 @@ core_RootContext.prototype = {
 		case 1:
 			break;
 		}
+		var hash = HxOverrides.substr(window.location.hash,1,null);
+		console.log(hash);
+		if(this.hash != hash) {
+			this.updateHash(hash);
+		}
+	}
+	,updateHash: function(hash) {
+		var _gthis = this;
+		this.hash = hash;
+		var http = new haxe_Http(hash);
+		console.log(hash);
+		http.onData = function(data) {
+			console.log(data);
+			_gthis.changeLog(data);
+			_gthis.execLog();
+		};
+		http.request();
 	}
 	,__class__: core_RootContext
 };
@@ -925,6 +992,135 @@ var haxe_IMap = function() { };
 haxe_IMap.__name__ = true;
 haxe_IMap.prototype = {
 	__class__: haxe_IMap
+};
+var haxe_Http = function(url) {
+	this.url = url;
+	this.headers = new List();
+	this.params = new List();
+	this.async = true;
+	this.withCredentials = false;
+};
+haxe_Http.__name__ = true;
+haxe_Http.prototype = {
+	request: function(post) {
+		var me = this;
+		me.responseData = null;
+		var r = this.req = js_Browser.createXMLHttpRequest();
+		var onreadystatechange = function(_) {
+			if(r.readyState != 4) {
+				return;
+			}
+			var s;
+			try {
+				s = r.status;
+			} catch( e ) {
+				s = null;
+			}
+			if(s != null && "undefined" !== typeof window) {
+				var protocol = window.location.protocol.toLowerCase();
+				var rlocalProtocol = new EReg("^(?:about|app|app-storage|.+-extension|file|res|widget):$","");
+				var isLocal = rlocalProtocol.match(protocol);
+				if(isLocal) {
+					if(r.responseText != null) {
+						s = 200;
+					} else {
+						s = 404;
+					}
+				}
+			}
+			if(s == undefined) {
+				s = null;
+			}
+			if(s != null) {
+				me.onStatus(s);
+			}
+			if(s != null && s >= 200 && s < 400) {
+				me.req = null;
+				me.onData(me.responseData = r.responseText);
+			} else if(s == null) {
+				me.req = null;
+				me.onError("Failed to connect or resolve host");
+			} else {
+				switch(s) {
+				case 12007:
+					me.req = null;
+					me.onError("Unknown host");
+					break;
+				case 12029:
+					me.req = null;
+					me.onError("Failed to connect to host");
+					break;
+				default:
+					me.req = null;
+					me.responseData = r.responseText;
+					me.onError("Http Error #" + r.status);
+				}
+			}
+		};
+		if(this.async) {
+			r.onreadystatechange = onreadystatechange;
+		}
+		var uri = this.postData;
+		if(uri != null) {
+			post = true;
+		} else {
+			var _g_head = this.params.h;
+			while(_g_head != null) {
+				var val = _g_head.item;
+				_g_head = _g_head.next;
+				var p = val;
+				if(uri == null) {
+					uri = "";
+				} else {
+					uri += "&";
+				}
+				var s1 = p.param;
+				var uri1 = encodeURIComponent(s1) + "=";
+				var s2 = p.value;
+				uri += uri1 + encodeURIComponent(s2);
+			}
+		}
+		try {
+			if(post) {
+				r.open("POST",this.url,this.async);
+			} else if(uri != null) {
+				var question = this.url.split("?").length <= 1;
+				r.open("GET",this.url + (question ? "?" : "&") + uri,this.async);
+				uri = null;
+			} else {
+				r.open("GET",this.url,this.async);
+			}
+		} catch( e1 ) {
+			if (e1 instanceof js__$Boot_HaxeError) e1 = e1.val;
+			me.req = null;
+			this.onError(e1.toString());
+			return;
+		}
+		r.withCredentials = this.withCredentials;
+		if(!Lambda.exists(this.headers,function(h) {
+			return h.header == "Content-Type";
+		}) && post && this.postData == null) {
+			r.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+		}
+		var _g_head1 = this.headers.h;
+		while(_g_head1 != null) {
+			var val1 = _g_head1.item;
+			_g_head1 = _g_head1.next;
+			var h1 = val1;
+			r.setRequestHeader(h1.header,h1.value);
+		}
+		r.send(uri);
+		if(!this.async) {
+			onreadystatechange(null);
+		}
+	}
+	,onData: function(data) {
+	}
+	,onError: function(msg) {
+	}
+	,onStatus: function(status) {
+	}
+	,__class__: haxe_Http
 };
 var haxe_Resource = function() { };
 haxe_Resource.__name__ = true;
@@ -1350,6 +1546,17 @@ js_Boot.__isNativeObj = function(o) {
 js_Boot.__resolveNativeClass = function(name) {
 	return $global[name];
 };
+var js_Browser = function() { };
+js_Browser.__name__ = true;
+js_Browser.createXMLHttpRequest = function() {
+	if(typeof XMLHttpRequest != "undefined") {
+		return new XMLHttpRequest();
+	}
+	if(typeof ActiveXObject != "undefined") {
+		return new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	throw new js__$Boot_HaxeError("Unable to create XMLHttpRequest object.");
+};
 var js_html_compat_ArrayBuffer = function(a) {
 	if((a instanceof Array) && a.__enum__ == null) {
 		this.a = a;
@@ -1465,6 +1672,7 @@ react_ReactStringTools.__name__ = true;
 react_ReactStringTools.createElement = function(type,attrs,children0) {
 	return React.createElement(type,attrs,children0);
 };
+function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
 String.prototype.__class__ = String;

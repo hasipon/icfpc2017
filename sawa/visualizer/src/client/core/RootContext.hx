@@ -5,6 +5,7 @@ import game.command.MoveStruct;
 import game.command.ScoreStruct;
 import game.command.SetupStruct;
 import game.command.StopStruct;
+import haxe.Http;
 import haxe.Json;
 import haxe.Resource;
 import haxe.ds.Option;
@@ -12,6 +13,7 @@ import js.Browser;
 
 class RootContext 
 {
+    private var hash:String;
     public var game:Game;
     public var selectedIndex:Int;
     public var mapNames:Array<String>;
@@ -26,6 +28,7 @@ class RootContext
     
     public function new()
     {
+        hash = "";
         mapNames = Resource.listNames();
         selectedIndex = 0;
         game = new Game();
@@ -92,7 +95,6 @@ class RootContext
     
     public function execLog():Void
     {
-        trace(log);
         game = new Game();
         playingState = Option.None;
         warning = null;
@@ -163,5 +165,26 @@ class RootContext
             case Option.Some(_playingState):
                 _playingState.update();
         }
+        
+        var hash = Browser.location.hash.substr(1);
+        trace(hash);
+        if (this.hash != hash)
+        {
+            updateHash(hash);
+        }
+    }
+    
+    private function updateHash(hash:String) 
+    {
+        this.hash = hash;
+        var http = new Http(hash);
+        trace(hash);
+        http.onData = function (data)
+        {
+            trace(data);
+            changeLog(data);
+            execLog();
+        }
+        http.request();
     }
 }

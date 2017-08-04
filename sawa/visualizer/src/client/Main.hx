@@ -38,4 +38,5 @@ class Main
             Browser.document.getElementById('control')
         );
     }
+    
 }

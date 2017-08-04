@@ -53,7 +53,6 @@ class RootView extends ReactComponentOfProps<RootProps>
                     ", river : " + props.context.game.riverCount +
                     ", 最大スコア : " + props.context.game.maxScore
                 ),
-                
                 "div".createElement(
                     {},
                     [
@@ -96,7 +95,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 1.3"
+                    "version : 1.5"
                 ),
             ]
         );
