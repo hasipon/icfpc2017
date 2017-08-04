@@ -30,7 +30,7 @@ ostream& operator << (ostream& os, pair<P, Q> p)
   return os;
 }
 
-#include "../../common/include/Graph.hpp"
+#include "../../common/hasi_template/common.hpp"
 #include "../../common/algorithms/BFS.hpp"
 #include "../../common/algorithms/bridge.hpp"
 #include "../../common/algorithms/normalize_graph.hpp"

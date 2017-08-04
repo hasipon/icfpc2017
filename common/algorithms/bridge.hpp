@@ -3,7 +3,6 @@
 #include <map>
 #include <vector>
 
-#include "../include/Graph.hpp"
 #include "./normalize_graph.hpp"
 
 namespace _diamond_princess {
