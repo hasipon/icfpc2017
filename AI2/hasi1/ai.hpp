@@ -102,6 +102,7 @@ struct AI {
 			}
 		}
 		cerr << score << endl;
+		cerr << r.source << " " << r.target << endl;
 		return r;
 	}
 	long long get_score(UnionFind& uf) {
@@ -178,7 +179,11 @@ struct AI {
 		for (const auto& x : moves) {
 			oss << x.size() << " ";
 			for (const auto& y : x) {
-				oss << y.punter_id << " " << y.source << " " << y.target << " " << (y.is_pass ? 1 : 0) << " ";
+				if (y.is_pass) {
+					oss << y.punter_id << " 0 0 1 ";
+				} else {
+					oss << y.punter_id << " " << y.source << " " << y.target << " 0 ";
+				}
 			}
 		}
 		return oss.str();
