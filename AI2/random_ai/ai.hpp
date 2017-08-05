@@ -60,9 +60,10 @@ struct AI {
     return Move(g.edges.front());
   }
 
-pair<int,int> Future() {
-		return {0, 0};
-	}
+  vector<pair<int,int>> Future()
+  {
+    return {};
+  }
 
   void Parse(const string& state)
   {
