@@ -356,8 +356,14 @@ struct io_Main {
 			ai.Init(punter_id, num_of_punters, g, futures);
 			ostringstream ss;
 			if (futures) {
-				auto x = ai.Future();
-				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\",\"futures\":[{\"source\":" << x.first << ",\"target\":" << x.second << "}]}";
+				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\",\"futures\":[";
+				bool flag = false;
+				for (auto x : ai.Future()) {
+					if (flag) ss << ",";
+					flag = true;
+					ss << "{\"source\":" << x.first << ",\"target\":" << x.second << "\"}";
+				}
+				ss << "]}";
 			} else {
 				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\"}";
 			}

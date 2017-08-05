@@ -121,19 +121,20 @@ class Score
     @num_of_punters.times do |punter_id|
       score = 0
       acc = @claims[punter_id].accessible(mine)
-      future_ok = false
       acc.each do |site_id|
-        if @futures[punter_id] && @futures[punter_id].path[mine].first == site_id
+        score += costs[site_id] ** 2
+      end
+
+      # future
+      if @futures[punter_id] && @futures[punter_id].path[mine].length >= 1
+        site_id = @futures[punter_id].path[mine].first
+        if acc.include? site_id
           score += costs[site_id] ** 3
-          future_ok = true
         else
-          score += costs[site_id] ** 2
+          score -= costs[site_id] ** 3
         end
       end
-      # penalty is given if the future is not fullfiled
-      if @futures[punter_id] && @futures[punter_id].path[mine] && !future_ok
-        score -= costs[@futures[punter_id].path[mine].first] ** 3
-      end
+
       ret.push(score)
     end
     ret
