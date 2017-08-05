@@ -3,13 +3,22 @@ require 'socket'
 require_relative 'score'
 
 class IO
-  def read_message
+  def _read_message
     len = 0
     while c = self.getc
       break if c == ":"
       len = len * 10 + c.to_i
     end
     JSON.load(self.read(len))
+  end
+
+  def read_message(retry_count = 5)
+    raise "read_message: retry count == 0" if retry_count == 0
+    begin
+      _read_message
+    rescue Errno::ECONNRESET
+      read_message(retry_count - 1)
+    end
   end
 
   def send_message(obj)
