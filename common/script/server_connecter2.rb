@@ -43,7 +43,6 @@ class Client
   def send_msg_to_server(msg)
     json = msg_to_json(msg)
     @state = json['state']
-    puts "state: #{@state}"
     json.delete 'state'
     msg = json_to_msg(json)
     log "me -> server\n#{msg}"
