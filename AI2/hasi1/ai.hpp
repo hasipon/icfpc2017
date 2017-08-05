@@ -118,7 +118,10 @@ struct AI {
 		}
 		return r;
 	}
-	void Init(int punter_id, int num_of_punters, const Graph& g) {
+	pair<int,int> Future() {
+		throw 1;
+	}
+	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures) {
 		this->punter_id = punter_id;
 		this->num_of_punters = num_of_punters;
 		edges = g.edges;

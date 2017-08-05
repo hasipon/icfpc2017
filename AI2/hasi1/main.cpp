@@ -41,6 +41,22 @@ struct io_Json {
 			++p;
 		}
 	}
+	bool read_bool() {
+		read_ws();
+		bool r = false;
+		{
+			auto c = peek();
+			if (c == 't') {
+				p += 4;
+				r = true;
+			} else if (c == 'f') {
+				p += 5;
+			} else {
+				cerr << "read_bool" << c << endl; throw 1;
+			}
+		}
+		return r;
+	}
 	int read_number() {
 		read_ws();
 		bool minus = false;
@@ -190,6 +206,7 @@ struct io_Main {
 	Graph g;
 	Moves moves;
 	string state;
+	bool futures = false;
 
 	void write(const string& s) {
 		ostringstream ss;
@@ -229,6 +246,18 @@ struct io_Main {
 				for (; !s->end_array(); s->read_separator()) {
 					g.mines.push_back(s->read_number());
 				}
+			} else {
+				s->read_value();
+			}
+		}
+	}
+
+	void read_settings(io_Json* s) {
+		s->start_object();
+		for (; !s->end_object(); s->read_separator()) {
+			auto k = s->read_key();
+			if (k == "futures") {
+				futures = s->read_bool();
 			} else {
 				s->read_value();
 			}
@@ -295,6 +324,8 @@ struct io_Main {
 					num_of_punters = s->read_number();
 				} else if (k == "map") {
 					read_map(s);
+				} else if (k == "settings") {
+					read_settings(s);
 				} else if (k == "move") {
 					mode = 2;
 					s->start_object();
@@ -322,9 +353,14 @@ struct io_Main {
 		}
 		if (mode == 3) return;
 		if (mode == 1) {
-			ai.Init(punter_id, num_of_punters, g);
+			ai.Init(punter_id, num_of_punters, g, futures);
 			ostringstream ss;
-			ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\"}";
+			if (futures) {
+				auto x = ai.Future();
+				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\",\"futures\":[{\"source\":" << x.first << ",\"target\":" << x.second << "}]}";
+			} else {
+				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\"}";
+			}
 			write(ss.str());
 		} else {
 			auto move = ai.Think(moves, state);
