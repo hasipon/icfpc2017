@@ -4,10 +4,10 @@ require 'pp'
 require 'json'
 
 class Client
-  def initialize(host, port, ai_path, name)
+  def initialize(host, port, ai_path, name, logfile)
     @ai_path = ai_path
     @name = "#{name}@#{Time.now.to_i}"
-    @log_file = open(logfile_name, mode = "w")
+    @log_file = open(logfile || logfile_name, mode = "w")
     exit 1 unless @server_socket = TCPSocket.new(host, port)
   end
 
@@ -117,14 +117,16 @@ host = nil
 name = "bob"
 quiet = nil
 opt = OptionParser.new
+logfile = nil
 opt.on('-p', '--port PORT') {|v| port =  v }
 opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
 opt.on('-n', '--name NAME') {|v| name =  v }
 opt.on('-q', '--quiet') {|v| quiet =  v }
+opt.on('-l', '--log LOGFILE') {|v| logfile =  v }
 opt.parse(ARGV)
 
-client = Client.new(host, port.to_i, ai_path, name)
+client = Client.new(host, port.to_i, ai_path, name, logfile)
 
 # handshake
 client.handshake
