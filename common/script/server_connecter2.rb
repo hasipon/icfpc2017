@@ -101,7 +101,12 @@ class Client
   end
 
   def handshake_with_client
+    if @pid
+      Process.detach(@pid)
+      Process.kill('KILL', @pid)
+    end
     exit 1 unless @ai_socket = IO.popen(ai_path, "r+")
+    @pid = @ai_socket.pid
     msg = next_ai_message
     json = msg_to_json(msg)
     json = {"you" =>  json["me"]}
