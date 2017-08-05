@@ -37,7 +37,7 @@ class Evaluter
             
             searchRivers(game, mine, punterId, 0, distances, currentSites);
             
-            for (i in 0...MAX_DISTANCE)
+            for (i in 1...MAX_DISTANCE+1)
             {
                 var nextSites = [];
                 for (site in currentSites)
@@ -51,7 +51,9 @@ class Evaluter
             for (siteId in distances.keys())
             {
                 var distance = distances[siteId];
-                value += table[distance] * game.scoreDictionary[mine.id][siteId];
+                var score = game.scoreDictionary[mine.id][siteId];
+                var aditional = table[distance] * score;
+                value += aditional;
             }
         }
         
@@ -62,25 +64,19 @@ class Evaluter
     {
         for (river in site.rivers)
         {
-            while (true)
-            {
-                var another = river.getAnother(site.id); 
-                if (!distances.exists(another))
-                {   
-                    if (river.owner == punterId)
-                    {
-                        distances[another] = i;
-                        site = game.sites[another];
-                        continue;
-                    }
-                    else
-                    {
-                        distances[another] = i + 1;
-                        nextSites.push(game.sites[another]);
-                    }
+            var another = river.getAnother(site.id); 
+            if (!distances.exists(another))
+            {   
+                if (river.owner == punterId)
+                {
+                    distances[another] = i;
+                    searchRivers(game, game.sites[another], punterId, i, distances, nextSites);
                 }
-                
-                break;
+                else
+                {
+                    distances[another] = i + 1;
+                    nextSites.push(game.sites[another]);
+                }
             }
         }
     }

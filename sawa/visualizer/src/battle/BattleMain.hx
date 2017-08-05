@@ -13,7 +13,7 @@ class BattleMain {
     
     public static function main():Void
     {
-        var maps = [MAPS + "/sample.json"];
+        var maps = [MAPS + "/circle.json"];
         //var maps = [for (map in FileSystem.readDirectory(MAPS)) if (StringTools.endsWith(map, ".json")) MAPS + "/" + map];
         for (i in 0...200)
         {

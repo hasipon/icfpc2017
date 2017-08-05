@@ -24,50 +24,46 @@ namespace search {
 		public global::eval.Evaluter evaluter;
 		
 		public virtual object getMove(global::game.Game game, int punter) {
-			unchecked {
-				global::Array<object> livingRivers = game.getLivingRivers();
-				global::Array<object> moves = new global::Array<object>(new object[]{});
-				{
-					int _g = 0;
-					while (( _g < livingRivers.length )) {
-						global::game.River river = ((global::game.River) (livingRivers[_g]) );
-						 ++ _g;
-						object __temp_stmt3 = null;
-						{
-							object __temp_odecl1 = new global::haxe.lang.DynamicObject(new int[]{}, new object[]{}, new int[]{116192081, 842117339, 1860705976}, new double[]{((double) (river.b) ), ((double) (river.a) ), ((double) (punter) )});
-							__temp_stmt3 = new global::haxe.lang.DynamicObject(new int[]{1213755260}, new object[]{__temp_odecl1}, new int[]{}, new double[]{});
-						}
-						
-						moves.push(new global::search.MoveAndScore(((object) (__temp_stmt3) )));
+			global::Array<object> livingRivers = game.getLivingRivers();
+			global::Array<object> moves = new global::Array<object>(new object[]{});
+			{
+				int _g = 0;
+				while (( _g < livingRivers.length )) {
+					global::game.River river = ((global::game.River) (livingRivers[_g]) );
+					 ++ _g;
+					object __temp_stmt3 = null;
+					{
+						object __temp_odecl1 = new global::haxe.lang.DynamicObject(new int[]{}, new object[]{}, new int[]{116192081, 842117339, 1860705976}, new double[]{((double) (river.b) ), ((double) (river.a) ), ((double) (punter) )});
+						__temp_stmt3 = new global::haxe.lang.DynamicObject(new int[]{1213755260}, new object[]{__temp_odecl1}, new int[]{}, new double[]{});
 					}
 					
+					moves.push(new global::search.MoveAndScore(((object) (__temp_stmt3) )));
 				}
 				
-				object __temp_stmt4 = null;
-				{
-					object __temp_odecl2 = new global::haxe.lang.DynamicObject(new int[]{}, new object[]{}, new int[]{1860705976}, new double[]{((double) (punter) )});
-					__temp_stmt4 = new global::haxe.lang.DynamicObject(new int[]{1246880977}, new object[]{__temp_odecl2}, new int[]{}, new double[]{});
-				}
-				
-				moves.push(new global::search.MoveAndScore(((object) (__temp_stmt4) )));
-				{
-					int _g1 = 0;
-					while (( _g1 < moves.length )) {
-						global::search.MoveAndScore move = ((global::search.MoveAndScore) (moves[_g1]) );
-						 ++ _g1;
-						game.addMove(move.move);
-						move.score = this.evaluter.eval(game);
-						game.undoMove();
-					}
-					
-				}
-				
-				int id = punter;
-				moves.sort(new global::search.BeamSearcher_getMove_45__Fun(id));
-				global::haxe.Log.trace.__hx_invoke2_o(default(double), global::haxe.lang.Runtime.concat("score max:", global::haxe.lang.Runtime.toString(((global::search.MoveAndScore) (moves[0]) ).score.getFor(punter))), default(double), new global::haxe.lang.DynamicObject(new int[]{302979532, 1547539107, 1648581351}, new object[]{"getMove", "search.BeamSearcher", "BeamSearcher.hx"}, new int[]{1981972957}, new double[]{((double) (46) )}));
-				global::haxe.Log.trace.__hx_invoke2_o(default(double), global::haxe.lang.Runtime.concat("score min:", global::haxe.lang.Runtime.toString(((global::search.MoveAndScore) (moves[( moves.length - 1 )]) ).score.getFor(punter))), default(double), new global::haxe.lang.DynamicObject(new int[]{302979532, 1547539107, 1648581351}, new object[]{"getMove", "search.BeamSearcher", "BeamSearcher.hx"}, new int[]{1981972957}, new double[]{((double) (47) )}));
-				return ((global::search.MoveAndScore) (moves[0]) ).move;
 			}
+			
+			object __temp_stmt4 = null;
+			{
+				object __temp_odecl2 = new global::haxe.lang.DynamicObject(new int[]{}, new object[]{}, new int[]{1860705976}, new double[]{((double) (punter) )});
+				__temp_stmt4 = new global::haxe.lang.DynamicObject(new int[]{1246880977}, new object[]{__temp_odecl2}, new int[]{}, new double[]{});
+			}
+			
+			moves.push(new global::search.MoveAndScore(((object) (__temp_stmt4) )));
+			{
+				int _g1 = 0;
+				while (( _g1 < moves.length )) {
+					global::search.MoveAndScore move = ((global::search.MoveAndScore) (moves[_g1]) );
+					 ++ _g1;
+					game.addMove(move.move);
+					move.score = this.evaluter.eval(game);
+					game.undoMove();
+				}
+				
+			}
+			
+			int id = punter;
+			moves.sort(new global::search.BeamSearcher_getMove_45__Fun(id));
+			return ((global::search.MoveAndScore) (moves[0]) ).move;
 		}
 		
 		
