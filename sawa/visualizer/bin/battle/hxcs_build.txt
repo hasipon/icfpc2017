@@ -393,8 +393,6 @@ M System.IO.FileInfo
 M System.AppDomainManager
 M System.Runtime.InteropServices._TypeBuilder
 M System.Runtime.Remoting.ObjRef
-M sys.FileSystem
-C sys.FileSystem
 M System.Reflection.Emit.UnmanagedMarshal
 M System.Runtime.Hosting.ActivationArguments
 M eval.Evaluter

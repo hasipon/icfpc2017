@@ -43,7 +43,6 @@ class BeamSearcher implements Searcher
         }
         
         moves.sort(MoveAndScore.compare.bind(punter));
-        trace("score max:" +  moves[0].score.getFor(punter));
         return moves[0].move;
     }
 }

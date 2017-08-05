@@ -104,7 +104,11 @@ Main.main = function() {
 	Main.rootContext.updateUi = Main.render;
 	Main.rootContext.updatePixi = ($_=Main.rootPixi,$bind($_,$_.update));
 	Main.render();
-	Main.rootPixi.onUpdate = ($_=Main.rootContext,$bind($_,$_.onFrame));
+	Main.update();
+};
+Main.update = function() {
+	Main.rootContext.onFrame();
+	haxe_Timer.delay(Main.update,300);
 };
 Main.render = function() {
 	ReactDOM.render(React.createElement(component_root_RootView,{ context : Main.rootContext}),window.document.getElementById("control"));
@@ -531,13 +535,13 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 		while(river.hasNext()) {
 			var river1 = river.next();
 			var rate = (game1.sites.get(river1.a).x - left) / (right - left);
-			var ax = 20 * (1 - rate) + (PixiView.WIDTH - 20) * rate;
+			var ax = 20 * (1 - rate) + (PixiView.WIDTH - 20) * rate + Math.random() * 5;
 			var rate1 = (game1.sites.get(river1.a).y - top) / (bottom - top);
-			var ay = 20 * (1 - rate1) + (PixiView.HEIGHT - 20) * rate1;
+			var ay = 20 * (1 - rate1) + (PixiView.HEIGHT - 20) * rate1 + Math.random() * 5;
 			var rate2 = (game1.sites.get(river1.b).x - left) / (right - left);
-			var bx = 20 * (1 - rate2) + (PixiView.WIDTH - 20) * rate2;
+			var bx = 20 * (1 - rate2) + (PixiView.WIDTH - 20) * rate2 + Math.random() * 5;
 			var rate3 = (game1.sites.get(river1.b).y - top) / (bottom - top);
-			var by = 20 * (1 - rate3) + (PixiView.HEIGHT - 20) * rate3;
+			var by = 20 * (1 - rate3) + (PixiView.HEIGHT - 20) * rate3 + Math.random() * 5;
 			if(river1.owner == game__$PunterId_PunterId_$Impl_$.NotFound) {
 				this._graphic.lineStyle(1,6710886,0.1);
 			} else if(river1.owner == you) {
@@ -553,9 +557,9 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 		while(site2.hasNext()) {
 			var site3 = site2.next();
 			var rate4 = (site3.x - left) / (right - left);
-			var x = 20 * (1 - rate4) + (PixiView.WIDTH - 20) * rate4;
+			var x = 20 * (1 - rate4) + (PixiView.WIDTH - 20) * rate4 + Math.random() * 5;
 			var rate5 = (site3.y - top) / (bottom - top);
-			var y = 20 * (1 - rate5) + (PixiView.HEIGHT - 20) * rate5;
+			var y = 20 * (1 - rate5) + (PixiView.HEIGHT - 20) * rate5 + Math.random() * 5;
 			this._graphic.drawCircle(x,y,5);
 		}
 		this._graphic.lineStyle(1,13369378,0.8);
@@ -563,9 +567,9 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 		while(site4.hasNext()) {
 			var site5 = site4.next();
 			var rate6 = (site5.x - left) / (right - left);
-			var x1 = 20 * (1 - rate6) + (PixiView.WIDTH - 20) * rate6;
+			var x1 = 20 * (1 - rate6) + (PixiView.WIDTH - 20) * rate6 + Math.random() * 5;
 			var rate7 = (site5.y - top) / (bottom - top);
-			var y1 = 20 * (1 - rate7) + (PixiView.HEIGHT - 20) * rate7;
+			var y1 = 20 * (1 - rate7) + (PixiView.HEIGHT - 20) * rate7 + Math.random() * 5;
 			this._graphic.drawCircle(x1,y1,10);
 		}
 	}
@@ -647,7 +651,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
 		var tmp9 = react_ReactStringTools.createElement("div",{ },this.props.context.warning == null ? "" : "エラー：" + this.props.context.warning);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 1.5");
+		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 1.7");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp6,tmp8,tmp9,tmp10]);
 	}
 	,onClick: function(e) {
@@ -776,7 +780,7 @@ core_RootContext.prototype = {
 		this.updatePixi();
 		this.updateUi();
 	}
-	,onFrame: function(time) {
+	,onFrame: function() {
 		var _g = this.playingState;
 		switch(_g[1]) {
 		case 0:
@@ -816,6 +820,7 @@ var game_Game = function() {
 	this.siteCount = 0;
 	this.riverCount = 0;
 	this.maxScore = 0;
+	this.punterCount = 0;
 	this.moves = [];
 };
 game_Game.__name__ = true;
@@ -834,6 +839,7 @@ game_Game.prototype = {
 			var v = new game_Punter(this,id);
 			this1.h[id] = v;
 		}
+		this.punterCount = punterIds;
 	}
 	,setupMap: function(map) {
 		var _g = 0;
@@ -1174,6 +1180,33 @@ haxe_Resource.getString = function(name) {
 		}
 	}
 	return null;
+};
+var haxe_Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
+haxe_Timer.__name__ = true;
+haxe_Timer.delay = function(f,time_ms) {
+	var t = new haxe_Timer(time_ms);
+	t.run = function() {
+		t.stop();
+		f();
+	};
+	return t;
+};
+haxe_Timer.prototype = {
+	stop: function() {
+		if(this.id == null) {
+			return;
+		}
+		clearInterval(this.id);
+		this.id = null;
+	}
+	,run: function() {
+	}
+	,__class__: haxe_Timer
 };
 var haxe_io_Bytes = function(data) {
 	this.length = data.byteLength;

@@ -95,8 +95,6 @@
 	
     <Compile Include="src\haxe\Constraints.cs"/>
 	
-    <Compile Include="src\sys\FileSystem.cs"/>
-	
     <Compile Include="src\eval\Evaluter.cs"/>
 	
     <Compile Include="src\cs\internal\StringExt.cs"/>

@@ -2,6 +2,7 @@ package;
 
 import component.root.RootView;
 import core.RootContext;
+import haxe.Timer;
 import js.Browser;
 import react.React;
 import react.ReactDOM;
@@ -24,8 +25,15 @@ class Main
         
         render();
         
-        rootPixi.onUpdate = rootContext.onFrame;
+        
+        update();
 	}
+    
+    private static function update() 
+    {
+        rootContext.onFrame();
+        Timer.delay(update, 180);
+    }
     
     public static function render():Void
     {

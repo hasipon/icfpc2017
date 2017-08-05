@@ -6,13 +6,13 @@ namespace eval {
 		
 		static Evaluter() {
 			unchecked {
-				global::eval.Evaluter.MAX_DISTANCE = 1;
+				global::eval.Evaluter.MAX_DISTANCE = 0;
 				object __temp_stmt2 = null;
 				{
 					global::Array<double> _g = new global::Array<double>(new double[]{});
 					{
 						int _g2 = 0;
-						int _g1 = global::eval.Evaluter.MAX_DISTANCE;
+						int _g1 = ( global::eval.Evaluter.MAX_DISTANCE + 1 );
 						while (( _g2 < _g1 )) {
 							int i = _g2++;
 							_g.push(global::System.Math.Pow(((double) (0.2) ), ((double) (i) )));
@@ -49,19 +49,23 @@ namespace eval {
 		
 		public global::Array<double> table;
 		
-		public virtual global::eval.EvalutionResult eval(global::game.Game game) {
-			global::Array<double> _g = new global::Array<double>(new double[]{});
-			{
-				object punter = ((object) (new global::haxe.ds._IntMap.IntMapValueIterator<object>(((global::haxe.ds.IntMap<object>) (global::haxe.ds.IntMap<object>.__hx_cast<object>(((global::haxe.ds.IntMap) (((global::haxe.IMap<int, object>) (game.punters) )) ))) ))) );
-				while (global::haxe.lang.Runtime.toBool(global::haxe.lang.Runtime.callField(punter, "hasNext", 407283053, null))) {
-					global::game.Punter punter1 = ((global::game.Punter) (global::haxe.lang.Runtime.callField(punter, "next", 1224901875, null)) );
-					_g.push(this.evalFor(game, punter1.id));
+		public virtual global::eval.EvalutionResult eval(global::game.Game game1) {
+			unchecked {
+				global::Array<double> _g = new global::Array<double>(new double[]{});
+				{
+					int _g2 = 0;
+					int _g1 = game1.punterCount;
+					while (( _g2 < _g1 )) {
+						int i = _g2++;
+						_g.push(this.evalFor(game1, global::game._PunterId.PunterId_Impl_._new(i)));
+					}
+					
 				}
 				
+				global::Array<double> values = _g;
+				global::haxe.Log.trace.__hx_invoke2_o(default(double), values, default(double), new global::haxe.lang.DynamicObject(new int[]{302979532, 1547539107, 1648581351}, new object[]{"eval", "eval.Evaluter", "Evaluter.hx"}, new int[]{1981972957}, new double[]{((double) (27) )}));
+				return new global::eval.EvalutionResult(((global::Array<double>) (values) ));
 			}
-			
-			global::Array<double> values = _g;
-			return new global::eval.EvalutionResult(((global::Array<double>) (values) ));
 		}
 		
 		
@@ -71,9 +75,9 @@ namespace eval {
 				object mine = ((global::haxe.IMap<int, object>) (game.mines) ).iterator();
 				while (global::haxe.lang.Runtime.toBool(global::haxe.lang.Runtime.callField(mine, "hasNext", 407283053, null))) {
 					global::game.Site mine1 = ((global::game.Site) (global::haxe.lang.Runtime.callField(mine, "next", 1224901875, null)) );
-					global::Array<object> currentSites = new global::Array<object>(new object[]{mine1});
+					global::Array<object> currentSites = new global::Array<object>(new object[]{});
 					global::haxe.IMap<int, int> distances = new global::haxe.ds.IntMap<int>();
-					distances.@set(mine1.id, 0);
+					this.searchRivers(game, mine1, punterId, 0, distances, currentSites);
 					{
 						int _g1 = 0;
 						int _g = global::eval.Evaluter.MAX_DISTANCE;
@@ -114,26 +118,35 @@ namespace eval {
 		
 		
 		public virtual void searchRivers(global::game.Game game, global::game.Site site, int punterId, int i, global::haxe.IMap<int, int> distances, global::Array<object> nextSites) {
-			object river = ((global::haxe.IMap<int, object>) (site.rivers) ).iterator();
-			while (global::haxe.lang.Runtime.toBool(global::haxe.lang.Runtime.callField(river, "hasNext", 407283053, null))) {
-				global::game.River river1 = ((global::game.River) (global::haxe.lang.Runtime.callField(river, "next", 1224901875, null)) );
-				while (true) {
-					int another = ( (( river1.a == site.id )) ? (river1.b) : (river1.a) );
-					if ( ! (distances.exists(another)) ) {
-						distances.@set(another, i);
-						nextSites.push(((global::game.Site) ((((global::haxe.IMap<int, object>) (game.sites) ).@get(another)).@value) ));
-						if (( river1.owner == punterId )) {
-							site = ((global::game.Site) ((((global::haxe.IMap<int, object>) (game.sites) ).@get(another)).@value) );
-							continue;
+			unchecked {
+				object river = ((global::haxe.IMap<int, object>) (site.rivers) ).iterator();
+				while (global::haxe.lang.Runtime.toBool(global::haxe.lang.Runtime.callField(river, "hasNext", 407283053, null))) {
+					global::game.River river1 = ((global::game.River) (global::haxe.lang.Runtime.callField(river, "next", 1224901875, null)) );
+					while (true) {
+						int another = ( (( river1.a == site.id )) ? (river1.b) : (river1.a) );
+						if ( ! (distances.exists(another)) ) {
+							if (( river1.owner == punterId )) {
+								distances.@set(another, i);
+								site = ((global::game.Site) ((((global::haxe.IMap<int, object>) (game.sites) ).@get(another)).@value) );
+								continue;
+							}
+							else {
+								{
+									int v = ( i + 1 );
+									distances.@set(another, v);
+								}
+								
+								nextSites.push(((global::game.Site) ((((global::haxe.IMap<int, object>) (game.sites) ).@get(another)).@value) ));
+							}
+							
 						}
 						
+						break;
 					}
 					
-					break;
 				}
 				
 			}
-			
 		}
 		
 		

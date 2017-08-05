@@ -65,6 +65,7 @@ namespace search {
 				int id = punter;
 				moves.sort(new global::search.BeamSearcher_getMove_45__Fun(id));
 				global::haxe.Log.trace.__hx_invoke2_o(default(double), global::haxe.lang.Runtime.concat("score max:", global::haxe.lang.Runtime.toString(((global::search.MoveAndScore) (moves[0]) ).score.getFor(punter))), default(double), new global::haxe.lang.DynamicObject(new int[]{302979532, 1547539107, 1648581351}, new object[]{"getMove", "search.BeamSearcher", "BeamSearcher.hx"}, new int[]{1981972957}, new double[]{((double) (46) )}));
+				global::haxe.Log.trace.__hx_invoke2_o(default(double), global::haxe.lang.Runtime.concat("score min:", global::haxe.lang.Runtime.toString(((global::search.MoveAndScore) (moves[( moves.length - 1 )]) ).score.getFor(punter))), default(double), new global::haxe.lang.DynamicObject(new int[]{302979532, 1547539107, 1648581351}, new object[]{"getMove", "search.BeamSearcher", "BeamSearcher.hx"}, new int[]{1981972957}, new double[]{((double) (47) )}));
 				return ((global::search.MoveAndScore) (moves[0]) ).move;
 			}
 		}

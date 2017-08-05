@@ -8,8 +8,8 @@ import game.SiteId;
 class Evaluter 
 {
     public var table:Array<Float>;
-    public static var MAX_DISTANCE = 1;
-    public static var MS_TABLE = [for (i in 0...MAX_DISTANCE) Math.pow(0.2, i)];
+    public static var MAX_DISTANCE = 0;
+    public static var MS_TABLE = [for (i in 0...MAX_DISTANCE + 1) Math.pow(0.1, i)];
 
     public function new(table:Array<Float>)
     {
@@ -19,12 +19,11 @@ class Evaluter
     public function eval(game:Game):EvalutionResult
     {
         var values = [
-            for (punter in game.punters)
+            for (i in 0...game.punterCount)
             {
-                evalFor(game, punter.id);
+                evalFor(game, new PunterId(i));
             }
         ];
-        
         return new EvalutionResult(values);
     }
     
@@ -33,10 +32,10 @@ class Evaluter
         var value = 0.0;
         for (mine in game.mines)
         {
-            var currentSites = [mine];
-            
+            var currentSites = [];
             var distances = new Map<SiteId, Int>();
-            distances[mine.id] = 0;
+            
+            searchRivers(game, mine, punterId, 0, distances, currentSites);
             
             for (i in 0...MAX_DISTANCE)
             {
@@ -67,14 +66,17 @@ class Evaluter
             {
                 var another = river.getAnother(site.id); 
                 if (!distances.exists(another))
-                {
-                    distances[another] = i;
-                    nextSites.push(game.sites[another]);
-                    
+                {   
                     if (river.owner == punterId)
                     {
+                        distances[another] = i;
                         site = game.sites[another];
                         continue;
+                    }
+                    else
+                    {
+                        distances[another] = i + 1;
+                        nextSites.push(game.sites[another]);
                     }
                 }
                 

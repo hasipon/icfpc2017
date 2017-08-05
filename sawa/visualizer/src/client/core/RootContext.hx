@@ -156,7 +156,7 @@ class RootContext
         updateUi();
     }
     
-    public function onFrame(time:Float):Void
+    public function onFrame():Void
     {
         switch (playingState)
         {

@@ -89,12 +89,12 @@ class PixiView extends Application
         
         inline function resolveX(x:Float):Float
         {
-            return lerp(inverseLerp(x, left, right), 20, WIDTH - 20);
+            return lerp(inverseLerp(x, left, right), 20, WIDTH - 20) + Math.random() * 5;
         }
         
         inline function resolveY(y:Float):Float
         {
-            return lerp(inverseLerp(y, top, bottom), 20, HEIGHT - 20);
+            return lerp(inverseLerp(y, top, bottom), 20, HEIGHT - 20) + Math.random() * 5;
         }
         
         var you = switch (rootContext.playingState)
