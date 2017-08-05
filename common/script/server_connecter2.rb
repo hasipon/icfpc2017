@@ -1,13 +1,14 @@
 require "socket"
 require 'optparse'
 require 'pp'
+require 'json'
 
 class Client
   def initialize(host, port, ai_path, name)
+    @ai_path = ai_path
     @name = "#{name}@#{Time.now.to_i}"
     @log_file = open(logfile_name, mode = "w")
     exit 1 unless @server_socket = TCPSocket.new(host, port)
-    exit 1 unless @ai_socket = IO.popen(ai_path, "r+")
   end
 
   def handshake
@@ -27,18 +28,26 @@ class Client
   def next_ai_message
     log "wait ai message"
     ret = receive_messege(ai_socket)
-    # log "ai -> me\n#{ret}"
+    log "ai -> me\n#{ret}"
     ret
   end
 
   def send_msg_to_ai(msg)
-    # log "ai <- me\n#{msg}"
+    json = msg_to_json(msg)
+    json['state'] = state if state
+    msg = json_to_msg(json)
+    log "ai <- me\n#{msg}"
     ai_socket.print(msg)
   end
 
   def send_msg_to_server(msg)
+    json = msg_to_json(msg)
+    @state = json['state']
+    puts "state: #{@state}"
+    json.delete 'state'
+    msg = json_to_msg(json)
     log "me -> server\n#{msg}"
-    server_socket.print(msg)
+    server_socket.print(json_to_msg(json))
   end
 
   def receive_messege(stream)
@@ -53,12 +62,26 @@ class Client
     "#{len}:#{msg}"
   end
 
+  def msg_to_json(msg)
+    JSON.load(msg.split(':', 2)[1])
+  end
+
+  def json_to_msg(json)
+    payload = JSON.generate(json)
+    "#{payload.length}:#{payload}"
+  end
+
+
   def server_socket
     @server_socket
   end
 
   def ai_socket
     @ai_socket
+  end
+
+  def state
+    @state
   end
 
   def log(msg)
@@ -72,6 +95,18 @@ class Client
 
   def logfile_name
     "#{@name}.log"
+  end
+
+  def ai_path
+    @ai_path
+  end
+
+  def handshake_with_client
+    exit 1 unless @ai_socket = IO.popen(ai_path, "r+")
+    msg = next_ai_message
+    json = msg_to_json(msg)
+    json = {"you" =>  json["me"]}
+    send_msg_to_ai(json_to_msg(json))
   end
 end
 
@@ -96,15 +131,21 @@ client = Client.new(host, port.to_i, ai_path, name)
 client.handshake
 
 # setup
+client.handshake_with_client
 setup_msg = client.next_server_message
 client.send_msg_to_ai(setup_msg)
+
+puts "setup end"
 
 # ready
 # client.send_msg_to_server '11:{"ready":0}'
 ready_msg = client.next_ai_message
-client.send_msg_to_server ready_msg
+client.send_msg_to_server(ready_msg)
+
+puts "ready end"
 
 while msg = client.next_server_message
+  client.handshake_with_client
   client.send_msg_to_ai msg
   msg = client.next_ai_message
   break unless msg
