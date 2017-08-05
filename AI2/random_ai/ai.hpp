@@ -32,7 +32,7 @@ struct AI {
     return "DOM-DOM-RANDOM";
   }
 
-  void Init(int _punter_id, int num_of_punters, const Graph& g_)
+  void Init(int _punter_id, int num_of_punters, const Graph& g_, bool futures)
   {
     ostringstream oss;
     oss << _punter_id;
@@ -56,9 +56,13 @@ struct AI {
     }
 
     random_shuffle(g.edges.begin(), g.edges.end());
-    remove_if(g.edges.begin(), g.edges.end(), [&] (Edge e) { return used.count(e); });
+    remove_if(g.edges.begin(), g.edges.end(), [&] (const Edge& e) { return used.count(e); });
     return Move(g.edges.front());
   }
+
+pair<int,int> Future() {
+		return {0, 0};
+	}
 
   void Parse(const string& state)
   {
@@ -70,17 +74,17 @@ struct AI {
     return ;
   }
 
-  string State()
+  string State() const
   {
     ostringstream oss;
     each (e, used) {
       int a, b;
       oss << a << b << endl;
     }
-        return oss.str();
+    return oss.str();
   }
 
-  int PunterId()
+  int PunterId() const
   {
     return punter_id;
   }
