@@ -55,15 +55,9 @@ struct AI {
       }
     }
 
-    vector<Edge> es;
-    each (e, g.edges) {
-      if (used.count(e) == 0) {
-        es.push_back(e);
-      }
-    }
-
-    random_shuffle(es.begin(), es.end());
-    return Move(es.front());
+    random_shuffle(g.edges.begin(), g.edges.end());
+    remove_if(g.edges.begin(), g.edges.end(), [&] (Edge e) { return used.count(e); });
+    return Move(g.edges.front());
   }
 
   void Parse(const string& state)

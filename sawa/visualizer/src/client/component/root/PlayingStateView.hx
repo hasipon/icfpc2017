@@ -18,6 +18,12 @@ class PlayingStateView extends ReactComponentOfProps<PlayingStateProps>
             [
                 "button".createElement(
                     {
+                        onClick: onGotoTopClick
+                    },
+                    "|<"
+                ), 
+                "button".createElement(
+                    {
                         onClick: onUndoClick
                     },
                     "<"
@@ -34,8 +40,24 @@ class PlayingStateView extends ReactComponentOfProps<PlayingStateProps>
                     },
                     ">"
                 ), 
+                "button".createElement(
+                    {
+                        onClick: onGotoEndClick
+                    },
+                    ">|"
+                ), 
             ]
         );
+    }
+    
+    function onGotoTopClick() 
+    {
+        props.context.gotoTop();
+    }
+    
+    function onGotoEndClick() 
+    {
+        props.context.gotoEnd();
     }
     
     private function onTogglePlayingClick()
