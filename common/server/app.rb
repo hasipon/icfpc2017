@@ -8,7 +8,7 @@ num_of_punters = nil
 port = nil
 map_file = nil
 map_json = nil
-settings = nil
+settings = {}
 
 opt.on('-n', '--num-of-punters NUM') { |v| num_of_punters = v.to_i }
 opt.on('-p', '--port PORT') { |v| port = v.to_i }
