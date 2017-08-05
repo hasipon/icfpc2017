@@ -65,5 +65,33 @@ class PlayingState
             parent.updatePixi();
         }
     }
-
+    
+    
+    public function gotoTop() 
+    {
+        while (currentIndex > 0)
+        {
+            parent.game.undoMove();
+            currentIndex -= 1;
+        }
+        
+        parent.updatePixi();
+    }
+    
+    public function gotoEnd() 
+    {
+        while (true)
+        {
+            if (moves.length <= currentIndex)
+            {
+                playing = false;
+                parent.updateUi();
+                return;
+            }
+            
+            parent.game.addMove(moves[currentIndex]);
+            currentIndex += 1;
+            parent.updatePixi();
+        }
+    }
 }

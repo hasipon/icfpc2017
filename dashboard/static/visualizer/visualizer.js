@@ -623,10 +623,18 @@ component_root_PlayingStateView.__super__ = React.Component;
 component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
 	render: function() {
 		var context = this.props.context;
-		var tmp = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onUndoClick)},"<");
-		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onTogglePlayingClick)},context.playing ? "■" : "▶");
-		var tmp2 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onDoClick)},">");
-		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2]);
+		var tmp = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onGotoTopClick)},"|<");
+		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onUndoClick)},"<");
+		var tmp2 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onTogglePlayingClick)},context.playing ? "■" : "▶");
+		var tmp3 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onDoClick)},">");
+		var tmp4 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onGotoEndClick)},">|");
+		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2,tmp3,tmp4]);
+	}
+	,onGotoTopClick: function() {
+		this.props.context.gotoTop();
+	}
+	,onGotoEndClick: function() {
+		this.props.context.gotoEnd();
 	}
 	,onTogglePlayingClick: function() {
 		this.props.context.togglePlaying();
@@ -726,6 +734,25 @@ core_PlayingState.prototype = {
 		if(this.currentIndex > 0) {
 			this.parent.game.undoMove();
 			this.currentIndex -= 1;
+			this.parent.updatePixi();
+		}
+	}
+	,gotoTop: function() {
+		while(this.currentIndex > 0) {
+			this.parent.game.undoMove();
+			this.currentIndex -= 1;
+		}
+		this.parent.updatePixi();
+	}
+	,gotoEnd: function() {
+		while(true) {
+			if(this.moves.length <= this.currentIndex) {
+				this.playing = false;
+				this.parent.updateUi();
+				return;
+			}
+			this.parent.game.addMove(this.moves[this.currentIndex]);
+			this.currentIndex += 1;
 			this.parent.updatePixi();
 		}
 	}

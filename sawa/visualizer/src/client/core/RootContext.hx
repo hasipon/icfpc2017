@@ -25,7 +25,7 @@ class RootContext
     public var warning:String;
     public var playingState:Option<PlayingState>;
     public var speed:Float;
-    
+        
     public function new()
     {
         hash = "";
