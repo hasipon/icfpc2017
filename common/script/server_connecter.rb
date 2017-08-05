@@ -81,11 +81,13 @@ port =  nil
 ai_path = nil
 host = nil
 name = "bob"
+quiet = nil
 opt = OptionParser.new
 opt.on('-p', '--port PORT') {|v| port =  v }
 opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
 opt.on('-n', '--name NAME') {|v| name =  v }
+opt.on('-q', '--quiet') {|v| quiet =  v }
 opt.parse(ARGV)
 
 client = Client.new(host, port.to_i, ai_path, name)
@@ -111,4 +113,4 @@ end
 
 puts "logfile: #{client.logfile_name}"
 
-`curl -F 'file=@#{client.logfile_name}' http://13.114.38.186/uploadlog`
+`curl -F 'file=@#{client.logfile_name}' http://13.114.38.186/uploadlog` unless quiet
