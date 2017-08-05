@@ -19,7 +19,7 @@ class River
         this.owner = PunterId.NotFound;
     }
     
-    public function getAnother(source:SiteId):SiteId
+    public inline function getAnother(source:SiteId):SiteId
     {
         return if (a == source) b else a;
     }

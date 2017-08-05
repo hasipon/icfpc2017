@@ -101,10 +101,10 @@ Main.__name__ = true;
 Main.main = function() {
 	Main.rootContext = new core_RootContext();
 	Main.rootPixi = new PixiView(Main.rootContext);
-	Main.rootPixi.onUpdate = ($_=Main.rootContext,$bind($_,$_.onFrame));
 	Main.rootContext.updateUi = Main.render;
 	Main.rootContext.updatePixi = ($_=Main.rootPixi,$bind($_,$_.update));
 	Main.render();
+	Main.rootPixi.onUpdate = ($_=Main.rootContext,$bind($_,$_.onFrame));
 };
 Main.render = function() {
 	ReactDOM.render(React.createElement(component_root_RootView,{ context : Main.rootContext}),window.document.getElementById("control"));
@@ -631,7 +631,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClick)},["表示"]);
 		var tmp2 = react_ReactStringTools.createElement("div",{ },[tmp,tmp1]);
 		var tmp3 = react_ReactStringTools.createElement("div",{ },"site : " + this.props.context.game.siteCount + ", mine : " + this.props.context.game.mineCount + ", river : " + this.props.context.game.riverCount + ", 最大スコア : " + this.props.context.game.maxScore);
-		var tmp4 = react_ReactStringTools.createElement("textarea",{ placeholder : "ログ", onChange : $bind(this,this.onChangeLog)},[this.props.context.log]);
+		var tmp4 = react_ReactStringTools.createElement("textarea",{ placeholder : "ログ", onChange : $bind(this,this.onChangeLog), value : this.props.context.log},[]);
 		var tmp5 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClickLog)},["ログ再生"]);
 		var tmp6 = react_ReactStringTools.createElement("div",{ },[tmp4,tmp5]);
 		var _g11 = this.props.context.playingState;
@@ -822,9 +822,9 @@ game_Game.__name__ = true;
 game_Game.prototype = {
 	setup: function(setupStruct) {
 		this.setupMap(setupStruct.map);
-		this.setupPanters(setupStruct.punters);
+		this.setupPunters(setupStruct.punters);
 	}
-	,setupPanters: function(punterIds) {
+	,setupPunters: function(punterIds) {
 		var _g1 = 0;
 		var _g = punterIds;
 		while(_g1 < _g) {
@@ -862,8 +862,8 @@ game_Game.prototype = {
 			var id = game__$RiverId_RiverId_$Impl_$._new(i);
 			var river = new game_River(this,id,data1.source,data1.target);
 			this.rivers.h[id] = river;
-			this.sites.get(river.a).rivers.set(river.getAnother(river.a),river);
-			this.sites.get(river.b).rivers.set(river.getAnother(river.b),river);
+			this.sites.get(river.a).rivers.set(river.a == river.a ? river.b : river.a,river);
+			this.sites.get(river.b).rivers.set(river.a == river.b ? river.b : river.a,river);
 			++i;
 		}
 		this.mineCount = map.mines.length;
@@ -890,7 +890,7 @@ game_Game.prototype = {
 					var river1 = site2.rivers.iterator();
 					while(river1.hasNext()) {
 						var river2 = river1.next();
-						var another = river2.getAnother(site2.id);
+						var another = river2.a == site2.id ? river2.b : river2.a;
 						if(!distances.exists(another)) {
 							var v = i1 + 1;
 							distances.set(another,v);
@@ -918,22 +918,46 @@ game_Game.prototype = {
 		}
 		this.moves.push(move);
 	}
+	,undoMove: function() {
+		var move = this.moves.pop();
+		if(move.pass == null) {
+			this.undoClaim(move.claim);
+		}
+	}
+	,undoClaim: function(move) {
+		var river = this.sites.get(move.source).rivers.get(move.target);
+		river.owner = game__$PunterId_PunterId_$Impl_$.NotFound;
+	}
+	,addMoves: function(moves) {
+		var _g = 0;
+		while(_g < moves.length) {
+			var move = moves[_g];
+			++_g;
+			this.addMove(move);
+		}
+	}
 	,claim: function(move) {
 		var river = this.sites.get(move.source).rivers.get(move.target);
 		river.owner = move.punter;
-		this.punters.h[move.punter].score = -1;
 	}
 	,pass: function(punter) {
 	}
-	,applyScore: function(punter,score) {
-		this.punters.h[punter].score = score;
+	,getLivingRivers: function() {
+		var _g = [];
+		var river = this.rivers.iterator();
+		while(river.hasNext()) {
+			var river1 = river.next();
+			if(river1.owner == game__$PunterId_PunterId_$Impl_$.NotFound) {
+				_g.push(river1);
+			}
+		}
+		return _g;
 	}
 	,__class__: game_Game
 };
 var game_Punter = function(game1,id) {
 	this.game = game1;
 	this.id = id;
-	this.score = -1;
 	this.accessableSites = new haxe_ds_IntMap();
 };
 game_Punter.__name__ = true;
@@ -1727,21 +1751,6 @@ PixiView.HEIGHT = 650;
 PixiView.COLORS = [16746513,8917503,1179528,8978193,16716168,1149183,14492177,1170722,1123037,10031513,10066193,1153433,6702097,4460902,1140292,6689041,1140241,1118566];
 component_root_PlayingStateView.displayName = "PlayingStateView";
 component_root_RootView.displayName = "RootView";
-game_Game.MAX_DISTANCE = 20;
-game_Game.MS_TABLE = (function($this) {
-	var $r;
-	var _g = [];
-	{
-		var _g2 = 0;
-		var _g1 = game_Game.MAX_DISTANCE;
-		while(_g2 < _g1) {
-			var i = _g2++;
-			_g.push(2048 * Math.pow(0.5,i));
-		}
-	}
-	$r = _g;
-	return $r;
-}(this));
 game__$PunterId_PunterId_$Impl_$.NotFound = game__$PunterId_PunterId_$Impl_$._new(-1);
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);

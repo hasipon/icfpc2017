@@ -146,6 +146,8 @@ M cs.system.ConsoleCancelEventHandler
 M cs.system.collections.Hashtable
 M cs.system.runtime.interopservices.CallingConvention
 M cs.system.text.Encoding
+M search.MoveAndScore
+C search.MoveAndScore
 M cs.system.MidpointRounding
 M cs.system.reflection.BindingFlags
 M cs.system.reflection.ParameterAttributes
@@ -254,6 +256,8 @@ M cs.system.DayOfWeek
 M System.Collections.Generic.IComparer`1
 M game.Game
 C game.Game
+M eval.EvalutionResult
+C eval.EvalutionResult
 M System.Collections.IDictionary
 M System.Security.AccessControl.DirectorySecurity
 M System.Diagnostics.ProcessStartInfo
@@ -287,6 +291,9 @@ M System.Security.IPermission
 M Reflect
 C Reflect
 M System.ComponentModel.IComponent
+M search.BeamSearcher
+C search.BeamSearcher
+C search.BeamSearcher_getMove_45__Fun
 M cs.system.diagnostics.ThreadWaitReason
 M cs.system.security.accesscontrol.AccessControlType
 M System.IFormattable
@@ -428,6 +435,8 @@ M System.Runtime.Remoting.ObjRef
 M System.Reflection.Emit.UnmanagedMarshal
 M System.Runtime.Hosting.ActivationArguments
 M System.Net.Sockets.SocketInformation
+M eval.Evaluter
+C eval.Evaluter
 M cs.system.UnhandledExceptionEventHandler
 M System.Net.IPEndPoint
 M System.Reflection.Emit.ConstructorBuilder

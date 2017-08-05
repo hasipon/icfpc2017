@@ -1,10 +1,11 @@
 package;
 
 import cs.Lib;
+import eval.Evaluter;
 import game.GameClient;
 import haxe.io.Input;
 import haxe.io.Output;
-import search.Searcher;
+import search.BeamSearcher;
 import sys.io.File;
 import sys.net.Host;
 import sys.net.Socket;
@@ -17,7 +18,7 @@ class CliMain
 		var mode = if (args.length > 0 && args[0] == "on")
         {
             var host = "punter.inf.ed.ac.uk";
-            var port = 9001;
+            var port = 9056;
             if (args.length > 1)
             {
                 port = Std.parseInt(args[1]);
@@ -34,7 +35,7 @@ class CliMain
         }
         
         var io = getIo(mode);
-        var client = new GameClient(io.input, io.output, new Searcher(0.9));
+        var client = new GameClient(io.input, io.output, new BeamSearcher(0.9, new Evaluter(Evaluter.MS_TABLE)));
         File.saveContent("output.txt", GameClient.result);
         Sys.stderr().writeString("finised\n");
     }	

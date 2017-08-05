@@ -1,0 +1,5 @@
+-main BattleMain
+-cp src/cli
+-cp src/battle
+-cp src/common
+-cs bin/battle

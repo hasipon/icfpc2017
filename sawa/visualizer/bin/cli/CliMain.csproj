@@ -71,6 +71,8 @@
 	
     <Compile Include="src\haxe\format\JsonParser.cs"/>
 	
+    <Compile Include="src\search\MoveAndScore.cs"/>
+	
     <Compile Include="src\game\Punter.cs"/>
 	
     <Compile Include="src\Sys.cs"/>
@@ -91,9 +93,13 @@
 	
     <Compile Include="src\game\Game.cs"/>
 	
+    <Compile Include="src\eval\EvalutionResult.cs"/>
+	
     <Compile Include="src\StringTools.cs"/>
 	
     <Compile Include="src\Reflect.cs"/>
+	
+    <Compile Include="src\search\BeamSearcher.cs"/>
 	
     <Compile Include="src\haxe\io\Bytes.cs"/>
 	
@@ -102,6 +108,8 @@
     <Compile Include="src\haxe\Constraints.cs"/>
 	
     <Compile Include="src\haxe\ds\StringMap.cs"/>
+	
+    <Compile Include="src\eval\Evaluter.cs"/>
 	
     <Compile Include="src\haxe\io\BytesOutput.cs"/>
 	

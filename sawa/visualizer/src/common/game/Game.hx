@@ -9,7 +9,6 @@ import game.command.SetupStruct;
 
 class Game 
 {
-    
     public var sites:Map<SiteId, Site>;
     public var mines:Map<SiteId, Site>;
     public var rivers:Map<RiverId, River>;
@@ -40,10 +39,10 @@ class Game
     public function setup(setupStruct:SetupStruct):Void
     {
         setupMap(setupStruct.map);
-        setupPanters(setupStruct.punters);
+        setupPunters(setupStruct.punters);
     }
     
-    private function setupPanters(punterIds:Int) 
+    public function setupPunters(punterIds:Int) 
     {
         for (i in 0...punterIds)
         {
@@ -142,6 +141,25 @@ class Game
         moves.push(move);
     }
     
+    public function undoMove():Void
+    {
+        var move = moves.pop();
+        if (move.pass != null)
+        {
+            //
+        }
+        else
+        {
+            undoClaim(move.claim);
+        }
+    }
+    
+    private function undoClaim(move:ClaimStruct):Void
+    {
+        var river = sites[move.source].rivers[move.target];
+        river.owner = PunterId.NotFound;
+    }
+    
     public function addMoves(moves:Array<MoveStruct>):Void
     {
         for (move in moves) addMove(move);
@@ -151,7 +169,6 @@ class Game
     {
         var river = sites[move.source].rivers[move.target];
         river.owner = move.punter;
-        punters[move.punter].score = -1;
     }
     
     public function pass(punter:PunterId):Void
@@ -159,13 +176,9 @@ class Game
         // 終了
     }
     
-    public function applyScore(punter:PunterId, score:Int):Void
-    {
-        punters[punter].score = score;
-    }
-    
     public function getLivingRivers():Array<River>
     {
         return [for (river in rivers) if (river.owner == PunterId.NotFound) river];
     }
+    
 }

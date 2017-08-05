@@ -28,7 +28,7 @@ public class CliMain : global::haxe.lang.HxObject {
 			global::CliMode mode = null;
 			if (( ( args.length > 0 ) && string.Equals(global::haxe.lang.Runtime.toString(args[0]), "on") )) {
 				string host = "punter.inf.ed.ac.uk";
-				int port = 9001;
+				int port = 9056;
 				if (( args.length > 1 )) {
 					port = (global::Std.parseInt(global::haxe.lang.Runtime.toString(args[1]))).@value;
 				}
@@ -44,7 +44,7 @@ public class CliMain : global::haxe.lang.HxObject {
 			}
 			
 			object io = global::CliMain.getIo(mode);
-			global::game.GameClient client = new global::game.GameClient(((global::haxe.io.Input) (global::haxe.lang.Runtime.getField(io, "input", 1042138122, true)) ), ((global::haxe.io.Output) (global::haxe.lang.Runtime.getField(io, "output", 209784577, true)) ), new global::search.Searcher(((double) (0.9) )));
+			global::game.GameClient client = new global::game.GameClient(((global::haxe.io.Input) (global::haxe.lang.Runtime.getField(io, "input", 1042138122, true)) ), ((global::haxe.io.Output) (global::haxe.lang.Runtime.getField(io, "output", 209784577, true)) ), new global::search.BeamSearcher(0.9, new global::eval.Evaluter(((global::Array<double>) (global::eval.Evaluter.MS_TABLE) ))));
 			global::sys.io.File.saveContent("output.txt", global::game.GameClient.result);
 			((global::haxe.io.Output) (new global::cs.io.NativeOutput(((global::System.IO.Stream) (global::System.Console.OpenStandardError()) ))) ).writeString("finised\n");
 		}

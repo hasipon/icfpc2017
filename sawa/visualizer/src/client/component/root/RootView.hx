@@ -60,8 +60,9 @@ class RootView extends ReactComponentOfProps<RootProps>
                             {
                                 placeholder: "ログ",
                                 onChange: onChangeLog,
+                                value: props.context.log,
                             },
-                            [ props.context.log ]
+                            []
                         ),
                         "button".createElement(
                             {
@@ -95,7 +96,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 1.5"
+                    "version : 1.7"
                 ),
             ]
         );
