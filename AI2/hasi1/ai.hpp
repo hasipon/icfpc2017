@@ -156,7 +156,7 @@ struct AI {
 				Moves mm;
 				for (int j = 0; j < m; ++ j) {
 					int x, y, z, w;
-					cin >> x >> y >> z >> w;
+					iss >> x >> y >> z >> w;
 					Move v;
 					v.punter_id = x;
 					v.source = y;
