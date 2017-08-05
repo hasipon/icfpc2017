@@ -118,7 +118,7 @@ struct AI {
 		}
 		return r;
 	}
-	pair<int,int> Future() {
+	vector<pair<int,int>> Future() {
 		throw 1;
 	}
 	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures) {
