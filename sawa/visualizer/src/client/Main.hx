@@ -25,7 +25,6 @@ class Main
         
         render();
         
-        
         update();
 	}
     

@@ -46,6 +46,7 @@ class PixiView extends Application
 		position = Application.POSITION_FIXED;
 		width = WIDTH;
 		height = HEIGHT;
+        autoResize = false;
 		backgroundColor = 0x006666;
 		transparent = true;
 		antialias = false;
@@ -54,7 +55,6 @@ class PixiView extends Application
 		_graphic = new Graphics();
         drawBackground();
         
-
 		stage.addChild(_graphic);
 	}
     
@@ -70,9 +70,6 @@ class PixiView extends Application
         drawBackground();
         
         var game = rootContext.game;
-        
-        var viewWidth   = 600;
-        var viewHeight  = 600;
         
         var top    = Math.POSITIVE_INFINITY;
         var bottom = Math.NEGATIVE_INFINITY; 

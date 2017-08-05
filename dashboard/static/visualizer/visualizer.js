@@ -472,6 +472,7 @@ var PixiView = function(rootContext) {
 	this.position = "fixed";
 	this.width = PixiView.WIDTH;
 	this.height = PixiView.HEIGHT;
+	this.autoResize = false;
 	this.backgroundColor = 26214;
 	this.transparent = true;
 	this.antialias = false;
@@ -498,8 +499,6 @@ PixiView.prototype = $extend(pixi_plugins_app_Application.prototype,{
 	,update: function() {
 		this.drawBackground();
 		var game1 = this.rootContext.game;
-		var viewWidth = 600;
-		var viewHeight = 600;
 		var top = Infinity;
 		var bottom = -Infinity;
 		var left = Infinity;
