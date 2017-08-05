@@ -473,6 +473,7 @@ var PixiView = function(rootContext) {
 	this.width = PixiView.WIDTH;
 	this.height = PixiView.HEIGHT;
 	this.autoResize = false;
+	this.position = "relative";
 	this.backgroundColor = 26214;
 	this.transparent = true;
 	this.antialias = false;

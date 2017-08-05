@@ -47,6 +47,7 @@ class PixiView extends Application
 		width = WIDTH;
 		height = HEIGHT;
         autoResize = false;
+        this.position = "relative";
 		backgroundColor = 0x006666;
 		transparent = true;
 		antialias = false;
