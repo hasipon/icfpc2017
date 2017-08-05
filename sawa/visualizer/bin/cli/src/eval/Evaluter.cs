@@ -6,7 +6,7 @@ namespace eval {
 		
 		static Evaluter() {
 			unchecked {
-				global::eval.Evaluter.MAX_DISTANCE = 0;
+				global::eval.Evaluter.MAX_DISTANCE = 5;
 				object __temp_stmt2 = null;
 				{
 					global::Array<double> _g = new global::Array<double>(new double[]{});

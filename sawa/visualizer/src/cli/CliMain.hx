@@ -36,7 +36,7 @@ class CliMain
         
         var io = getIo(mode);
         var client = new GameClient(io.input, io.output, new BeamSearcher(0.9, new Evaluter(Evaluter.MS_TABLE)));
-        File.saveContent("output.txt", GameClient.result);
+        File.saveContent("../../dashboard/static/logs/sawa@" + Math.ffloor(Date.now().getTime()) + ".log", GameClient.result);
         Sys.stderr().writeString("finised\n");
     }	
     

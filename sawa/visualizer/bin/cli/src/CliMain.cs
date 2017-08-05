@@ -45,7 +45,8 @@ public class CliMain : global::haxe.lang.HxObject {
 			
 			object io = global::CliMain.getIo(mode);
 			global::game.GameClient client = new global::game.GameClient(((global::haxe.io.Input) (global::haxe.lang.Runtime.getField(io, "input", 1042138122, true)) ), ((global::haxe.io.Output) (global::haxe.lang.Runtime.getField(io, "output", 209784577, true)) ), new global::search.BeamSearcher(0.9, new global::eval.Evaluter(((global::Array<double>) (global::eval.Evaluter.MS_TABLE) ))));
-			global::sys.io.File.saveContent("output.txt", global::game.GameClient.result);
+			global::Date _this = new global::Date(((global::System.DateTime) (global::System.DateTime.Now) ));
+			global::sys.io.File.saveContent(global::haxe.lang.Runtime.concat(global::haxe.lang.Runtime.concat("../../dashboard/static/logs/sawa@", global::haxe.lang.Runtime.toString(global::System.Math.Floor(((double) (( ((double) (((long) (( ((long) (global::System.TimeZone.CurrentTimeZone.ToUniversalTime(((global::System.DateTime) (_this.date) )).Ticks) ) - ((long) (global::Date.epochTicks) ) )) )) ) / ((double) (global::System.TimeSpan.TicksPerMillisecond) ) )) )))), ".log"), global::game.GameClient.result);
 			((global::haxe.io.Output) (new global::cs.io.NativeOutput(((global::System.IO.Stream) (global::System.Console.OpenStandardError()) ))) ).writeString("finised\n");
 		}
 	}

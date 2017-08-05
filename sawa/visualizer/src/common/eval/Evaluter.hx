@@ -8,7 +8,7 @@ import game.SiteId;
 class Evaluter 
 {
     public var table:Array<Float>;
-    public static var MAX_DISTANCE = 0;
+    public static var MAX_DISTANCE = 5;
     public static var MS_TABLE = [for (i in 0...MAX_DISTANCE + 1) Math.pow(0.1, i)];
 
     public function new(table:Array<Float>)
