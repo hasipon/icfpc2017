@@ -16,8 +16,8 @@ $./venv/bin/python3 -m flask run
 ```
 
 ### ログのアップロード
-`multipart/form-data` 形式で `file=filename` を POSTする。成功したら204が返る。
-`/logs/filename` からダウンロードできる。
+- `/uploadlog` に `multipart/form-data` 形式で `file=<filename>` をPOSTする。成功したら204が返る。
+- `/logs/<filename>` からダウンロードできる。
 
 例
 ```sh
