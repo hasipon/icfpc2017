@@ -68,6 +68,18 @@ struct AI {
   void Parse(const string& state)
   {
     istringstream sin(state);
+    sin >> punter_id;
+
+    int x;
+
+    sin >> x;
+    g.edges.resize(x);
+    each (e, g.edges)  sin >> e.first >> e.second;
+
+    sin >> x;
+    g.mines.resize(x);
+    each (i, g.mines)  sin >> i;
+
     for (int a, b; sin >> a >> b; ) {
       used.insert(Edge(a, b));
       used.insert(Edge(b, a));
@@ -78,9 +90,16 @@ struct AI {
   string State() const
   {
     ostringstream oss;
+    oss << punter_id << ' ';
+
+    oss << g.edges.size() << ' ' ;
+    each (e, g.edges) oss << e.first << ' ' << e.second << ' ';
+
+    oss << g.mines.size() << ' ';
+    each (i, g.mines) oss << i << ' ';
+
     each (e, used) {
-      int a, b;
-      oss << a << b << endl;
+      oss << e.first << ' ' << e.second << ' ';
     }
     return oss.str();
   }
