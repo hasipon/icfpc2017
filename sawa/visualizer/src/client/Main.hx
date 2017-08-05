@@ -18,12 +18,13 @@ class Main
     {
         rootContext = new RootContext();
         rootPixi = new PixiView(rootContext);
-        rootPixi.onUpdate = rootContext.onFrame;
         
         rootContext.updateUi = render;
         rootContext.updatePixi = rootPixi.update;
         
         render();
+        
+        rootPixi.onUpdate = rootContext.onFrame;
 	}
     
     public static function render():Void

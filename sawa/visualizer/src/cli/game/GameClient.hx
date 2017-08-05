@@ -7,7 +7,7 @@ import haxe.io.Bytes;
 import haxe.io.BytesOutput;
 import haxe.io.Input;
 import haxe.io.Output;
-import search.Searcher;
+import search.BeamSearcher;
 import sys.io.File;
 
 class GameClient 
@@ -16,11 +16,11 @@ class GameClient
     public var input:Input;
     public var output:Output;
     public var game:Game;
-    public var searcher:Searcher;
+    public var searcher:BeamSearcher;
     public var punter:PunterId;
     public static var result:String = "";
     
-    public function new(input:Input, output:Output, searcher:Searcher) 
+    public function new(input:Input, output:Output, searcher:BeamSearcher) 
     {   
         this.searcher = searcher;
         this.stderr = Sys.stderr();

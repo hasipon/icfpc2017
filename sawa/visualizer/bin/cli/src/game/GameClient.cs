@@ -14,12 +14,12 @@ namespace game {
 		}
 		
 		
-		public GameClient(global::haxe.io.Input input, global::haxe.io.Output output, global::search.Searcher searcher) {
+		public GameClient(global::haxe.io.Input input, global::haxe.io.Output output, global::search.BeamSearcher searcher) {
 			global::game.GameClient.__hx_ctor_game_GameClient(this, input, output, searcher);
 		}
 		
 		
-		public static void __hx_ctor_game_GameClient(global::game.GameClient __hx_this, global::haxe.io.Input input, global::haxe.io.Output output, global::search.Searcher searcher) {
+		public static void __hx_ctor_game_GameClient(global::game.GameClient __hx_this, global::haxe.io.Input input, global::haxe.io.Output output, global::search.BeamSearcher searcher) {
 			__hx_this.searcher = searcher;
 			__hx_this.stderr = ((global::haxe.io.Output) (new global::cs.io.NativeOutput(((global::System.IO.Stream) (global::System.Console.OpenStandardError()) ))) );
 			__hx_this.input = input;
@@ -105,7 +105,7 @@ namespace game {
 		
 		public global::game.Game game;
 		
-		public global::search.Searcher searcher;
+		public global::search.BeamSearcher searcher;
 		
 		public int punter;
 		
@@ -171,7 +171,7 @@ namespace game {
 					
 					case 1202495957:
 					{
-						this.searcher = ((global::search.Searcher) (@value) );
+						this.searcher = ((global::search.BeamSearcher) (@value) );
 						return @value;
 					}
 					
