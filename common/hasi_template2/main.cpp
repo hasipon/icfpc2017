@@ -356,10 +356,10 @@ struct io_Main {
 			ai.Init(punter_id, num_of_punters, g, futures);
 			ostringstream ss;
 			if (futures) {
-				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\"}";
-			} else {
 				auto x = ai.Future();
 				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\",\"futures\":[{\"source\":" << x.first << ",\"target\":" << x.second << "}]}";
+			} else {
+				ss << "{\"ready\":" << ai.PunterId() << ",\"state\":\"" << ai.State() << "\"}";
 			}
 			write(ss.str());
 		} else {
