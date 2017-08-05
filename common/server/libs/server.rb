@@ -118,5 +118,7 @@ class Server
       socket.send_message stop
       socket.close
     end
+
+    p stop
   end
 end
