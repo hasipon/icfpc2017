@@ -1,5 +1,7 @@
 #pragma once
 
+// ただのランダムですよ
+
 #include <set>
 #include <map>
 #include <iostream>
