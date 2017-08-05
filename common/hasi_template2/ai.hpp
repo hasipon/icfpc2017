@@ -17,8 +17,8 @@ struct AI {
 		this->state = state;
 		return Move();
 	}
-	pair<int,int> Future() {
-		return {0, 0};
+	vector<pair<int,int>> Future() {
+		return {};
 	}
 	string State() {
 		return state;
