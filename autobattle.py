@@ -85,8 +85,12 @@ def run():
     print("sim.stderr")
     print(sim.stderr.read().decode('utf-8'))
 
+def fix_name(name):
+    if '@' not in name:
+        return name
+    return name.split('@')[0]
+
 def calc_rating():
-    log_path = pathlib.Path(__file__).resolve().parent / 'dashboard' / 'static' / 'logs'
     log_files = glob.glob(os.path.join(str(log_path), '*@[1-9]*.log'))
     rating = {}
 
@@ -108,6 +112,9 @@ def calc_rating():
         ranking = []
         names = info['punter_names']
 
+        for i in range(len(names)):
+            names[i] = fix_name(names[i])
+
         for name in names:
             if name not in rating:
                 rating[name] = 1500
@@ -124,11 +131,12 @@ def calc_rating():
 
         for i in range(n):
             for j in range(i + 1, n):
+                if ranking[i][0] == ranking[j][0]:
+                    continue
                 rd = (rating[names[j]] - rating[names[i]]) * 0.04
                 diff[i] += 16 + rd
                 diff[j] -= 16 + rd
 
-        print(diff)
         for i in range(n):
             rating[names[i]] += diff[i]
 
