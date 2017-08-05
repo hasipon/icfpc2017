@@ -18,7 +18,7 @@ class CliMain
 		var mode = if (args.length > 0 && args[0] == "on")
         {
             var host = "punter.inf.ed.ac.uk";
-            var port = 9036;
+            var port = 9086;
             if (args.length > 1)
             {
                 port = Std.parseInt(args[1]);
