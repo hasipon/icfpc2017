@@ -80,6 +80,8 @@ class Server
       }
       socket.send_message setup
 
+      puts "setup: #{setup}"
+
       ready = socket.read_message
       if ready["futures"]
         futures[ready["ready"]] = normalize_futures(ready["futures"])
@@ -101,6 +103,8 @@ class Server
       break if play_count >= @max_play_count
       sockets.each_with_index do |socket, index|
         # TODO: timeout, zombie
+        puts "send_message(play_count = #{play_count}, index = #{index})"
+        p moves
         socket.send_message({"move" => {"moves" => moves}})
         moves[index] = socket.read_message
         score.update(moves[index])
