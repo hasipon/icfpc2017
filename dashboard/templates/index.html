@@ -5,14 +5,14 @@
   <h2>ログ一覧</h2>
   <table class="table table-condensed table-striped">
   <tr>
-    <th class="text-center">ファイル名</th>
+    <th class="text-center">ファイル</th>
     <th class="text-center">ビジュアライズ</th>
   </tr>
 
   {% for f in logfiles %}
   <tr>
-    <td class="text-center"><a href="/logs/{{f}}">ほげ</a></td>
-    <td class="text-center"><a href="/visualizer/index.html#http://{{request.headers.get('Host')}}/logs/{{f}}">ほげ</a></td>
+    <td class="text-center"><a href="/logs/{{f}}">{{f}}</a></td>
+    <td class="text-center"><a href="/visualizer/index.html#http://{{request.headers.get('Host')}}/logs/{{f}}"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></a></td>
   </tr>
   {% endfor %}
 </div>
