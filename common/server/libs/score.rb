@@ -77,25 +77,18 @@ class Score
     end
   end
 
-  def update(moves)
-    # sort by punter id
-    moves.sort! do |a, b|
-      (a["claim"] || a["pass"])["punter"] <=> (b["claim"] || b["pass"])["punter"]
-    end
-
+  def update(move)
     # update
-    moves.each do |move|
-      next if move.has_key? 'pass'
+    return if move.has_key? 'pass'
 
-      punter_id = move["claim"]["punter"]
-      source = move["claim"]["source"]
-      target = move["claim"]["target"]
+    punter_id = move["claim"]["punter"]
+    source = move["claim"]["source"]
+    target = move["claim"]["target"]
 
-      if @rivers[[source, target]].nil?
-        @rivers[[source, target]] = punter_id
+    if @rivers[[source, target]].nil?
+      @rivers[[source, target]] = punter_id
 
-        @claims[punter_id].add_edge(source, target)
-      end
+      @claims[punter_id].add_edge(source, target)
     end
   end
 
@@ -126,7 +119,7 @@ class Score
       end
 
       # future
-      if @futures[punter_id] && @futures[punter_id].path[mine].length >= 1
+      if @futures[punter_id] && @futures[punter_id].path[mine]
         site_id = @futures[punter_id].path[mine].first
         if acc.include? site_id
           score += costs[site_id] ** 3
