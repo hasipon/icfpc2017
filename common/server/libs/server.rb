@@ -80,6 +80,8 @@ class Server
       }
       socket.send_message setup
 
+      puts "setup: #{setup}"
+
       ready = socket.read_message
       if ready["futures"]
         futures[ready["ready"]] = normalize_futures(ready["futures"])
