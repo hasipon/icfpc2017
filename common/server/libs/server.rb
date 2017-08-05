@@ -116,6 +116,11 @@ class Server
         p moves
         socket.send_message({"move" => {"moves" => moves}})
         moves[index] = socket.read_message
+
+        unless moves[index]
+          puts "illformed moves[#{index}] = #{moves[index]} is send"
+        end
+
         score.update(moves[index])
         play_count += 1
       end
