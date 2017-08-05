@@ -32,15 +32,38 @@ class PlayingState
         trace(playing);
         if (playing)
         {
-            if (moves.length <= currentIndex)
-            {
-                playing = false;
-                return;
-            }
-            
-            parent.game.addMove(moves[currentIndex]);
-            currentIndex += 1;
+            doMove();
+        }
+    }
+    
+    public function togglePlaying()
+    {
+        playing = !playing;
+        parent.updateUi();
+    }
+    
+    public function doMove()
+    {
+        if (moves.length <= currentIndex)
+        {
+            playing = false;
+            parent.updateUi();
+            return;
+        }
+        
+        parent.game.addMove(moves[currentIndex]);
+        currentIndex += 1;
+        parent.updatePixi();
+    }
+    
+    public function undoMove():Void
+    {
+        if (currentIndex > 0)
+        {
+            parent.game.undoMove();
+            currentIndex -= 1;
             parent.updatePixi();
         }
     }
+
 }

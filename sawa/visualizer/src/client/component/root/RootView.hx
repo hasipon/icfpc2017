@@ -51,7 +51,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                     "site : " + props.context.game.siteCount +
                     ", mine : " + props.context.game.mineCount +
                     ", river : " + props.context.game.riverCount +
-                    ", 最大スコア : " + props.context.game.maxScore
+                    ", 最大スコア理論値 : " + props.context.game.maxScore
                 ),
                 "div".createElement(
                     {},
@@ -86,6 +86,12 @@ class RootView extends ReactComponentOfProps<RootProps>
                                     {
                                         context: playingState,
                                     }
+                                ),
+                                React.createElement(
+                                    PlayingStateControlView,
+                                    {
+                                        context: playingState,
+                                    }
                                 )
                             ];
                     }
@@ -96,7 +102,7 @@ class RootView extends ReactComponentOfProps<RootProps>
                 ),
                 "div".createElement(
                     {},
-                    "version : 1.7"
+                    "version : 1.8"
                 ),
             ]
         );

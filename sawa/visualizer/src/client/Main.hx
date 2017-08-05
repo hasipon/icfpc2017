@@ -31,7 +31,7 @@ class Main
     private static function update() 
     {
         rootContext.onFrame();
-        Timer.delay(update, 350);
+        Timer.delay(update, 150);
     }
     
     public static function render():Void
