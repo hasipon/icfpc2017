@@ -17,6 +17,7 @@ class Game
     public var mineCount:Int;
     public var siteCount:Int;
     public var riverCount:Int;
+    public var punterCount:Int;
     public var maxScore:Int;
     public var moves:Array<MoveStruct>;
     
@@ -32,6 +33,7 @@ class Game
         siteCount  = 0;
         riverCount = 0;
         maxScore   = 0;
+        punterCount = 0;
         
         moves = [];
     }
@@ -49,6 +51,7 @@ class Game
             var id = new PunterId(i);
             punters[id] = new Punter(this, id);
         }
+        punterCount = punterIds;
     }
     
     public function setupMap(map:MapStruct) 

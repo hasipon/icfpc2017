@@ -23,6 +23,7 @@ namespace game {
 			__hx_this.siteCount = 0;
 			__hx_this.riverCount = 0;
 			__hx_this.maxScore = 0;
+			__hx_this.punterCount = 0;
 			__hx_this.moves = new global::Array<object>(new object[]{});
 		}
 		
@@ -43,6 +44,8 @@ namespace game {
 		
 		public int riverCount;
 		
+		public int punterCount;
+		
 		public int maxScore;
 		
 		public global::Array<object> moves;
@@ -54,19 +57,23 @@ namespace game {
 		
 		
 		public virtual void setupPunters(int punterIds) {
-			int _g1 = 0;
-			int _g = punterIds;
-			while (( _g1 < _g )) {
-				int i = _g1++;
-				int id = global::game._PunterId.PunterId_Impl_._new(i);
-				{
-					global::haxe.IMap<int, object> this1 = this.punters;
-					global::game.Punter v = new global::game.Punter(this, id);
-					((global::haxe.ds.IntMap<object>) (global::haxe.ds.IntMap<object>.__hx_cast<object>(((global::haxe.ds.IntMap) (this1) ))) ).@set(id, v);
+			{
+				int _g1 = 0;
+				int _g = punterIds;
+				while (( _g1 < _g )) {
+					int i = _g1++;
+					int id = global::game._PunterId.PunterId_Impl_._new(i);
+					{
+						global::haxe.IMap<int, object> this1 = this.punters;
+						global::game.Punter v = new global::game.Punter(this, id);
+						((global::haxe.ds.IntMap<object>) (global::haxe.ds.IntMap<object>.__hx_cast<object>(((global::haxe.ds.IntMap) (this1) ))) ).@set(id, v);
+					}
+					
 				}
 				
 			}
 			
+			this.punterCount = punterIds;
 		}
 		
 		
@@ -263,6 +270,13 @@ namespace game {
 					}
 					
 					
+					case 740702967:
+					{
+						this.punterCount = ((int) (@value) );
+						return @value;
+					}
+					
+					
 					case 1571143203:
 					{
 						this.riverCount = ((int) (@value) );
@@ -308,6 +322,13 @@ namespace game {
 					case 586597902:
 					{
 						this.maxScore = ((int) (global::haxe.lang.Runtime.toInt(@value)) );
+						return @value;
+					}
+					
+					
+					case 740702967:
+					{
+						this.punterCount = ((int) (global::haxe.lang.Runtime.toInt(@value)) );
 						return @value;
 					}
 					
@@ -454,6 +475,12 @@ namespace game {
 					}
 					
 					
+					case 740702967:
+					{
+						return this.punterCount;
+					}
+					
+					
 					case 1571143203:
 					{
 						return this.riverCount;
@@ -519,6 +546,12 @@ namespace game {
 					case 586597902:
 					{
 						return ((double) (this.maxScore) );
+					}
+					
+					
+					case 740702967:
+					{
+						return ((double) (this.punterCount) );
 					}
 					
 					
@@ -638,6 +671,7 @@ namespace game {
 		public override void __hx_getFields(global::Array<object> baseArr) {
 			baseArr.push("moves");
 			baseArr.push("maxScore");
+			baseArr.push("punterCount");
 			baseArr.push("riverCount");
 			baseArr.push("siteCount");
 			baseArr.push("mineCount");

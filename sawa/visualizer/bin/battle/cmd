@@ -27,7 +27,6 @@ src\search\BeamSearcher.cs
 src\haxe\io\Bytes.cs
 src\search\Searcher.cs
 src\haxe\Constraints.cs
-src\sys\FileSystem.cs
 src\eval\Evaluter.cs
 src\cs\internal\StringExt.cs
 src\cs\internal\Runtime.cs
