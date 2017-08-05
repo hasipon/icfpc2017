@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'pqueue'
 require 'set'
 
@@ -23,6 +24,13 @@ class UndirectedGraph
     @path[target].push source
   end
 
+  def load_paths(paths)
+    # [{"source" => 1, "target" => 2}, ...] の形式を読み込む
+    paths.each do |path|
+      add_edge(path["source"], path["target"])
+    end
+  end
+
   def accessible(source)
     ret = Set.new
     q = [source]
@@ -44,16 +52,24 @@ class UndirectedGraph
 end
 
 class Score
-  def initialize(map, num_of_punters)
+  def initialize(map, num_of_punters, futures)
     @map = map
     @num_of_punters = num_of_punters
 
-    @graph = UndirectedGraph.new
+    @futures = {}
+    futures.each do |punter_id, future|
+      @futures[punter_id] = UndirectedGraph.new
+      @futures[punter_id].load_paths future
+    end
+
     @rivers = {}
 
-    @map["rivers"].each do |river|
-      @graph.add_edge(river["source"], river["target"])
-    end
+    @graph = UndirectedGraph.new
+    @graph.load_paths @map["rivers"]
+
+    # @map["rivers"].each do |river|
+    #   @graph.add_edge(river["source"], river["target"])
+    # end
 
     @claims = []
     @num_of_punters.times do
@@ -68,7 +84,6 @@ class Score
     end
 
     # update
-    p moves
     moves.each do |move|
       next if move.has_key? 'pass'
 
@@ -106,8 +121,18 @@ class Score
     @num_of_punters.times do |punter_id|
       score = 0
       acc = @claims[punter_id].accessible(mine)
+      future_ok = false
       acc.each do |site_id|
-        score += costs[site_id] ** 2
+        if @futures[punter_id] && @futures[punter_id].path[mine].first == site_id
+          score += costs[site_id] ** 3
+          future_ok = true
+        else
+          score += costs[site_id] ** 2
+        end
+      end
+      # penalty is given if the future is not fullfiled
+      if @futures[punter_id] && @futures[punter_id].path[mine] && !future_ok
+        score -= costs[@futures[punter_id].path[mine].first] ** 3
       end
       ret.push(score)
     end
