@@ -67,6 +67,7 @@ class Client
 
   def response_log(msg)
     @log_file.puts(msg.gsub(/(\r\n|\r|\n|\f)/,""))
+    @log_file.flush
   end
 
   def logfile_name
@@ -110,3 +111,4 @@ end
 
 puts "logfile: #{client.logfile_name}"
 
+`curl -F 'file=@#{client.logfile_name}' http://13.114.38.186/uploadlog`

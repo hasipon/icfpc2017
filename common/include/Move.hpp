@@ -6,6 +6,8 @@
 
 using namespace std;
 
+
+
 struct Move {
     int punter_id;
     int source;

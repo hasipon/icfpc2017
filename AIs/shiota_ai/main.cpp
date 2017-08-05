@@ -1,9 +1,11 @@
-#include "common.hpp"
-#include "ai.hpp"
 #include <iostream>
 #include <cstdio>
 #include <sstream>
+
 using namespace std;
+#include "common.hpp"
+#include "ai.hpp"
+
 
 int io_get_n() {
 	int n = 0;
