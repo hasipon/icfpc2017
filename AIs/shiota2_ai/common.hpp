@@ -31,13 +31,13 @@ struct Graph {
     vector<int> mines;
     string toString() const {
         stringstream ss;
-        // 辺数
+        // $BJU?t(B
         ss << edges.size() << ' ';
-        // 辺
+        // $BJU(B
         for(Edge e : edges){
             ss << e.first << ' ' << e.second <<' ';
         }
-        // mine数
+        // mine$B?t(B
         ss << mines.size() <<' ';
         // mine
         for(int m : mines){
@@ -51,17 +51,17 @@ Graph parseGraph(string in){
     Graph g;
     stringstream ss(in);
 
-    // 辺数
+    // $BJU?t(B
     int en;
     ss >> en;
-    // 辺
+    // $BJU(B
     for(int i = 0; i< en; i++){
         Edge e;
         ss >> e.first >> e.second;
         g.edges.push_back(e);
     }
 
-    // mine数
+    // mine$B?t(B
     int em;
     ss >> em;
     // mine
