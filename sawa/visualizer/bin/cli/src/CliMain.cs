@@ -28,7 +28,7 @@ public class CliMain : global::haxe.lang.HxObject {
 			global::CliMode mode = null;
 			if (( ( args.length > 0 ) && string.Equals(global::haxe.lang.Runtime.toString(args[0]), "on") )) {
 				string host = "punter.inf.ed.ac.uk";
-				int port = 9036;
+				int port = 9086;
 				if (( args.length > 1 )) {
 					port = (global::Std.parseInt(global::haxe.lang.Runtime.toString(args[1]))).@value;
 				}

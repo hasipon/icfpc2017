@@ -8,11 +8,13 @@ num_of_punters = nil
 port = nil
 map_file = nil
 map_json = nil
+settings = nil
 
 opt.on('-n', '--num-of-punters NUM') { |v| num_of_punters = v.to_i }
 opt.on('-p', '--port PORT') { |v| port = v.to_i }
 opt.on('-m', '--map-file FILENAME') { |v| map_file = v }
-opt.on('-j', '--map-json JSON_STRING') { |v| map_json = v }
+opt.on('-j', '--map-json MAP_JSON') { |v| map_json = v }
+opt.on('-s', '--settings SETTINGS_JSON') { |v| settings = JSON.load(v) }
 
 opt.parse!(ARGV)
 
@@ -32,7 +34,9 @@ map = (map_file && JSON.load(File.read(map_file))) ||
 opts = {
   map: map,
   num_of_punters: num_of_punters,
-  port: port
+  port: port,
 }
+opts[:settings] = settings if settings
+
 app = Server.new(opts)
 app.run_game_once

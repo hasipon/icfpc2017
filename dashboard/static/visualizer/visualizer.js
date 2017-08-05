@@ -108,7 +108,7 @@ Main.main = function() {
 };
 Main.update = function() {
 	Main.rootContext.onFrame();
-	haxe_Timer.delay(Main.update,180);
+	haxe_Timer.delay(Main.update,350);
 };
 Main.render = function() {
 	ReactDOM.render(React.createElement(component_root_RootView,{ context : Main.rootContext}),window.document.getElementById("control"));

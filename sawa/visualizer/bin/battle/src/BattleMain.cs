@@ -58,7 +58,7 @@ public class BattleMain : global::haxe.lang.HxObject {
 	
 	public static void main() {
 		unchecked {
-			global::Array<object> maps = new global::Array<object>(new object[]{global::haxe.lang.Runtime.concat(global::BattleMain.MAPS, "/sample.json")});
+			global::Array<object> maps = new global::Array<object>(new object[]{global::haxe.lang.Runtime.concat(global::BattleMain.MAPS, "/circle.json")});
 			{
 				int _g = 0;
 				while (( _g < 200 )) {

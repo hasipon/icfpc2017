@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'socket'
 require_relative 'score'
 
@@ -18,18 +19,36 @@ class IO
 end
 
 class Server
+  # opts = {
+  #   map: mapのオブジェクト,
+  #   num_of_punters: パンターの数,
+  #   port: ポート,
+  #   settings: セッティング
+  # }
   def initialize(opts)
     @map = opts[:map]
     @num_of_punters = opts[:num_of_punters]
     @server = TCPServer.open(opts[:port])
+    @settings = opts[:settings]
 
     @max_play_count = @map["rivers"].length
   end
 
+  # source が mine じゃないやつは無視する
+  # target が mine のやつも無視する
+  # 同じ mine から複数の target が指定されている場合は最後の1つだけを採用する
+  def normalize_futures(futures)
+    ret = {}
+    futures.each do |river|
+      next if !@map["mines"].member? river["source"]
+      next if @map["mines"].member? river["target"]
+      ret[river["source"]] = river["target"]
+    end
+    ret.map { |s, t| { "source" => s, "target" => t } }
+  end
+
   def run_game_once
     puts "Start a game with #{@num_of_punters} punters."
-
-    score = Score.new(@map, @num_of_punters)
 
     # accept clients
     sockets = []
@@ -50,15 +69,23 @@ class Server
     end
 
     # setup
+    futures = {}
     sockets.each_with_index do |socket, index|
       setup = {
         "punter" => index,
         "punters" => @num_of_punters,
-        "map" => @map
+        "map" => @map,
+        "settings" => @settings
       }
       socket.send_message setup
-      socket.read_message # read ready
+
+      ready = socket.read_message
+      if ready["futures"]
+        futures[ready["ready"]] = normalize_futures(ready["futures"])
+      end
     end
+
+    score = Score.new(@map, @num_of_punters, futures)
 
     # game play
     play_count = 0
