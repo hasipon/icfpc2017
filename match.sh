@@ -22,7 +22,7 @@ for ((i=2; i < $NUM_ARGS; i++)); do
     make
     popd
     pushd ./dashboard/static
-    ruby ../../common/script/server_connecter.rb -p $PORT -a ../../AIs/$AI_NAME/a.out -h localhost -n $AI_NAME &
+    ruby ../../common/script/server_connecter.rb -p $PORT -a ../../AIs/$AI_NAME/a.out -h localhost -n $AI_NAME $LOG_OPTION &
     popd
     LOG_OPTION=""
 done
