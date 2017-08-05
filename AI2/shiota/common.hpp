@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <iostream>
+
 using namespace std;
 
 using Edge = pair<int, int>;
@@ -32,6 +34,7 @@ struct Graph {
     string toString() const {
         stringstream ss;
         // 辺数
+        cerr << __LINE__  << ' ' << edges.size() <<endl;
         ss << edges.size() << ' ';
         // 辺
         for(Edge e : edges){
@@ -47,9 +50,8 @@ struct Graph {
     }
 };
 
-Graph parseGraph(string in){
+Graph parseGraph(stringstream &ss){
     Graph g;
-    stringstream ss(in);
 
     // 辺数
     int en;

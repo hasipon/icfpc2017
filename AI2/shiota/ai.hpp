@@ -39,7 +39,6 @@ struct AI {
 
         // serilize
         oss << punter_id << ' ';
-
         oss << g.edges.size() << ' ';
         for(auto e : g.edges){
             oss << e.first <<' ';
@@ -59,6 +58,7 @@ struct AI {
             oss << d <<' ';
         }
 
+        oss << "Graph" <<' ';
 
         oss << g.toString() <<' ';
         state = oss.str();
@@ -66,11 +66,11 @@ struct AI {
     Move Think(const Moves& moves, const string& state) {
         Move ret;
         UnionFind UF;
-            // S: 今後取りうる辺
-            set<Edge> S;
-            // 自分の領域
-            set<int> mySite;
-            Graph g;
+        // S: 今後取りうる辺
+        set<Edge> S;
+        // 自分の領域
+        set<int> mySite;
+        Graph g;
         try{
             stringstream iss(state);
 
@@ -100,7 +100,9 @@ struct AI {
                 iss >> UF.data[i];
             }
 
-            g = parseGraph(iss.str());
+            string s;
+            iss >> s;
+            g = parseGraph(iss);
 
 
             // 入力ここまで
@@ -133,18 +135,20 @@ struct AI {
                     kouho.push_back(make_pair(score, e));
                 }
             }
-            Edge choosed;
-            if(kouho.size()){
-                choosed = max_element(kouho.begin(), kouho.end())->second;
-            }else{
-                choosed = *S.begin();
+            if(S.size()){
+                Edge choosed;
+                if(kouho.size()){
+                    choosed = max_element(kouho.begin(), kouho.end())->second;
+                }else{
+                    choosed = *S.begin();
+                }
+                UF.merge(choosed.first, choosed.second);
+                mySite.insert(choosed.first);
+                mySite.insert(choosed.second);
+
+
+                ret =  Move(choosed.first, choosed.second);
             }
-            UF.merge(choosed.first, choosed.second);
-            mySite.insert(choosed.first);
-            mySite.insert(choosed.second);
-
-
-            ret =  Move(choosed.first, choosed.second);
         }catch(char* s){
             cerr << s <<endl;
         }
@@ -168,9 +172,10 @@ struct AI {
             oss << d <<' ';
         }
 
+        oss << "Graph" << ' ';
         oss << g.toString() <<' ';
         this->state = oss.str();
-        return Move();
+        return ret;
     }
     vector<pair<int,int>> Future() {
         return {};
