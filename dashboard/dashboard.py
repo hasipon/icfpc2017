@@ -14,12 +14,11 @@ app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 
 @app.route('/')
 def index():
-    json_data = ''
-    with open(str(repo_path / 'problems.json')) as f:
-        json_data = f.read()
-    data = json.loads(json_data)
-    probs = data['problems']
-    return render_template('index.html', problems=probs)
+    logpath = str(static_path / 'logs')
+    logfiles = glob.glob(os.path.join(logpath, '*@[0-9]*.log'))
+    logfiles = [os.path.relpath(x, logpath) for x in logfiles]
+    logfiles.sort(key=lambda x: x.split('@')[1], reverse=True)
+    return render_template('index.html', logfiles=logfiles)
 
 @app.route('/gitstatus')
 def git_status():
