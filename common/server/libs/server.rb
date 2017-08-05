@@ -74,6 +74,7 @@ class Server
       setup = {
         "punter" => index,
         "punters" => @num_of_punters,
+        "punter_names" => names,
         "map" => @map,
         "settings" => @settings
       }
