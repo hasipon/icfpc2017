@@ -16,21 +16,41 @@ class PlayingStateView extends ReactComponentOfProps<PlayingStateProps>
                 className: "result",
             },
             [
-                {
-                    var data = "スコア：";
-                    for (scoreStruct in props.context.scores)
+                "button".createElement(
                     {
-                        data += scoreStruct.punter + "番";
-                        if (context.you == scoreStruct.punter) data += "(あなた)";
-                        data += ":";
-                        data += scoreStruct.score;
-                        data += ", ";
-                    }
-                    
-                    data;
-                }
+                        onClick: onUndoClick
+                    },
+                    "<"
+                ), 
+                "button".createElement(
+                    {
+                        onClick: onTogglePlayingClick
+                    },
+                    if (context.playing) "■" else "▶"
+                ),
+                "button".createElement(
+                    {
+                        onClick: onDoClick
+                    },
+                    ">"
+                ), 
             ]
         );
+    }
+    
+    private function onTogglePlayingClick()
+    {
+        props.context.togglePlaying();
+    }
+    
+    private function onDoClick()
+    {
+        props.context.doMove();
+    }
+    
+    private function onUndoClick()
+    {
+        props.context.undoMove();
     }
 }
 

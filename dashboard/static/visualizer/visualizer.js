@@ -108,7 +108,7 @@ Main.main = function() {
 };
 Main.update = function() {
 	Main.rootContext.onFrame();
-	haxe_Timer.delay(Main.update,350);
+	haxe_Timer.delay(Main.update,150);
 };
 Main.render = function() {
 	ReactDOM.render(React.createElement(component_root_RootView,{ context : Main.rootContext}),window.document.getElementById("control"));
@@ -589,12 +589,12 @@ Std.__name__ = true;
 Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
-var component_root_PlayingStateView = function(props) {
-	React.Component.call(this,props);
+var component_root_PlayingStateControlView = function(props,context) {
+	React.Component.call(this,props,context);
 };
-component_root_PlayingStateView.__name__ = true;
-component_root_PlayingStateView.__super__ = React.Component;
-component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
+component_root_PlayingStateControlView.__name__ = true;
+component_root_PlayingStateControlView.__super__ = React.Component;
+component_root_PlayingStateControlView.prototype = $extend(React.Component.prototype,{
 	render: function() {
 		var context = this.props.context;
 		var data = "スコア：";
@@ -612,6 +612,30 @@ component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
 			data += ", ";
 		}
 		return react_ReactStringTools.createElement("div",{ className : "result"},[data]);
+	}
+	,__class__: component_root_PlayingStateControlView
+});
+var component_root_PlayingStateView = function(props) {
+	React.Component.call(this,props);
+};
+component_root_PlayingStateView.__name__ = true;
+component_root_PlayingStateView.__super__ = React.Component;
+component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
+	render: function() {
+		var context = this.props.context;
+		var tmp = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onUndoClick)},"<");
+		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onTogglePlayingClick)},context.playing ? "■" : "▶");
+		var tmp2 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onDoClick)},">");
+		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2]);
+	}
+	,onTogglePlayingClick: function() {
+		this.props.context.togglePlaying();
+	}
+	,onDoClick: function() {
+		this.props.context.doMove();
+	}
+	,onUndoClick: function() {
+		this.props.context.undoMove();
 	}
 	,__class__: component_root_PlayingStateView
 });
@@ -634,7 +658,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		var tmp = react_ReactStringTools.createElement("select",{ name : "map", size : "12", onChange : $bind(this,this.onSelect)},_g);
 		var tmp1 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClick)},["表示"]);
 		var tmp2 = react_ReactStringTools.createElement("div",{ },[tmp,tmp1]);
-		var tmp3 = react_ReactStringTools.createElement("div",{ },"site : " + this.props.context.game.siteCount + ", mine : " + this.props.context.game.mineCount + ", river : " + this.props.context.game.riverCount + ", 最大スコア : " + this.props.context.game.maxScore);
+		var tmp3 = react_ReactStringTools.createElement("div",{ },"site : " + this.props.context.game.siteCount + ", mine : " + this.props.context.game.mineCount + ", river : " + this.props.context.game.riverCount + ", 最大スコア理論値 : " + this.props.context.game.maxScore);
 		var tmp4 = react_ReactStringTools.createElement("textarea",{ placeholder : "ログ", onChange : $bind(this,this.onChangeLog), value : this.props.context.log},[]);
 		var tmp5 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onClickLog)},["ログ再生"]);
 		var tmp6 = react_ReactStringTools.createElement("div",{ },[tmp4,tmp5]);
@@ -643,7 +667,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		switch(_g11[1]) {
 		case 0:
 			var playingState = _g11[2];
-			tmp7 = [React.createElement(component_root_PlayingStateView,{ context : playingState})];
+			tmp7 = [React.createElement(component_root_PlayingStateView,{ context : playingState}),React.createElement(component_root_PlayingStateControlView,{ context : playingState})];
 			break;
 		case 1:
 			tmp7 = [];
@@ -681,12 +705,27 @@ core_PlayingState.prototype = {
 	update: function() {
 		console.log(this.playing);
 		if(this.playing) {
-			if(this.moves.length <= this.currentIndex) {
-				this.playing = false;
-				return;
-			}
-			this.parent.game.addMove(this.moves[this.currentIndex]);
-			this.currentIndex += 1;
+			this.doMove();
+		}
+	}
+	,togglePlaying: function() {
+		this.playing = !this.playing;
+		this.parent.updateUi();
+	}
+	,doMove: function() {
+		if(this.moves.length <= this.currentIndex) {
+			this.playing = false;
+			this.parent.updateUi();
+			return;
+		}
+		this.parent.game.addMove(this.moves[this.currentIndex]);
+		this.currentIndex += 1;
+		this.parent.updatePixi();
+	}
+	,undoMove: function() {
+		if(this.currentIndex > 0) {
+			this.parent.game.undoMove();
+			this.currentIndex -= 1;
 			this.parent.updatePixi();
 		}
 	}
@@ -1782,6 +1821,7 @@ pixi_plugins_app_Application.POSITION_INHERIT = "inherit";
 PixiView.WIDTH = 900;
 PixiView.HEIGHT = 650;
 PixiView.COLORS = [16746513,8917503,1179528,8978193,16716168,1149183,14492177,1170722,1123037,10031513,10066193,1153433,6702097,4460902,1140292,6689041,1140241,1118566];
+component_root_PlayingStateControlView.displayName = "PlayingStateControlView";
 component_root_PlayingStateView.displayName = "PlayingStateView";
 component_root_RootView.displayName = "RootView";
 game__$PunterId_PunterId_$Impl_$.NotFound = game__$PunterId_PunterId_$Impl_$._new(-1);
