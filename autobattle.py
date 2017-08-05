@@ -12,7 +12,7 @@ port = 9999
 ai_bin_path = '/home/ubuntu/LOCAL/autobattle/ai'
 maps_path = '/home/ubuntu/LOCAL/autobattle/maps'
 simulator_rb = '/home/ubuntu/LOCAL/autobattle/server/app.rb'
-server_connector_rb = '/home/ubuntu/LOCAL/autobattle/server_connector.rb'
+server_connector_rb = '/home/ubuntu/LOCAL/autobattle/server_connecter2.rb'
 log_path = '/home/ubuntu/LOCAL/dashboard/dashboard/static/logs'
 
 def find_map_files():
@@ -35,7 +35,8 @@ def run_server(n, battle_map):
       simulator_rb,
       "-p", str(port),
       "-n", str(n),
-      "-m", battle_map
+      "-m", battle_map,
+      "-s", '{"futures": true}',
     ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return sim
 
@@ -59,8 +60,10 @@ def run():
     print("Map",  battle_map)
     print("Participants", participants)
 
-    sim = run_server(n, battle_map)
+    print(participants)
+    logname = 'autobattle-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
+    sim = run_server(n, battle_map)
     time.sleep(1.0)
 
     ai_ps = []
@@ -75,6 +78,9 @@ def run():
           '-n', os.path.basename(participants[i]),
         ]
         if i == 0:
+            options.append('-l')
+            options.append(logname)
+        else:
             options.append('-q')
         p = subprocess.Popen(options)
         ai_ps.append(p)
@@ -84,6 +90,13 @@ def run():
     print(sim.stdout.read().decode('utf-8'))
     print("sim.stderr")
     print(sim.stderr.read().decode('utf-8'))
+
+    with open(logname) as f:
+        lines = f.readlines()
+        if 2 <= len(lines):
+            scores = json.loads(lines[-1])
+            if scores and 'stop' in scores:
+                os.rename(logname, os.path.join(log_path, logname))
 
 def fix_name(name):
     if '@' not in name:
@@ -145,6 +158,10 @@ def calc_rating():
 def main():
     if sys.argv[1] == 'run':
         run()
+    if sys.argv[1] == 'eternal-run':
+        while True:
+            run()
+            time.sleep(1.0)
     elif sys.argv[1] == 'rating':
         calc_rating()
 
