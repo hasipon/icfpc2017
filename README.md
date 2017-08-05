@@ -31,3 +31,8 @@ curl http://13.114.38.186/logs/test
 # ruby common/server/app.rb -n パンターの数 -p ポート -m JSONが書かれたマップファイル
 ruby common/server/app.rb -n 3 -p 8080 -m common/server/sample_map
 ```
+futureしたいとき
+```sh
+# ruby common/server/app.rb -n パンターの数 -p ポート -m JSONが書かれたマップファイル
+ruby common/server/app.rb -n 3 -p 8080 -m common/server/sample_map -s '{"futures":true}'
+```
