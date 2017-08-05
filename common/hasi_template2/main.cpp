@@ -267,7 +267,7 @@ struct io_Main {
 	void run() {
 		{
 			ostringstream ss;
-			ss << "{\"me\":" << ai.Name() << "}";
+			ss << "{\"me\":\"" << ai.Name() << "\"}";
 			write(ss.str());
 		}
 		{
