@@ -80,6 +80,8 @@ class Server
       }
       socket.send_message setup
 
+      puts "setup: #{setup}"
+
       ready = socket.read_message
       if ready["futures"]
         futures[ready["ready"]] = normalize_futures(ready["futures"])
@@ -91,21 +93,23 @@ class Server
     # game play
     play_count = 0
     moves = []
+
+    # initial move is pass
     @num_of_punters.times do |idx|
       moves.push({"pass" => {"punter" => idx}})
     end
-    current_moves = []
+
     while true
       break if play_count >= @max_play_count
       sockets.each_with_index do |socket, index|
         # TODO: timeout, zombie
+        puts "send_message(play_count = #{play_count}, index = #{index})"
+        p moves
         socket.send_message({"move" => {"moves" => moves}})
-        current_moves.push socket.read_message
+        moves[index] = socket.read_message
+        score.update(moves[index])
         play_count += 1
       end
-      score.update(current_moves)
-      moves = current_moves
-      current_moves = []
     end
 
     # stop
