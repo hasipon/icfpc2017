@@ -76,6 +76,7 @@ struct AI {
 		return {};
 	}
 	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures) {
+		this->punter_id = punter_id;
 		N = 0;
 		for (auto x : g.edges) {
 			if (!idx.count(x.first)) { idx[x.first] = N++; rev.push_back(x.first); }
@@ -169,4 +170,3 @@ struct AI {
 		return oss.str();
 	}
 };
-
