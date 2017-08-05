@@ -24,7 +24,7 @@ popd
 
 pushd ./dashboard/static
 ruby ../../common/script/server_connecter.rb -p $PORT -a ../../AIs/$AI1/a.out -h localhost -n $AI1 &
-ruby ../../common/script/server_connecter.rb -p $PORT -a ../../AIs/$AI2/a.out -h localhost -n $AI2 &
+ruby ../../common/script/server_connecter.rb -p $PORT -a ../../AIs/$AI2/a.out -h localhost -n $AI2 -q &
 popd
 
 RANDOM_AI=shiota_ai
@@ -33,5 +33,5 @@ make
 popd
 pushd ./dashboard/static
 for ((i=2; i < $NUM_PENTER; i++)); do
-    ruby ../../common/script/server_connecter.rb -p $PORT -a ../../AIs/$RANDOM_AI/a.out -h localhost -n ${RANDOM_AI}-$i &
+    ruby ../../common/script/server_connecter.rb -p $PORT -a ../../AIs/$RANDOM_AI/a.out -h localhost -n ${RANDOM_AI}-$i -q &
 done
