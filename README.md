@@ -36,3 +36,12 @@ futureしたいとき
 # ruby common/server/app.rb -n パンターの数 -p ポート -m JSONが書かれたマップファイル
 ruby common/server/app.rb -n 3 -p 8080 -m common/server/sample_map -s '{"futures":true}'
 ```
+
+### オフライン篇
+```sh
+ruby common/server/app.rb --mode offline -p パンター1,パンター2,パンター3 -m JSONが書かれたマップファイル
+```
+例
+```sh
+ruby common/server/app.rb --mode offline -p AIs/hasi3/a.out,AIs/hasi2/a.out -m maps/sample.json
+```
