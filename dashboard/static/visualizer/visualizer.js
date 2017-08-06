@@ -675,7 +675,7 @@ component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
 		var tmp5 = react_ReactStringTools.createElement("input",{ onChange : $bind(this,this.onChangeIndex), value : context.currentIndex});
 		var tmp6 = " / " + context.moves.length;
 		var tmp7 = react_ReactStringTools.createElement("input",{ onChange : $bind(this,this.onChangeFps), value : context.parent.framePerSec});
-		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6," FPS:",tmp7]);
+		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6," 再生速度:",tmp7]);
 	}
 	,onChangeFps: function(e) {
 		this.props.context.parent.changeFps(e.target.value);
@@ -736,7 +736,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
 		var tmp9 = react_ReactStringTools.createElement("div",{ },this.props.context.warning == null ? "" : "エラー：" + this.props.context.warning);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 2.6");
+		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 2.7");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp6,tmp8,tmp9,tmp10]);
 	}
 	,onClick: function(e) {
@@ -776,6 +776,14 @@ core_PlayingState.prototype = {
 					break;
 				}
 			}
+			while(this.rest <= -1) {
+				this.rest += 1;
+				this.undoMove();
+				if(!this.playing) {
+					this.rest = 0;
+					break;
+				}
+			}
 		}
 	}
 	,togglePlaying: function() {
@@ -794,11 +802,14 @@ core_PlayingState.prototype = {
 		this.parent.updateUi();
 	}
 	,undoMove: function() {
-		if(this.currentIndex > 0) {
-			this.parent.game.undoMove();
-			this.currentIndex -= 1;
-			this.parent.updatePixi();
+		if(this.currentIndex <= 0) {
+			this.playing = false;
+			this.parent.updateUi();
+			return;
 		}
+		this.parent.game.undoMove();
+		this.currentIndex -= 1;
+		this.parent.updatePixi();
 	}
 	,gotoTop: function() {
 		while(this.currentIndex > 0) {
