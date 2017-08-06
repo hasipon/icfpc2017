@@ -8,6 +8,7 @@ class IO
     len = 0
     while c = self.getc
       break if c == ":"
+      raise "non-numeric character: #{c}" unless c =~ /[0-9]/
       len = len * 10 + c.to_i
     end
     raise "len shoud be a positive integer" if len == 0
@@ -130,7 +131,7 @@ class Server
     end
 
     while true
-      break if play_count > @max_play_count
+      break if play_count >= @max_play_count
 
       puts "play_count: #{play_count}"
       p moves
