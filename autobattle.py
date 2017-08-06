@@ -233,6 +233,7 @@ def calc_rating():
     for name in users.keys():
         users[name]['rating'] = rating[name]
     output['history'] = history
+    output['update'] = str(int(time.time()))
 
     print(json.dumps(output))
     with open(os.path.join(static_path, 'rating.json'), 'w') as outfile:

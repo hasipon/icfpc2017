@@ -105,7 +105,6 @@ namespace eval {
 								global::haxe.lang.Null<int> score = ((global::haxe.IMap<int, int>) (global::haxe.IMap__Statics_.__hx_cast<int, int>(((global::haxe.IMap) ((((global::haxe.IMap<int, object>) (game.scoreDictionary) ).@get(mine1.id)).@value) ))) ).@get(siteId1);
 								double aditional = ( this.table[(distance).@value] * (score).@value );
 								@value += aditional;
-								global::haxe.Log.trace.__hx_invoke2_o(default(double), (distance).toDynamic(), default(double), new global::haxe.lang.DynamicObject(new int[]{302979532, 1547539107, 1648581351, 1830310359}, new object[]{"evalFor", "eval.Evaluter", "Evaluter.hx", new global::Array<object>(new object[]{this.table[(distance).@value], (score).toDynamic()})}, new int[]{1981972957}, new double[]{((double) (57) )}));
 							}
 							
 						}

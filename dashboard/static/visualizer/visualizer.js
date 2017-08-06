@@ -858,7 +858,7 @@ core_RootContext.prototype = {
 				var data1 = JSON.parse(content);
 				if(data1.stop != null) {
 					var moves = data1.stop.moves;
-					var start = first ? moves.length - you : 0;
+					var start = 0;
 					var _g3 = start;
 					var _g2 = moves.length;
 					while(_g3 < _g2) {
@@ -872,7 +872,7 @@ core_RootContext.prototype = {
 					break;
 				} else {
 					var moves1 = data1.move.moves;
-					var start1 = first ? moves1.length - you : 0;
+					var start1 = 0;
 					var _g31 = start1;
 					var _g21 = moves1.length;
 					while(_g31 < _g21) {
