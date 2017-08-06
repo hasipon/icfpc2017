@@ -11,6 +11,7 @@ settings = {}
 timeout_setup = 10
 timeout_gameplay = 1
 mode = :online
+logfile = nil
 $debug = 0
 
 # online
@@ -27,6 +28,7 @@ opt.on('-j', '--map-json MAP_JSON') { |v| map_json = v }
 opt.on('-s', '--settings SETTINGS_JSON') { |v| settings = JSON.load(v) }
 opt.on('--timeout-setup') { |v| timeout_setup = v }
 opt.on('--timeout-gameplay') { |v| timeout_gameplay = v }
+opt.on('--logfile FILENAME') { |v| logfile = v }
 opt.on('--debug') { |v| $debug = 1 }
 
 # online
@@ -46,11 +48,14 @@ end
 map = (map_file && JSON.load(File.read(map_file))) ||
       (map_json && JSON.load(map_json))
 
+logfile = "/dev/null" unless logfile
+
 opts = {
   map: map,
   settings: settings,
   timeout_setup: timeout_setup,
-  timeout_gameplay: timeout_gameplay
+  timeout_gameplay: timeout_gameplay,
+  logfile: logfile
 }
 
 if mode == :online
