@@ -134,17 +134,9 @@ struct AI {
             mx_point = point;
             ret = Move(e);
           }
-          if (mx_point == point) {
-            const int h = get_h(dst);
-            if (mn > h) {
-              mn = h;
-              ret = Move(e);
-            }
-          }
         }
       }
     }
-
 
     if (ret.is_pass) {
       each (src, mines) {
@@ -189,12 +181,12 @@ struct AI {
   int get_point(Edge e)
   {
     UnionFind tmp = uf;
-
+    const int h = get_h(e.second);
     int sum = 0;
     uf.merge(e.first, e.second);
     each (mine, mines) {
       if (uf.is_same_set(mine, e.second)) {
-        const int c = cost[make_pair(mine, e.second)];
+        const int c = max(0, cost[make_pair(mine, e.second)] - h);
         sum += c * c;
       }
     }

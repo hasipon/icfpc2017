@@ -9,31 +9,13 @@ import pixi.core.graphics.Graphics;
 import pixi.core.sprites.Sprite;
 import pixi.core.textures.Texture;
 import pixi.plugins.app.Application;
+import tweenxcore.Tools.FloatTools;
+import tweenxcore.color.HsvColor;
 
 class PixiView extends Application 
 {
     static var WIDTH = 900;
     static var HEIGHT = 650;
-    static var COLORS = [
-        0xFF8811,
-        0x8811FF,
-        0x11FF88,
-        0x88FF11,
-        0xFF1188,
-        0x1188FF,
-        0xDD2211,
-        0x11DD22,
-        0x1122DD,
-        0x991199,
-        0x999911,
-        0x119999,
-        0x664411,
-        0x441166,
-        0x116644,
-        0x661111,
-        0x116611,
-        0x111166,
-    ];
     
     var _graphic:Graphics;
     var rootContext:RootContext;
@@ -111,18 +93,7 @@ class PixiView extends Application
             var bx = resolveX(game.sites[river.b].x);
             var by = resolveY(game.sites[river.b].y);
             
-            if (river.owner == PunterId.NotFound)
-            {
-                _graphic.lineStyle(1, 0x666666, 0.1);
-            }
-            else if (river.owner == you)
-            {
-                _graphic.lineStyle(1, 0xFF0000, 0.6);
-            }
-            else
-            {
-                _graphic.lineStyle(1, COLORS[river.owner % COLORS.length], 0.6);
-            }
+            _graphic.lineStyle(1, getColor(river.owner, you).toRgbInt(), 0.7);
             
             _graphic.moveTo(ax, ay);
             _graphic.lineTo(bx, by);
@@ -146,6 +117,39 @@ class PixiView extends Application
             _graphic.drawCircle(x, y, 10);
         }
         
+    }
+    
+    public static function getColor(punter:PunterId, you:PunterId):HsvColor
+    {
+        return if (punter == PunterId.NotFound)
+        {
+            new HsvColor(0, 0, 0.92);
+        }
+        else if (punter == you)
+        {
+            new HsvColor(0, 1, 1);
+        }
+        else
+        {
+            var value:Int = punter;
+            new HsvColor(
+                FloatTools.lerp(
+                    (value / 2.779) % 1,
+                    0.15,
+                    0.95
+                ),
+                FloatTools.lerp(
+                    (value / 4.679) % 1,
+                    0.65,
+                    0.85
+                ),
+                FloatTools.lerp(
+                    (value / 3.879) % 1,
+                    0.65,
+                    0.85
+                )
+            );
+        }
     }
     
     public static inline function lerp(rate:Float, from:Float, to:Float):Float

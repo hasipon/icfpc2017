@@ -10,6 +10,7 @@ class PlayingState
     public var parent:RootContext;
     public var moves:Array<MoveStruct>;
     public var scores:Array<ScoreStruct>;
+    public var punterNames:Array<String>;
     public var you:PunterId;
     public var currentIndex = 0;
     public var playing:Bool;
@@ -18,12 +19,14 @@ class PlayingState
         parent:RootContext, 
         you:PunterId,
         moves:Array<MoveStruct>,
-        scores:Array<ScoreStruct>
+        scores:Array<ScoreStruct>,
+        punterNames:Array<String>
     ) {
         this.parent = parent;
         this.you = you;
         this.moves = moves;
         this.scores = scores;
+        this.punterNames = punterNames;
         playing = true;
     }
     
