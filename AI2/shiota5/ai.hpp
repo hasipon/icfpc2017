@@ -6,7 +6,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "cut_info.hpp.h"
+#include "cut_info.hpp"
+#include "common.hpp"
 
 const int INF = 1<<30;
 
@@ -54,6 +55,8 @@ struct AI {
 				E1.push_back(p.first);
 			}
 		}
+
+		cut::calcMinCutForThink(G, mines);
 
 		Move r;
 		if (mode == 0) {
