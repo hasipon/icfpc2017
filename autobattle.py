@@ -31,17 +31,6 @@ def choice_participants(ais_, n):
     random.shuffle(ais)
     return ais[:n]
 
-def run_server(n, battle_map):
-    sim = subprocess.Popen([
-      '/usr/bin/ruby',
-      simulator_rb,
-      "-p", str(port),
-      "-n", str(n),
-      "-m", battle_map,
-      "-s", '{"futures": true}',
-    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return sim
-
 def prepare():
     maps = find_map_files()
     print("=== Map List ===")
@@ -74,10 +63,17 @@ def run_offline():
       '--mode', 'offline',
       '-n', str(len(participants)),
       '-m', battle_map,
-      '-s', '{"futures": true}',
       '--logfile', logname,
       '--punters', ','.join(participants)
     ]
+
+    options.append('-s')
+    options.append(random.choice((
+      '{}',
+      '{"futures": true}',
+      '{"splurges": true}',
+      '{"futures": true, "splurges": true}'
+    )))
 
     print("=== Command ===")
     print(' '.join(options))
@@ -102,49 +98,6 @@ def run_offline():
         os.rename(logname, os.path.join(log_path, logname))
     else:
         sys.exit(1)
-
-def run_old():
-    battle_map, participants = prepare()
-    print("Map",  battle_map)
-    print("Participants", participants)
-
-    print(participants)
-    logname = 'AC-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
-
-    sim = run_server(n, battle_map)
-    time.sleep(1.0)
-
-    ai_ps = []
-
-    for i in range(n):
-        options = [
-          '/usr/bin/ruby',
-          server_connector_rb ,
-          '-p', str(port),
-          '-a', participants[i],
-          '-h', 'localhost',
-          '-n', os.path.basename(participants[i]),
-        ]
-        if i == 0:
-            options.append('-l')
-            options.append(logname)
-        else:
-            options.append('-q')
-        p = subprocess.Popen(options)
-        ai_ps.append(p)
-
-    sim.wait()
-    print("sim.stdout")
-    print(sim.stdout.read().decode('utf-8'))
-    print("sim.stderr")
-    print(sim.stderr.read().decode('utf-8'))
-
-    with open(logname) as f:
-        lines = f.readlines()
-        if 2 <= len(lines):
-            scores = json.loads(lines[-1])
-            if scores and 'stop' in scores:
-                os.rename(logname, os.path.join(log_path, logname))
 
 def fix_name(name):
     if '@' not in name:
