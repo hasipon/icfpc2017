@@ -25,14 +25,22 @@ ostream& operator << (ostream& os, pair<P, Q> p)
   return os;
 }
 
-struct UnionFind {
-  vector<int> data;
-  UnionFind() {}
-  UnionFind(int n) : data(n, -1) {}
-  int root(int x) {
+struct UnionFind
+{
+  map<int, int> data;
+
+  UnionFind()
+  {
+  }
+
+  int root(int x)
+  {
+    if (data.count(x) == 0) data[x] = -1;
     return data[x] < 0 ? x : data[x] = root(data[x]);
   }
-  bool merge(int x, int y) {
+
+  bool merge(int x, int y)
+  {
     x = root(x);
     y = root(y);
     if (x == y) return false;
@@ -41,13 +49,15 @@ struct UnionFind {
     data[y] = x;
     return true;
   }
+
   bool is_same_set(int a, int b)
   {
     return root(a) == root(b);
   }
 };
 
-struct AI {
+struct AI
+{
   int punter_id;
   map<int, vector<int>> g;
   vector<int> mines;
@@ -63,12 +73,11 @@ struct AI {
 
   string Name()
   {
-    return "bfs";
+    return "bfs1";
   }
 
   void BFS(int src)
   {
-    cerr << src << endl;
     set<int> vis;
     vis.insert(src);
 
@@ -99,8 +108,6 @@ struct AI {
 
     mines = _g.mines;
     each (mine, mines) BFS(mine);
-
-    uf = UnionFind(node.size());
   }
 
   Move Think(const Moves& moves, const string& state)
@@ -149,8 +156,7 @@ struct AI {
       each (src, mines) {
         each (dst, g[src]) {
           Edge e(src, dst);
-          if (used.count(e)) continue;
-          ret = Move(e);
+          unless (used.count(e)) ret = Move(e);
         }
       }
     }
@@ -158,11 +164,11 @@ struct AI {
       each (src, node) {
         each (dst, g[src]) {
           Edge e(src, dst);
-          if (used.count(e)) continue;
-          ret = Move(e);
+          unless (used.count(e)) ret = Move(e);
         }
       }
     }
+
     assert(!ret.is_pass);
 
     uf.merge(ret.source, ret.target);
@@ -172,6 +178,7 @@ struct AI {
     connected.insert(ret.target);
     used.insert(Edge(ret.source, ret.target));
     used.insert(Edge(ret.target, ret.source));
+
     return ret;
   }
 
@@ -267,9 +274,13 @@ struct AI {
       owned.insert(Edge(b, a));
     }
 
+    // uf
     assert(sin >> header >> x);
-    uf.data.resize(x);
-    each (i, uf.data) assert(sin >> i);
+    for (int i = 0; i < x; ++i) {
+      int a, b;
+      assert(sin >> a >> b);
+      uf.data[a] = b;
+    }
 
     return ;
   }
@@ -328,7 +339,7 @@ struct AI {
     // uf
     oss << "uf: ";
     oss << uf.data.size() << ' ';
-    each (i, uf.data) oss << i << ' ';
+    each (i, uf.data) oss << i.first << ' ' << i.second << ' ';
 
     return oss.str();
   }
