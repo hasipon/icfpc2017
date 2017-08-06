@@ -90,15 +90,29 @@ def run_offline():
         for line in sim.stderr:
             print(line.decode('utf-8'), end='')
 
+        sim.wait()
+
+        print("sim.returncode", sim.returncode)
         if sim.returncode != 0:
             sys.exit(sim.returncode)
 
+        valid_log = False
         with open(logname) as f:
             lines = f.readlines()
             if 2 <= len(lines):
                 scores = json.loads(lines[-1])
                 if scores and 'stop' in scores:
-                    os.rename(logname, os.path.join(log_path, logname))
+                    valid_log = True
+                else:
+                    print("scores.stop is not exist")
+            else:
+                print("too short log")
+
+        print("valid_log", valid_log)
+        if valid_log:
+            os.rename(logname, os.path.join(log_path, logname))
+        else:
+            sys.exit(1)
 
 def run_old():
     battle_map, participants = prepare()
