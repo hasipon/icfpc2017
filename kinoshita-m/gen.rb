@@ -1,5 +1,6 @@
 require 'optparse'
 require 'set'
+require 'json'
 
 opt = OptionParser.new
 
@@ -23,7 +24,7 @@ h.times do |i|
 
     map["sites"].push({"id" => id, "x" => j, "y" => i})
 
-    if i < h - 1
+    if i < h - 1 && rand(10) != 0
       r = {
         "source" => id,
         "target" => id + h
@@ -31,7 +32,7 @@ h.times do |i|
       map["rivers"].push r
     end
 
-    if j < w - 1
+    if j < w - 1 && rand(10) != 0
       r = {
         "source" => id,
         "target" => id + 1
@@ -39,10 +40,18 @@ h.times do |i|
       map["rivers"].push r
     end
 
-    if i < h - 1 && j < w - 1 && rand(50) == 0
+    if i < h - 1 && j < w - 1 && rand(10) == 0
       r = {
         "source" => id,
         "target" => id + h + 1
+      }
+      map["rivers"].push r
+    end
+
+    if i > 0 && j < w - 1 && rand(10) == 0
+      r = {
+        "source" => id,
+        "target" => id - h + 1
       }
       map["rivers"].push r
     end
@@ -58,4 +67,4 @@ end
 
 map["mines"] = mines.to_a
 
-puts map
+puts JSON.generate(map)

@@ -28,9 +28,9 @@ opt.on('--mode MODE') { |v| mode = v.to_sym }
 opt.on('-m', '--map-file FILENAME') { |v| map_file = v }
 opt.on('-j', '--map-json MAP_JSON') { |v| map_json = v }
 opt.on('-s', '--settings SETTINGS_JSON') { |v| settings = JSON.load(v) }
-opt.on('--timeout-setup') { |v| timeout_setup = v }
-opt.on('--timeout-gameplay-warn') { |v| timeout_gameplay_warn = v }
-opt.on('--timeout-gameplay') { |v| timeout_gameplay = v }
+opt.on('--timeout-setup TIME') { |v| timeout_setup = v.to_i }
+opt.on('--timeout-gameplay-warn TIME') { |v| timeout_gameplay_warn = v.to_i }
+opt.on('--timeout-gameplay TIME') { |v| timeout_gameplay = v.to_i }
 opt.on('--logfile FILENAME') { |v| logfile = v }
 opt.on('--debug') { |v| $debug = 1 }
 

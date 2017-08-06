@@ -52,9 +52,10 @@ class Main
         );
     }
     
-    public static function onKeyDown(e:KeyboardEvent):Void
+    public static function onKeyDown(e:KeyboardEvent):Bool
     {
-        switch (e.keyCode)
+        if (e.altKey || e.ctrlKey || e.shiftKey) { return true; } 
+        return switch (e.keyCode)
         {
             case KeyboardEvent.DOM_VK_A:
                 switch (rootContext.playingState)
@@ -62,6 +63,7 @@ class Main
                     case Option.Some(s): s.gotoTop();
                     case Option.None:
                 }
+                true;
                 
             case KeyboardEvent.DOM_VK_S | KeyboardEvent.DOM_VK_LEFT:
                 switch (rootContext.playingState)
@@ -69,6 +71,7 @@ class Main
                     case Option.Some(s): s.undoMove();
                     case Option.None:
                 }
+                true;
                 
             case KeyboardEvent.DOM_VK_D:
                 switch (rootContext.playingState)
@@ -76,6 +79,7 @@ class Main
                     case Option.Some(s): s.togglePlaying();
                     case Option.None:
                 }
+                true;
                 
             case KeyboardEvent.DOM_VK_F | KeyboardEvent.DOM_VK_RIGHT:
                 switch (rootContext.playingState)
@@ -83,6 +87,7 @@ class Main
                     case Option.Some(s): s.doMove();
                     case Option.None:
                 }
+                true;
                 
             case KeyboardEvent.DOM_VK_G:
                 switch (rootContext.playingState)
@@ -90,6 +95,7 @@ class Main
                     case Option.Some(s): s.gotoEnd();
                     case Option.None:
                 }
+                true;
                 
             case KeyboardEvent.DOM_VK_Z:
                 switch (rootContext.playingState)
@@ -99,9 +105,14 @@ class Main
                 }
                 rootContext.framePerSec = -rootContext.framePerSec;
                 rootContext.updateUi();
+                true;
                 
             case KeyboardEvent.DOM_VK_L:
                 rootContext.execLog();
+                true;
+                
+            case _:
+                true;
         }
     }
 }

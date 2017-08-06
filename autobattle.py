@@ -82,15 +82,7 @@ def run_offline():
     print("=== Command ===")
     print(' '.join(options))
 
-    with subprocess.Popen(options, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sim:
-        print("=== sim.stdout ===")
-        for line in sim.stdout:
-            print(line.decode('utf-8'), end='', flush=True)
-
-        print("=== sim.stderr ===")
-        for line in sim.stderr:
-            print(line.decode('utf-8'), end='')
-
+    with subprocess.Popen(options, stderr=subprocess.STDOUT) as sim:
         sim.wait()
 
         print("sim.returncode", sim.returncode)
