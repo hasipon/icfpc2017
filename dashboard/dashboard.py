@@ -51,6 +51,14 @@ def upload_log():
         f.save(str(static_path / 'logs' / f.filename))
         return ('', 204)
 
+@app.route('/autobattle')
+def get_autobattle():
+    filepath = os.path.join(str(static_path), 'rating.json')
+    rating_json = None
+    with open(filepath) as f:
+        rating_json = json.load(f)
+    return render_template('autobattle.html', json=rating_json)
+
 def invoke_server(port, num_of_punters, map_json):
     print("invoke server")
     subprocess.run([
