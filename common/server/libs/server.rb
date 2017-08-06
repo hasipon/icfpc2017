@@ -132,11 +132,12 @@ class Server
 
     while true
       break if play_count >= @max_play_count
-
-      puts "play_count: #{play_count}"
-      p moves
-
       @punter_paths.each_with_index do |punter_path, index|
+        break if play_count >= @max_play_count
+
+        puts "play_count: #{play_count}"
+        p moves
+
         IO.popen(punter_path, "r+") do |io|
           make_handshake(io)
 
@@ -163,14 +164,14 @@ class Server
             raise "error #{e}: client #{index}"
           end
 
-          score.update(moves[index])
-          play_count += 1
-
           if index == 0
             moves_tmp = moves
             moves_tmp.each { |m| m.delete("state") }
             @logfile.puts JSON.generate({"move"=>{"moves"=>moves_tmp}})
           end
+
+          score.update(moves[index])
+          play_count += 1
         end
       end
     end
@@ -258,6 +259,7 @@ class Server
     while true
       break if play_count >= @max_play_count
       sockets.each_with_index do |socket, index|
+        break if play_count >= @max_play_count
         # TODO: zombie
         puts "send_message(play_count = #{play_count}, index = #{index})"
         p moves
