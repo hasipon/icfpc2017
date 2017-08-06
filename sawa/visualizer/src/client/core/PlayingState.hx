@@ -93,6 +93,7 @@ class PlayingState
         parent.game.undoMove();
         currentIndex -= 1;
         parent.updatePixi();
+        parent.updateUi();
     }
     
     
