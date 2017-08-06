@@ -28,6 +28,7 @@
 <tr>
   <th class="text-center">ログ</th>
   <th class="text-center">差分</th>
+  <th class="text-center">ビジュアライズ</th>
 </tr>
 
 {% for data in json.history %}
@@ -38,6 +39,7 @@
   {{name}}:{{diff}} <br>
   {% endfor %}
   </td>
+  <td class="text-center"><a href="/visualizer/index.html#http://{{request.headers.get('Host')}}/logs/{{data.log}}"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></a></td>
 </tr>
 {% endfor %}
 </table>
