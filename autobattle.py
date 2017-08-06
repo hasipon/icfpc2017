@@ -66,7 +66,7 @@ def run_offline():
     print("Map",  battle_map)
     print("Participants", participants)
 
-    logname = 'autobattle-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
+    logname = 'AB-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     options = [
       '/usr/bin/ruby',
@@ -122,7 +122,7 @@ def run_old():
     print("Participants", participants)
 
     print(participants)
-    logname = 'autobattle-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
+    logname = 'AB-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     sim = run_server(n, battle_map)
     time.sleep(1.0)
@@ -165,7 +165,8 @@ def fix_name(name):
     return name.split('@')[0]
 
 def calc_rating():
-    log_files = glob.glob(os.path.join(str(log_path), '*@[1-9]*.log'))
+    log_files = glob.glob(os.path.join(str(log_path), 'AB-*@[1-9]*.log'))
+    log_files.sort(key=lambda x: x.split('@')[1]) 
     users = {}
     rating = {}
     history = []
@@ -242,7 +243,10 @@ def calc_rating():
     output['users'] = users
     for name in users.keys():
         users[name]['rating'] = rating[name]
+
+    history.reverse()
     output['history'] = history
+
     output['update'] = str(int(time.time()))
 
     rating_json = 'rating.json'
