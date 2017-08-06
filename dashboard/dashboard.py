@@ -64,7 +64,37 @@ def get_autobattle():
     rating_json = None
     with open(filepath) as f:
         rating_json = json.load(f)
-    return render_template('autobattle.html', json=rating_json)
+
+    rating_csv = []
+    if rating_json:
+        # add header
+        header = ['#']
+        for name in rating_json['ranking']:
+            header.append(name)
+        rating_csv.append("%r,\n" % header)
+
+        rate = {}
+        for name in rating_json['ranking']:
+            rate[name] = 1500
+
+        # add initial rating
+        line = []
+        line.append(str(len(rating_csv)))
+        for name in rating_json['ranking']:
+            line.append(rate[name])
+        rating_csv.append("%r,\n" % line)
+
+        # add dynamic rating
+        for data in rating_json['history']:
+            line = []
+            line.append(str(len(rating_csv)))
+            for ranking in data['ranking']:
+                name = ranking[1]
+                rate[name] += data['diff'][name]
+            for name in rating_json['ranking']:
+                line.append(rate[name])
+            rating_csv.append("%r,\n" % line)
+    return render_template('autobattle.html', json=rating_json, csv=rating_csv)
 
 def invoke_server(port, num_of_punters, map_json):
     print("invoke server")
