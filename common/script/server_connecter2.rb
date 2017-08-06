@@ -4,10 +4,12 @@ require 'pp'
 require 'json'
 
 class Client
-  def initialize(host, port, ai_path, name, logfile)
+  def initialize(host, port, ai_path, name, logfile, verbose)
     @ai_path = ai_path
     @name = "#{name}@#{Time.now.to_i}"
     @log_file = open(logfile || logfile_name, mode = "w")
+    @verbose = verbose
+    @turn = 0
     exit 1 unless @server_socket = TCPSocket.new(host, port)
   end
 
@@ -28,7 +30,7 @@ class Client
   def next_ai_message
     log "wait ai message"
     ret = receive_messege(ai_socket)
-    log "ai -> me\n#{ret}"
+    log "ai -> me\n#{ret}" if @verbose
     ret
   end
 
@@ -36,7 +38,7 @@ class Client
     json = msg_to_json(msg)
     json['state'] = state if state
     msg = json_to_msg(json)
-    log "ai <- me\n#{msg}"
+    log "ai <- me\n#{msg}" if @verbose
     ai_socket.print(msg)
   end
 
@@ -84,7 +86,7 @@ class Client
   end
 
   def log(msg)
-    STDOUT.puts(msg)
+    STDOUT.puts("turn:#{@turn} #{msg}")
   end
 
   def response_log(msg)
@@ -110,7 +112,12 @@ class Client
     msg = next_ai_message
     json = msg_to_json(msg)
     json = {"you" =>  json["me"]}
+    log "handshaked with ai"
     send_msg_to_ai(json_to_msg(json))
+  end
+
+  def increment_turn
+    @turn = @turn+1
   end
 end
 
@@ -123,15 +130,17 @@ name = "bob"
 quiet = nil
 opt = OptionParser.new
 logfile = nil
+verbose = nil
 opt.on('-p', '--port PORT') {|v| port =  v }
 opt.on('-h', '--host HOST') {|v| host =  v }
 opt.on('-a', '--ai AI_PATH') {|v| ai_path =  v }
 opt.on('-n', '--name NAME') {|v| name =  v }
 opt.on('-q', '--quiet') {|v| quiet =  v }
 opt.on('-l', '--log LOGFILE') {|v| logfile =  v }
+opt.on('-v', '--verbose') {|v| verbose =  v }
 opt.parse(ARGV)
 
-client = Client.new(host, port.to_i, ai_path, name, logfile)
+client = Client.new(host, port.to_i, ai_path, name, logfile, verbose)
 
 # handshake
 client.handshake
@@ -150,12 +159,14 @@ client.send_msg_to_server(ready_msg)
 
 puts "ready end"
 
+client.increment_turn
 while msg = client.next_server_message
   client.handshake_with_client
   client.send_msg_to_ai msg
   msg = client.next_ai_message
   break unless msg
   client.send_msg_to_server msg
+  client.increment_turn
 end
 
 puts "logfile: #{client.logfile_name}"
