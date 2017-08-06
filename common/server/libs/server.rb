@@ -155,8 +155,10 @@ class Server
               move = io.read_message
               if move["claim"]
                 moves[index] = {"claim" => move["claim"]}
-              else
+              elsif move["pass"]
                 moves[index] = {"pass" => move["pass"]}
+              elsif move["splurge"]
+                moves[index] = {"splurge" => move["splurge"]}
               end
               states[index] = move["state"]
             end

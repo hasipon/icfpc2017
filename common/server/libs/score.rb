@@ -89,8 +89,8 @@ class Score
     punter_id = move["splurge"]["punter"]
     route = move["splurge"]["route"]
 
-    if @pass_counts[punter_id] >= route.length - 2
-      $stderr.puts "pass count is insufficient"
+    unless @pass_counts[punter_id] >= route.length - 2
+      $stderr.puts "pass count is insufficient (pass count = #{@pass_counts[punter_id]}, route = #{route})"
       return false
     end
 
