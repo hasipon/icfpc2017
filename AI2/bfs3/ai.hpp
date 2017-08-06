@@ -26,14 +26,22 @@ ostream& operator << (ostream& os, pair<P, Q> p)
   return os;
 }
 
-struct UnionFind {
-  vector<int> data;
-  UnionFind() {}
-  UnionFind(int n) : data(n, -1) {}
-  int root(int x) {
+struct UnionFind
+{
+  map<int, int> data;
+
+  UnionFind()
+  {
+  }
+
+  int root(int x)
+  {
+    if (data.count(x) == 0) data[x] = -1;
     return data[x] < 0 ? x : data[x] = root(data[x]);
   }
-  bool merge(int x, int y) {
+
+  bool merge(int x, int y)
+  {
     x = root(x);
     y = root(y);
     if (x == y) return false;
@@ -42,6 +50,7 @@ struct UnionFind {
     data[y] = x;
     return true;
   }
+
   bool is_same_set(int a, int b)
   {
     return root(a) == root(b);
@@ -109,8 +118,6 @@ struct AI {
     mines = _g.mines;
     each (mine, mines) reachables[mine] = BFS(mine);
     sort(mines.begin(), mines.end(), [&] (int a, int b) { return reachables[a] > reachables[b]; });
-
-    uf = UnionFind(node.size());
 
     mode = SCORE_GREEDY;
   }
@@ -286,9 +293,13 @@ struct AI {
       owned.insert(Edge(b, a));
     }
 
+    // uf
     assert(sin >> header >> x);
-    uf.data.resize(x);
-    each (i, uf.data) assert(sin >> i);
+    for (int i = 0; i < x; ++i) {
+      int a, b;
+      assert(sin >> a >> b);
+      uf.data[a] = b;
+    }
 
     return ;
   }
@@ -351,7 +362,7 @@ struct AI {
     // uf
     oss << "uf: ";
     oss << uf.data.size() << ' ';
-    each (i, uf.data) oss << i << ' ';
+    each (i, uf.data) oss << i.first << ' ' << i.second << ' ';
 
     return oss.str();
   }
