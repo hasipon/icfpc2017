@@ -61,8 +61,9 @@ struct AI {
 
   UnionFind uf;
 
-  string Name() {
-    return "Volvic";
+  string Name()
+  {
+    return "bfs";
   }
 
   void BFS(int src)
@@ -82,7 +83,6 @@ struct AI {
         }
       }
     }
-
     return ;
   }
 
@@ -144,7 +144,6 @@ struct AI {
         }
       }
     }
-
 
     if (ret.is_pass) {
       each (src, mines) {
