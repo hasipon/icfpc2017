@@ -160,6 +160,7 @@ struct GameState {
     sites: HashMap<SiteId, Site>,
     rivers: HashMap<RiverId, River>,
     mines: Vec<SiteId>,
+    scores: HashMap<SiteId, HashMap<SiteId, i32>>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -176,6 +177,7 @@ struct River {
     id: RiverId,
     a:SiteId, 
     b:SiteId,
+    distance_from_mine: HashMap<SiteId, i32>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -251,9 +253,21 @@ impl Move {
     }
 }
 
+impl River {
+    fn get_another(&self, site:SiteId) -> SiteId {
+        return if self.a == site {
+            self.b
+        } else {
+            assert!(self.b == site, "riverに含まれない");
+            self.a
+        }
+    }
+}
+
 impl GameState {
     fn do_move(&mut self, mov:&Move) {
         //
+        
     }
 }
 
@@ -315,6 +329,7 @@ fn setup(message:SetupMessage)->GameState
                 id: id,
                 a: river.target,
                 b: river.source,
+                distance_from_mine: HashMap::new(),
             }
         );
 
@@ -335,16 +350,97 @@ fn setup(message:SetupMessage)->GameState
         }
     }
 
+    let mut scores:HashMap<SiteId, HashMap<SiteId, i32>> = HashMap::new();
+    for mine in &message.map.mines {
+        let mut current_sites:Vec<SiteId> = Vec::new();
+        let mut local_scores = HashMap::new();
+        
+        local_scores.insert(mine.clone(), 0);
+        current_sites.push(mine.clone());
+        
+        for i in 0..sites.len() {
+            let mut next_sites:Vec<SiteId> = Vec::new();
+            for site_id in &current_sites {
+                let site = sites.get(&site_id).unwrap();
+                for river_id in &site.rivers {
+                    let river = rivers.get(&river_id).unwrap();
+                    let another_id = river.get_another(site.id);
+                    if !local_scores.contains_key(&another_id) {
+                        let d = i as i32;
+                        local_scores.insert(another_id, d * d);
+                        next_sites.push(another_id);
+                    }
+                }
+            }
+            current_sites = next_sites;
+            if current_sites.len() <= 0 {
+                break;
+            }
+        }
+
+        scores.insert(mine.clone(), local_scores);
+    }
+
     return GameState{
         punter_id: message.punter,
         punters: punters,
         sites: sites,
         rivers: rivers,
         mines: message.map.mines,
+        scores: scores,
     }
 }
 
 fn think(message:MovesMessage, state:GameState)->Value
 {
+    let mut distances:HashMap<PunterId, HashMap<GroupId, HashMap<GroupId, i32>>> = HashMap::new();
+    for punter in &state.punters {
+        let mut groups = &punter.groups;
+        let mut punter_distances = HashMap::new();
+
+        for mine in &state.mines {
+            let mut current_groups:Vec<GroupId> = Vec::new();
+            let mut mine_distances = HashMap::new();
+            let mine_group_id = state.sites.get(&mine).unwrap().group_ids.get(&punter.id).unwrap();
+
+            mine_distances.insert(mine_group_id, 0);
+            current_groups.push(mine_group_id.clone());
+            
+            for i in 0..state.sites.len() {
+                let mut next_groups:Vec<GroupId> = Vec::new();
+
+                for group_id in &current_groups {
+                    let group = groups.get(&group_id).unwrap();
+                    for site_id in &group.sites {
+                        let site = state.sites.get(&site_id).unwrap();
+
+                        for river_id in &site.rivers {
+                            let river = state.rivers.get(&river_id).unwrap();
+                            let another_id = river.get_another(site.id);
+                            let another = state.sites.get(&another_id).unwrap();                            
+                            let another_group_id = another.group_ids.get(&punter.id).unwrap();
+
+                            if !mine_distances.contains_key(another_group_id) {
+                                let d = i as i32;
+                                mine_distances.insert(another_group_id, d);
+                                next_groups.push(another_group_id.clone());
+                            }
+                        }
+                    }
+                }
+                current_groups = current_groups;
+                if current_groups.len() <= 0 {
+                    break;
+                }
+            }
+
+            punter_distances.insert(mine.clone(), mine_distances);
+        }
+    }
+
     return Move::Pass(state.punter_id).to_message(state);
+}
+
+fn think_random() {
+
 }
