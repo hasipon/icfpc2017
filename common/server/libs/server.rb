@@ -141,6 +141,7 @@ class Server
         IO.popen(punter_path, "r+") do |io|
           make_handshake(io)
 
+          message = nil
           begin
             Timeout.timeout(@timeout_gameplay) do
               message = {
