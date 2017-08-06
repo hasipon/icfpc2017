@@ -219,8 +219,8 @@ def calc_rating():
                 ei = 1.0 / (1.0 + 10 ** ((rj - ri) / 400.0))
                 ej = 1.0 / (1.0 + 10 ** ((ri - rj) / 400.0))
 
-                diff[i] += 16 * (1 - ei)
-                diff[j] += 16 * (0 - ej)
+                diff[i] += int(16 * (1 - ei))
+                diff[j] += int(16 * (0 - ej))
 
         for i in range(n):
             name = ranking[i][1]
@@ -236,7 +236,7 @@ def calc_rating():
         his['diff'] = {}
 
         for i in range(n):
-            his['diff'][names[i]] = diff[i]
+            his['diff'][ranking[i][1]] = diff[i]
         history.append(his)
 
     output = {}
