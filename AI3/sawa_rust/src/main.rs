@@ -114,9 +114,16 @@ struct MovesMessage {
 }
 #[derive(Serialize, Deserialize)]
 struct MoveMessage {
+    #[serde(skip_serializing_if="Option::is_none")]
     claim : Option<ClaimMessage>,
+
+    #[serde(skip_serializing_if="Option::is_none")]
     pass : Option<PassMessage>, 
+    
+    #[serde(skip_serializing_if="Option::is_none")]
     splurge : Option<SplugeMessage>,
+
+    #[serde(skip_serializing_if="Option::is_none")]
     state : Option<GameState>,
 }
 #[derive(Serialize, Deserialize)]
