@@ -598,6 +598,16 @@ Std.__name__ = true;
 Std.string = function(s) {
 	return js_Boot.__string_rec(s,"");
 };
+Std.parseInt = function(x) {
+	var v = parseInt(x,10);
+	if(v == 0 && (HxOverrides.cca(x,1) == 120 || HxOverrides.cca(x,1) == 88)) {
+		v = parseInt(x);
+	}
+	if(isNaN(v)) {
+		return null;
+	}
+	return v;
+};
 var StringTools = function() { };
 StringTools.__name__ = true;
 StringTools.hex = function(n,digits) {
@@ -662,8 +672,10 @@ component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
 		var tmp2 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onTogglePlayingClick)},context.playing ? "■" : "▶");
 		var tmp3 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onDoClick)},">");
 		var tmp4 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onGotoEndClick)},">|");
-		var tmp5 = react_ReactStringTools.createElement("input",{ onChange : $bind(this,this.onChangeFps), value : context.parent.framePerSec});
-		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2,tmp3,tmp4," FPS:",tmp5]);
+		var tmp5 = react_ReactStringTools.createElement("input",{ onChange : $bind(this,this.onChangeIndex), value : context.currentIndex});
+		var tmp6 = " / " + context.moves.length;
+		var tmp7 = react_ReactStringTools.createElement("input",{ onChange : $bind(this,this.onChangeFps), value : context.parent.framePerSec});
+		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6," FPS:",tmp7]);
 	}
 	,onChangeFps: function(e) {
 		this.props.context.parent.changeFps(e.target.value);
@@ -673,6 +685,9 @@ component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
 	}
 	,onGotoEndClick: function() {
 		this.props.context.gotoEnd();
+	}
+	,onChangeIndex: function() {
+		this.props.context.changeIndex(Std.parseInt(e.target.value));
 	}
 	,onTogglePlayingClick: function() {
 		this.props.context.togglePlaying();
@@ -721,7 +736,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
 		var tmp9 = react_ReactStringTools.createElement("div",{ },this.props.context.warning == null ? "" : "エラー：" + this.props.context.warning);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 2.3");
+		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 2.6");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp6,tmp8,tmp9,tmp10]);
 	}
 	,onClick: function(e) {
@@ -776,6 +791,7 @@ core_PlayingState.prototype = {
 		this.parent.game.addMove(this.moves[this.currentIndex]);
 		this.currentIndex += 1;
 		this.parent.updatePixi();
+		this.parent.updateUi();
 	}
 	,undoMove: function() {
 		if(this.currentIndex > 0) {
@@ -802,6 +818,10 @@ core_PlayingState.prototype = {
 			this.currentIndex += 1;
 			this.parent.updatePixi();
 		}
+	}
+	,changeIndex: function(index) {
+		this.currentIndex = index;
+		this.parent.updateUi();
 	}
 	,__class__: core_PlayingState
 };

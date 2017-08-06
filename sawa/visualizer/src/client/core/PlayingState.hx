@@ -68,6 +68,7 @@ class PlayingState
         parent.game.addMove(moves[currentIndex]);
         currentIndex += 1;
         parent.updatePixi();
+        parent.updateUi();
     }
     
     public function undoMove():Void
@@ -107,5 +108,11 @@ class PlayingState
             currentIndex += 1;
             parent.updatePixi();
         }
+    }
+    
+    public function changeIndex(index:Int):Void
+    {
+        currentIndex = index;
+        parent.updateUi();
     }
 }
