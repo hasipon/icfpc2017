@@ -150,7 +150,7 @@ struct AI {
       each (src, mines) {
         each (dst, g[src]) {
           Edge e(src, dst);
-          unless (used.count(e)) continue;
+          if (used.count(e)) continue;
           ret = Move(e);
         }
       }
@@ -159,7 +159,7 @@ struct AI {
       each (src, node) {
         each (dst, g[src]) {
           Edge e(src, dst);
-          unless (used.count(e)) continue;
+          if (used.count(e)) continue;
           ret = Move(e);
         }
       }

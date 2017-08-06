@@ -138,12 +138,11 @@ struct AI {
       }
     }
 
-
     if (ret.is_pass) {
       each (src, mines) {
         each (dst, g[src]) {
           Edge e(src, dst);
-          unless (used.count(e)) continue;
+          if (used.count(e)) continue;
           ret = Move(e);
         }
       }
@@ -152,7 +151,7 @@ struct AI {
       each (src, node) {
         each (dst, g[src]) {
           Edge e(src, dst);
-          unless (used.count(e)) continue;
+          if (used.count(e)) continue;
           ret = Move(e);
         }
       }
@@ -187,7 +186,7 @@ struct AI {
     uf.merge(e.first, e.second);
     each (mine, mines) {
       if (uf.is_same_set(mine, e.second)) {
-        const int c = cost[make_pair(mine, e.second)] - h;
+        const int c = max(0, cost[make_pair(mine, e.second)] - h);
         sum += c * c;
       }
     }
