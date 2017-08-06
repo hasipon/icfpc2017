@@ -15,6 +15,7 @@ maps_path = os.path.expanduser('~/LOCAL/autobattle/maps')
 simulator_rb = os.path.expanduser('~/LOCAL/autobattle/server/app.rb')
 server_connector_rb = os.path.expanduser('~/LOCAL/autobattle/server_connecter2.rb')
 log_path = os.path.expanduser('~/LOCAL/dashboard/dashboard/static/logs')
+static_path = os.path.expanduser('~/LOCAL/dashboard/dashboard/static')
 
 def find_map_files():
     return glob.glob(os.path.join(maps_path, '*.json'))
@@ -234,6 +235,8 @@ def calc_rating():
     output['history'] = history
 
     print(json.dumps(output))
+    with open(os.path.join(static_path, 'rating.json'), 'w') as outfile:
+        json.dump(output, outfile)
 
 def main():
     if sys.argv[1] == 'run':
