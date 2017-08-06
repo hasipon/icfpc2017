@@ -204,8 +204,8 @@ struct AI {
     each (mine, mines) {
       if (uf.is_same_set(mine, e.second)) {
         const pair<int, int> key = make_pair(mine, e.second);
-        const int c = max(0, cost[key] - h);
-        sum += c * c;
+        const int c = cost[key];
+        sum += c * c - h;
       }
     }
 
