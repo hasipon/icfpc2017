@@ -167,7 +167,7 @@ struct GameState {
 struct Site {
     id: SiteId,
     is_mine: bool,
-    rivers: Vec<RiverId>,
+    rivers: HashMap<SiteId, RiverId>,
     group_ids: HashMap<PunterId, GroupId>,
 }
 
@@ -192,7 +192,22 @@ struct Group {
     has_mine: bool,
     sites: HashSet<SiteId>,
 }
+impl Group {
+    fn merge(mut self, smaller:Group, punter:&Punter, state:&mut GameState)->Group {
+        if self.sites.len() < smaller.sites.len() {
+            return smaller.merge(self, punter, state);
+        }
 
+        self.has_mine = self.has_mine || smaller.has_mine;
+        for site_id in smaller.sites {
+            let mut site = state.sites.get_mut(&site_id).unwrap();
+            self.sites.insert(site_id);
+            site.group_ids.insert(punter.id, self.id);
+        }
+
+        return self;
+    }
+}
 impl Move {
     fn from_value(mut value:Value) -> Move
     {
@@ -312,7 +327,7 @@ fn setup(message:SetupMessage)->GameState
             Site{
                 id: id,
                 is_mine: false,
-                rivers: Vec::new(),
+                rivers: HashMap::new(),
                 group_ids: group_ids,
             }
         );
@@ -333,8 +348,8 @@ fn setup(message:SetupMessage)->GameState
             }
         );
 
-        sites.get_mut(&river.target).unwrap().rivers.push(id);
-        sites.get_mut(&river.source).unwrap().rivers.push(id);
+        sites.get_mut(&river.target).unwrap().rivers.insert(river.source, id);
+        sites.get_mut(&river.source).unwrap().rivers.insert(river.target, id);
         
         index += 1;
     }
@@ -362,13 +377,11 @@ fn setup(message:SetupMessage)->GameState
             let mut next_sites:Vec<SiteId> = Vec::new();
             for site_id in &current_sites {
                 let site = sites.get(&site_id).unwrap();
-                for river_id in &site.rivers {
-                    let river = rivers.get(&river_id).unwrap();
-                    let another_id = river.get_another(site.id);
+                for (another_id, _) in &site.rivers {
                     if !local_scores.contains_key(&another_id) {
                         let d = i as i32;
-                        local_scores.insert(another_id, d * d);
-                        next_sites.push(another_id);
+                        local_scores.insert(another_id.clone(), d * d);
+                        next_sites.push(another_id.clone());
                     }
                 }
             }
@@ -414,9 +427,7 @@ fn think(message:MovesMessage, state:GameState)->Value
                     for site_id in &group.sites {
                         let site = state.sites.get(&site_id).unwrap();
 
-                        for river_id in &site.rivers {
-                            let river = state.rivers.get(&river_id).unwrap();
-                            let another_id = river.get_another(site.id);
+                        for (another_id, _) in &site.rivers {
                             let another = state.sites.get(&another_id).unwrap();                            
                             let another_group_id = another.group_ids.get(&punter.id).unwrap();
 
