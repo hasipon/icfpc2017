@@ -141,6 +141,7 @@ class Server
         IO.popen(punter_path, "r+") do |io|
           make_handshake(io)
 
+          message = nil
           begin
             Timeout.timeout(@timeout_gameplay) do
               message = {
@@ -159,7 +160,7 @@ class Server
               states[index] = move["state"]
             end
           rescue => e
-            raise "error #{e}: client #{index}/#{punter_path}, message = #{message}"
+            raise "error #{e}: client #{index} = #{punter_path}, message = #{message}"
           end
 
           if index == 0

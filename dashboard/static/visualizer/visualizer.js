@@ -105,6 +105,7 @@ Main.main = function() {
 	Main.rootContext.updatePixi = ($_=Main.rootPixi,$bind($_,$_.update));
 	Main.render();
 	Main.update();
+	window.document.onkeydown = Main.onKeyDown;
 };
 Main.update = function() {
 	Main.rootContext.onFrame(15);
@@ -112,6 +113,70 @@ Main.update = function() {
 };
 Main.render = function() {
 	ReactDOM.render(React.createElement(component_root_RootView,{ context : Main.rootContext}),window.document.getElementById("control"));
+};
+Main.onKeyDown = function(e) {
+	var _g = e.keyCode;
+	switch(_g) {
+	case 65:
+		var _g1 = Main.rootContext.playingState;
+		switch(_g1[1]) {
+		case 0:
+			var s = _g1[2];
+			s.gotoTop();
+			break;
+		case 1:
+			break;
+		}
+		break;
+	case 68:
+		var _g2 = Main.rootContext.playingState;
+		switch(_g2[1]) {
+		case 0:
+			var s1 = _g2[2];
+			s1.togglePlaying();
+			break;
+		case 1:
+			break;
+		}
+		break;
+	case 70:
+		var _g3 = Main.rootContext.playingState;
+		switch(_g3[1]) {
+		case 0:
+			var s2 = _g3[2];
+			s2.doMove();
+			break;
+		case 1:
+			break;
+		}
+		break;
+	case 71:
+		var _g4 = Main.rootContext.playingState;
+		switch(_g4[1]) {
+		case 0:
+			var s3 = _g4[2];
+			s3.gotoEnd();
+			break;
+		case 1:
+			break;
+		}
+		break;
+	case 83:
+		var _g5 = Main.rootContext.playingState;
+		switch(_g5[1]) {
+		case 0:
+			var s4 = _g5[2];
+			s4.undoMove();
+			break;
+		case 1:
+			break;
+		}
+		break;
+	case 90:
+		Main.rootContext.framePerSec = -Main.rootContext.framePerSec;
+		Main.rootContext.updateUi();
+		break;
+	}
 };
 Math.__name__ = true;
 var Perf = $hx_exports["Perf"] = function(pos,offset) {
@@ -810,6 +875,7 @@ core_PlayingState.prototype = {
 		this.parent.game.undoMove();
 		this.currentIndex -= 1;
 		this.parent.updatePixi();
+		this.parent.updateUi();
 	}
 	,gotoTop: function() {
 		while(this.currentIndex > 0) {
@@ -885,7 +951,9 @@ core_RootContext.prototype = {
 			while(_g < _g1.length) {
 				var content = _g1[_g];
 				++_g;
-				console.log(content);
+				if(content == "") {
+					continue;
+				}
 				var data1 = JSON.parse(content);
 				if(data1.stop != null) {
 					var moves = data1.stop.moves;
@@ -916,7 +984,14 @@ core_RootContext.prototype = {
 				}
 			}
 			if(scores == null) {
-				throw new js__$Boot_HaxeError("stopがありません");
+				var _g4 = [];
+				var _g22 = 0;
+				var _g11 = setupData.punters;
+				while(_g22 < _g11) {
+					var punter = _g22++;
+					_g4.push({ punter : game__$PunterId_PunterId_$Impl_$._new(punter), score : -1});
+				}
+				scores = _g4;
 			}
 			this.playingState = haxe_ds_Option.Some(new core_PlayingState(this,you,allMoves,scores,punterNames));
 		} catch( e ) {
