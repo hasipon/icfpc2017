@@ -813,7 +813,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
 		var tmp9 = react_ReactStringTools.createElement("div",{ },this.props.context.warning == null ? "" : "エラー：" + this.props.context.warning);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 3.1");
+		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 3.2");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp6,tmp8,tmp9,tmp10]);
 	}
 	,onClick: function(e) {
