@@ -45,6 +45,7 @@ class Server
     @settings = opts[:settings]
     @timeout_setup = opts[:timeout_setup]
     @timeout_gameplay = opts[:timeout_gameplay]
+    @logfile = File.open(opts[:logfile], 'w')
 
     # online
     @num_of_punters = opts[:num_of_punters]
@@ -85,16 +86,18 @@ class Server
     states = Array.new(@num_of_punters)
 
     # setup
+    setup = {
+      "punters" => @num_of_punters,
+      "map" => @map,
+      "settings" => @settings
+    }
+    punter_names = []
     @punter_paths.each_with_index do |punter_path, index|
       IO.popen(punter_path, "r+") do |io|
-        make_handshake(io)
+        punter_names << make_handshake(io)
 
-        setup = {
-          "punter" => index,
-          "punters" => @num_of_punters,
-          "map" => @map,
-          "settings" => @settings
-        }
+        setup["punter"] = index
+
         io.send_message setup
         ready = io.read_message
 
@@ -104,6 +107,10 @@ class Server
         states[index] = ready["state"]
       end
     end
+    setup["punter"] = 0
+    setup["punter_names"] = punter_names
+    @logfile.puts(JSON.generate({"you" => punter_names[0]}))
+    @logfile.puts(JSON.generate(setup))
 
     score = Score.new(@map, @num_of_punters, futures)
 
@@ -123,7 +130,7 @@ class Server
           make_handshake(io)
 
           begin
-            timeout(@timeout_gameplay) do
+            Timeout.timeout(@timeout_gameplay) do
               message = {
                 "move" => {
                   "moves" => moves
@@ -140,6 +147,8 @@ class Server
 
           score.update(moves[index])
           play_count += 1
+
+          @logfile.puts(JSON.generate(moves)) if index == 0
         end
       end
     end
@@ -152,6 +161,7 @@ class Server
       }
     }
     p stop
+    @logfile.puts(JSON.generate(stop))
     @punter_paths.each_with_index do |punter_path, index|
       IO.popen(punter_path, "r+") do |io|
         make_handshake(io)
@@ -160,6 +170,8 @@ class Server
         io.send_message stop
       end
     end
+
+    @logfile.close
   end
 
   def run_game_once
@@ -223,7 +235,7 @@ class Server
         p moves
 
         begin
-          timeout(@timeout_gameplay) do
+          Timeout.timeout(@timeout_gameplay) do
             socket.send_message({"move" => {"moves" => moves}})
             moves[index] = socket.read_message
           end

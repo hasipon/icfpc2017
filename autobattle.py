@@ -9,11 +9,11 @@ import glob
 import time
 
 port = 9999
-ai_bin_path = '/home/ubuntu/LOCAL/autobattle/ai'
-maps_path = '/home/ubuntu/LOCAL/autobattle/maps'
-simulator_rb = '/home/ubuntu/LOCAL/autobattle/server/app.rb'
-server_connector_rb = '/home/ubuntu/LOCAL/autobattle/server_connecter2.rb'
-log_path = '/home/ubuntu/LOCAL/dashboard/dashboard/static/logs'
+ai_bin_path = os.path.expanduser('~/LOCAL/autobattle/ai')
+maps_path = os.path.expanduser('~/LOCAL/autobattle/maps')
+simulator_rb = os.path.expanduser('~/LOCAL/autobattle/server/app.rb')
+server_connector_rb = os.path.expanduser('~/LOCAL/autobattle/server_connecter2.rb')
+log_path = os.path.expanduser('~/LOCAL/dashboard/dashboard/static/logs')
 
 def find_map_files():
     return glob.glob(os.path.join(maps_path, '*.json'))
@@ -40,7 +40,7 @@ def run_server(n, battle_map):
     ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return sim
 
-def run():
+def prepare():
     maps = find_map_files()
     print("=== Map List ===")
     for m in maps:
@@ -56,7 +56,36 @@ def run():
     n = random.randint(2, len(ais))
     battle_map = choice_map(maps)
     participants = choice_participants(ais, n)
+    return battle_map, participants
 
+def run_offline():
+    battle_map, participants = prepare()
+    print("Map",  battle_map)
+    print("Participants", participants)
+
+    options = [
+      '/usr/bin/ruby',
+      simulator_rb,
+      '--mode', 'offline'
+      '-n', str(len(participants)),
+      '-m', battle_map,
+      '-s', '{"futures": true}',
+      '--punters'
+    ]
+
+    for ai in participants:
+        options.append(ai)
+
+    sim = subprocess.Popen(options, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    sim.wait()
+
+    print("sim.stdout")
+    print(sim.stdout.read().decode('utf-8'))
+    print("sim.stderr")
+    print(sim.stderr.read().decode('utf-8'))
+
+def run():
+    battle_map, participants = prepare()
     print("Map",  battle_map)
     print("Participants", participants)
 
@@ -119,7 +148,7 @@ def calc_rating():
 
         if not info or not scores:
             continue
-        if 'punter_names' not in info:
+        if 'punter_names' not in info or 'stop' not in scores:
             continue
 
         ranking = []
@@ -153,11 +182,11 @@ def calc_rating():
         for i in range(n):
             rating[names[i]] += diff[i]
 
-    print(rating)
+    print(json.dumps(rating))
 
 def main():
     if sys.argv[1] == 'run':
-        run()
+        run_offline()
     if sys.argv[1] == 'eternal-run':
         while True:
             run()
