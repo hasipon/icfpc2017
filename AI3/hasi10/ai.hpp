@@ -275,7 +275,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi5";
+		return "hasi10";
 	}
 	int PunterId() {
 		return punter_id;
