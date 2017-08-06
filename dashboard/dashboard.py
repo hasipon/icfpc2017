@@ -85,7 +85,7 @@ def get_autobattle():
         rating_csv.append("%r,\n" % line)
 
         # add dynamic rating
-        for data in rating_json['history']:
+        for data in reversed(rating_json['history']):
             line = []
             line.append(str(len(rating_csv)))
             for ranking in data['ranking']:
