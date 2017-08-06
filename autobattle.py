@@ -213,9 +213,14 @@ def calc_rating():
             for j in range(i + 1, n):
                 if ranking[i][0] == ranking[j][0]:
                     continue
-                rd = int((rating[names[j]] - rating[names[i]]) * 0.04)
-                diff[i] += 16 + rd
-                diff[j] -= 16 + rd
+                ri = rating[names[i]]
+                rj = rating[names[j]]
+
+                ei = 1 / (1 + 10 ** ((rj - ri) / 400))
+                ej = 1 / (1 + 10 ** ((ri - rj) / 400))
+
+                diff[i] += 16 * (1 - ei)
+                diff[j] += 16 + (0 - ej)
 
         for i in range(n):
             rating[names[i]] += diff[i]
