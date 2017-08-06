@@ -66,7 +66,7 @@ def run_offline():
     print("Map",  battle_map)
     print("Participants", participants)
 
-    logname = 'autobattle-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
+    logname = 'AB-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     options = [
       '/usr/bin/ruby',
@@ -85,7 +85,7 @@ def run_offline():
     with subprocess.Popen(options, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sim:
         print("=== sim.stdout ===")
         for line in sim.stdout:
-            print(line.decode('utf-8'), end='')
+            print(line.decode('utf-8'), end='', flush=True)
 
         print("=== sim.stderr ===")
         for line in sim.stderr:
@@ -111,6 +111,7 @@ def run_offline():
 
         print("valid_log", valid_log)
         if valid_log:
+            os.chmod(logname, 0o777)
             os.rename(logname, os.path.join(log_path, logname))
         else:
             sys.exit(1)
@@ -121,7 +122,7 @@ def run_old():
     print("Participants", participants)
 
     print(participants)
-    logname = 'autobattle-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
+    logname = 'AB-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     sim = run_server(n, battle_map)
     time.sleep(1.0)
@@ -164,7 +165,8 @@ def fix_name(name):
     return name.split('@')[0]
 
 def calc_rating():
-    log_files = glob.glob(os.path.join(str(log_path), '*@[1-9]*.log'))
+    log_files = glob.glob(os.path.join(str(log_path), 'AB-*@[1-9]*.log'))
+    log_files.sort(key=lambda x: x.split('@')[1]) 
     users = {}
     rating = {}
     history = []
@@ -211,9 +213,14 @@ def calc_rating():
             for j in range(i + 1, n):
                 if ranking[i][0] == ranking[j][0]:
                     continue
-                rd = (rating[names[j]] - rating[names[i]]) * 0.04
-                diff[i] += 16 + rd
-                diff[j] -= 16 + rd
+                ri = rating[names[i]]
+                rj = rating[names[j]]
+
+                ei = 1 / (1 + 10 ** ((rj - ri) / 400))
+                ej = 1 / (1 + 10 ** ((ri - rj) / 400))
+
+                diff[i] += 16 * (1 - ei)
+                diff[j] += 16 + (0 - ej)
 
         for i in range(n):
             rating[names[i]] += diff[i]
@@ -221,7 +228,8 @@ def calc_rating():
 
         users[ranking[0][1]]['win'] += 1
         his = {}
-        his['log'] = log
+        his['log'] = os.path.basename(log)
+        his['ranking'] = ranking
         his['diff'] = {}
 
         for i in range(n):
@@ -229,15 +237,30 @@ def calc_rating():
         history.append(his)
 
     output = {}
+    output['ranking'] = []
+
+    rank = []
+    for name in users.keys():
+        rank.append((rating[name], name))
+    rank.sort(reverse=True)
+    for r in rank:
+        output['ranking'].append(r[1])
+
     output['users'] = users
     for name in users.keys():
         users[name]['rating'] = rating[name]
+
+    history.reverse()
     output['history'] = history
+
     output['update'] = str(int(time.time()))
 
+    rating_json = 'rating.json'
     print(json.dumps(output))
-    with open(os.path.join(static_path, 'rating.json'), 'w') as outfile:
+    with open(rating_json, 'w') as outfile:
         json.dump(output, outfile)
+    os.chmod(rating_json, 0o777)
+    os.rename(rating_json, os.path.join(static_path, rating_json))
 
 def main():
     if sys.argv[1] == 'run':

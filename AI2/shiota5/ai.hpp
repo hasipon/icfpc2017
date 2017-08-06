@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "cut_info.hpp.h"
+
 const int INF = 1<<30;
 
 struct UnionFind {
@@ -256,6 +258,9 @@ struct AI {
 			mines.push_back(idx[x]);
 		}
 		M = mines.size();
+
+		cut::calcMinCut(G, mines);
+
 		D.resize(M, vector<int>(N, INF));
 		for (int i = 0; i < M; ++ i) {
 			queue<int> Q;
@@ -273,7 +278,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi5";
+		return "shiota5";
 	}
 	int PunterId() {
 		return punter_id;

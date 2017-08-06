@@ -26,6 +26,10 @@ struct UnionFind {
 	}
 };
 
+enum ParamHeader {
+	DST0,
+};
+
 struct AI {
 	int punter_id, N, M;
 	vector<int> mines;
@@ -134,17 +138,28 @@ struct AI {
 				}
 			}
 			int max_gain = -1, cnt = 1, dst = -1;
-			for (int i = 0; i < N; ++ i) {
-				if (gain[i] > max_gain || (gain[i] == max_gain && rand() % ++cnt == 0)) {
-					dst = i;
-					if (gain[i] > max_gain) cnt = 1;
-					max_gain = gain[i];
+			if (param.size() >= 1 && param[0] == DST0) {
+				int max_gain0 = param[1];
+				int dst0 = param[2];
+				if (gain[dst0] == max_gain0) {
+					max_gain = max_gain0;
+					dst = dst0;
+				}
+			}
+			if (max_gain == -1) {
+				for (int i = 0; i < N; ++ i) {
+					if (gain[i] > max_gain || (gain[i] == max_gain && rand() % ++cnt == 0)) {
+						dst = i;
+						if (gain[i] > max_gain) cnt = 1;
+						max_gain = gain[i];
+					}
 				}
 			}
 			cerr << "max_gain = " << max_gain << endl;
 			if (max_gain <= 0) {
 				mode = 2;
 			} else {
+				param = {DST0, max_gain, dst};
 				int src = base[dst];
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
@@ -273,7 +288,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi5";
+		return "hasi6";
 	}
 	int PunterId() {
 		return punter_id;
