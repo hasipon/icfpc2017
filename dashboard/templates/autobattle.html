@@ -27,6 +27,7 @@
 <table class="table table-condensed table-striped">
 <tr>
   <th class="text-center">ログ</th>
+  <th class="text-center">スコア</th>
   <th class="text-center">差分</th>
   <th class="text-center">ビジュアライズ</th>
 </tr>
@@ -35,8 +36,15 @@
 <tr>
   <td class="text-center"><a href="/logs/{{data.log}}">{{data.log}}</a></td>
   <td class="text-center">
-  {% for name, diff in data.diff.items() %}
-  {{name}}:{{diff}} <br>
+  {% for ranking in data.ranking %}
+  {{ranking[1]}}:{{ranking[0]}} <br>
+  {% endfor %}
+  </td>
+
+  <td class="text-center">
+  {% for ranking in data.ranking %}
+  {% set name = ranking[1] %}
+  {{name}}:{{data.diff[name]}} <br>
   {% endfor %}
   </td>
   <td class="text-center"><a href="/visualizer/index.html#http://{{request.headers.get('Host')}}/logs/{{data.log}}"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></a></td>

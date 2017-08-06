@@ -47,6 +47,13 @@ class PlayingStateView extends ReactComponentOfProps<PlayingStateProps>
                     },
                     ">|"
                 ), 
+                "input".createElement(
+                    {
+                        onChange: onChangeIndex,
+                        value: context.currentIndex,
+                    }
+                ), 
+                " / " + context.moves.length, 
                 " FPS:",
                 "input".createElement(
                     {
@@ -72,7 +79,11 @@ class PlayingStateView extends ReactComponentOfProps<PlayingStateProps>
     {
         props.context.gotoEnd();
     }
-    
+    function onChangeIndex()
+    {
+        props.context.changeIndex(Std.parseInt(untyped e.target.value));
+    }
+
     private function onTogglePlayingClick()
     {
         props.context.togglePlaying();
