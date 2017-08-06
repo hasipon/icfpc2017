@@ -7,6 +7,7 @@ import pathlib
 import os
 import glob
 import time
+from subprocess import CalledProcessError
 
 port = 9999
 ai_bin_path = os.path.expanduser('~/LOCAL/autobattle/ai')
@@ -60,31 +61,46 @@ def prepare():
 
 def run_offline():
     battle_map, participants = prepare()
+    print("=== Config ===")
     print("Map",  battle_map)
     print("Participants", participants)
+
+    logname = 'autobattle-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     options = [
       '/usr/bin/ruby',
       simulator_rb,
-      '--mode', 'offline'
+      '--mode', 'offline',
       '-n', str(len(participants)),
       '-m', battle_map,
       '-s', '{"futures": true}',
-      '--punters'
+      '--logfile', logname,
+      '--punters', ','.join(participants)
     ]
 
-    for ai in participants:
-        options.append(ai)
+    print("=== Command ===")
+    print(' '.join(options))
 
-    sim = subprocess.Popen(options, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    sim.wait()
+    with subprocess.Popen(options, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sim:
+        print("=== sim.stdout ===")
+        for line in sim.stdout:
+            print(line.decode('utf-8'), end='')
 
-    print("sim.stdout")
-    print(sim.stdout.read().decode('utf-8'))
-    print("sim.stderr")
-    print(sim.stderr.read().decode('utf-8'))
+        print("=== sim.stderr ===")
+        for line in sim.stderr:
+            print(line.decode('utf-8'), end='')
 
-def run():
+        if sim.returncode != 0:
+            sys.exit(sim.returncode)
+
+        with open(logname) as f:
+            lines = f.readlines()
+            if 2 <= len(lines):
+                scores = json.loads(lines[-1])
+                if scores and 'stop' in scores:
+                    os.rename(logname, os.path.join(log_path, logname))
+
+def run_old():
     battle_map, participants = prepare()
     print("Map",  battle_map)
     print("Participants", participants)
@@ -134,7 +150,9 @@ def fix_name(name):
 
 def calc_rating():
     log_files = glob.glob(os.path.join(str(log_path), '*@[1-9]*.log'))
+    users = {}
     rating = {}
+    history = []
 
     for log in log_files:
         info = None
@@ -160,6 +178,9 @@ def calc_rating():
         for name in names:
             if name not in rating:
                 rating[name] = 1500
+                users[name] = {}
+                users[name]['battle'] = 0
+                users[name]['win'] = 0
 
         for kv in scores['stop']['scores']:
             name = names[kv['punter']]
@@ -181,8 +202,24 @@ def calc_rating():
 
         for i in range(n):
             rating[names[i]] += diff[i]
+            users[names[i]]['battle'] += 1
 
-    print(json.dumps(rating))
+        users[ranking[0][1]]['win'] += 1
+        his = {}
+        his['log'] = log
+        his['diff'] = {}
+
+        for i in range(n):
+            his['diff'][names[i]] = diff[i]
+        history.append(his)
+
+    output = {}
+    output['users'] = users
+    for name in users.keys():
+        users[name]['rating'] = rating[name]
+    output['history'] = history
+
+    print(json.dumps(output))
 
 def main():
     if sys.argv[1] == 'run':
