@@ -106,6 +106,14 @@ class RootContext
             Browser.console.log(data);
             var handshake = Json.parse(data[0]);
             var setupData:SetupStruct = Json.parse(data[1]);
+            var punterNames = if (setupData.punter_names == null)
+            {
+                [];
+            }
+            else
+            {
+                setupData.punter_names;
+            }
             
             game.setup(setupData);
             var you = setupData.punter;
@@ -145,7 +153,7 @@ class RootContext
                 throw "stopがありません";
             }
             
-            playingState = Option.Some(new PlayingState(this, you, allMoves, scores));
+            playingState = Option.Some(new PlayingState(this, you, allMoves, scores, punterNames));
         }
         catch (e:Dynamic)
         {

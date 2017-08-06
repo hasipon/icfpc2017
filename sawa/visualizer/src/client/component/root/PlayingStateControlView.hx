@@ -8,25 +8,42 @@ class PlayingStateControlView extends ReactComponentOfProps<PlayingStateControlP
     override public function render():ReactElement
     {
         var context = props.context;
-        
         return "div".createElement(
             {
                 className: "result",
             },
             [
-                {
-                    var data = "スコア：";
+                ("スコア：":Dynamic)
+            ].concat(
+                [
                     for (scoreStruct in props.context.scores)
                     {
-                        data += scoreStruct.punter + "番";
-                        if (context.you == scoreStruct.punter) data += "(あなた)";
+                        var data = "";
+                        if ((scoreStruct.punter:Int) < props.context.punterNames.length)
+                        {
+                            data += props.context.punterNames[(scoreStruct.punter:Int)];
+                        }
+                        else
+                        {
+                            data += scoreStruct.punter + "番";
+                        }
+                        
+                        if (context.you == scoreStruct.punter) data += "(選択中)";
                         data += ":";
                         data += scoreStruct.score;
                         data += ", ";
+                        "font".createElement(
+                            {
+                                color : {
+                                    var color = PixiView.getColor(scoreStruct.punter, context.you);
+                                    "#" + color.toRgbHexString();
+                                }
+                            },
+                            data
+                        );
                     }
-                    data;
-                }
-            ]
+                ]
+            )
         );
     }
 }
