@@ -3,6 +3,23 @@ require 'optparse'
 require 'pp'
 require 'json'
 
+class Timer
+  def initialize
+  end
+
+  def epoc
+    Time.now.strftime('%s%L').to_i
+  end
+
+  def begin
+    @begin = epoc
+  end
+
+  def finish
+    epoc - @begin
+  end
+end
+
 class Client
   def initialize(host, port, ai_path, name, logfile, verbose)
     @ai_path = ai_path
@@ -141,6 +158,7 @@ opt.on('-v', '--verbose') {|v| verbose =  v }
 opt.parse(ARGV)
 
 client = Client.new(host, port.to_i, ai_path, name, logfile, verbose)
+timer = Timer.new
 
 # handshake
 client.handshake
@@ -148,9 +166,10 @@ client.handshake
 # setup
 client.handshake_with_client
 setup_msg = client.next_server_message
+timer.begin
 client.send_msg_to_ai(setup_msg)
-
-puts "setup end"
+setup_time = timer.finish
+puts "setup end. time: #{setup_time}[ms]"
 
 # ready
 # client.send_msg_to_server '11:{"ready":0}'
@@ -160,15 +179,27 @@ client.send_msg_to_server(ready_msg)
 puts "ready end"
 
 client.increment_turn
+max_ai_time = 0
 while msg = client.next_server_message
   client.handshake_with_client
+  break_flag = client.msg_to_json(msg)['stop']
+
+  timer.begin
   client.send_msg_to_ai msg
+  break if break_flag
   msg = client.next_ai_message
-  break unless msg
+  ai_time = timer.finish
+  max_ai_time = ai_time if ai_time > max_ai_time
+  unless msg
+    puts "!!AI failed to return response!!"
+    exit 1
+  end
+  puts "AI returned response time: #{ai_time}[ms] (max: #{max_ai_time})"
   client.send_msg_to_server msg
   client.increment_turn
 end
 
+puts "setup time #{setup_time}[ms]. max think time #{max_ai_time}[ms]."
 puts "logfile: #{client.logfile_name}"
 
 `curl -F 'file=@#{client.logfile_name}' http://13.114.38.186/uploadlog` unless quiet
