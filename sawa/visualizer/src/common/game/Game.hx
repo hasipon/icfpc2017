@@ -5,6 +5,7 @@ import game.command.ClaimStruct;
 import game.command.MapStruct;
 import game.command.MoveStruct;
 import game.command.SetupStruct;
+import game.command.SplurgeStruct;
 
 
 class Game 
@@ -132,13 +133,17 @@ class Game
     
     public function addMove(move:MoveStruct):Void
     {
-        if (move.pass != null)
-        {
-            pass(move.pass.punter);
-        }
-        else
+        if (move.claim != null)
         {
             claim(move.claim);
+        }
+        else if (move.splurge != null)
+        {
+            splurge(move.splurge);
+        }
+        else 
+        {
+            pass(move.pass.punter);
         }
         
         moves.push(move);
@@ -147,14 +152,24 @@ class Game
     public function undoMove():Void
     {
         var move = moves.pop();
-        if (move.pass != null)
-        {
-            //
-        }
-        else
+        if (move.claim != null)
         {
             undoClaim(move.claim);
         }
+        else if (move.splurge != null)
+        {
+            undoSplurge(move.splurge);
+        }
+        else 
+        {
+            //
+        }
+    }
+    
+    private function claim(move:ClaimStruct):Void
+    {
+        var river = sites[move.source].rivers[move.target];
+        river.owner = move.punter;
     }
     
     private function undoClaim(move:ClaimStruct):Void
@@ -168,10 +183,29 @@ class Game
         for (move in moves) addMove(move);
     }
     
-    public function claim(move:ClaimStruct):Void
+    private function splurge(move:SplurgeStruct):Void
     {
-        var river = sites[move.source].rivers[move.target];
-        river.owner = move.punter;
+        for (i in 1...move.route.length)
+        {
+            var source = move.route[i - 1];
+            var target = move.route[i];
+            
+            var river = sites[source].rivers[target];
+            river.owner = move.punter;
+        }
+        trace(move);
+    }
+    
+    private function undoSplurge(move:SplurgeStruct):Void
+    {
+        for (i in 1...move.route.length)
+        {
+            var source = move.route[i - 1];
+            var target = move.route[i];
+            
+            var river = sites[source].rivers[target];
+            river.owner = PunterId.NotFound;
+        }
     }
     
     public function pass(punter:PunterId):Void
