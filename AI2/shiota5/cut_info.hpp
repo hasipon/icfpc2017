@@ -181,7 +181,7 @@ namespace cut {
                 int cut = now.solve(mines[i], mines[j]);
                 ret[make_pair(mines[i], mines[j])] = cut;
                 ret[make_pair(mines[j], mines[i])] = cut;
-                cerr << "cut(" << i <<"," << j << ")" << ' ' << cut <<endl;
+                // cerr << "cut(" << i <<"," << j << ")" << ' ' << cut <<endl;
             }
         }
         return ret;
