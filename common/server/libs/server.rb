@@ -8,7 +8,7 @@ class IO
     len = 0
     while c = self.getc
       break if c == ":"
-      raise "non-numeric character: #{c}" unless c =~ /[0-9]/
+      # raise "non-numeric character: #{c}" unless c =~ /[0-9]/
       len = len * 10 + c.to_i
     end
     raise "len shoud be a positive integer" if len == 0
@@ -107,19 +107,20 @@ class Server
         io.send_message setup
         ready = io.read_message
 
-        if ready["futures"]
+        if @settings["futures"] && ready["futures"]
           futures[ready["ready"]] = normalize_futures(ready["futures"])
         end
         states[index] = ready["state"]
       end
     end
+    # log output
     setup["punter"] = 0
     setup["punter_names"] = punter_names
     @logfile.puts(JSON.generate({"you" => punter_names[0]}))
     setup.delete("state")
     @logfile.puts(JSON.generate(setup))
 
-    score = Score.new(@map, @num_of_punters, futures)
+    score = Score.new(@map, @num_of_punters, futures, @settings["splurges"])
 
     # game play
     play_count = 0
@@ -131,9 +132,9 @@ class Server
     end
 
     while true
-      break if play_count >= @max_play_count
+      break if play_count - 1 >= @max_play_count
       @punter_paths.each_with_index do |punter_path, index|
-        break if play_count >= @max_play_count
+        break if play_count - 1 >= @max_play_count
 
         puts "play_count: #{play_count}"
         p moves
@@ -244,7 +245,7 @@ class Server
       end
     end
 
-    score = Score.new(@map, @num_of_punters, futures)
+    score = Score.new(@map, @num_of_punters, futures, @settings["splurges"])
 
     # game play
     play_count = 0
@@ -256,9 +257,9 @@ class Server
     end
 
     while true
-      break if play_count >= @max_play_count
+      break if play_count >= @max_play_count - 1
       sockets.each_with_index do |socket, index|
-        break if play_count >= @max_play_count
+        break if play_count >= @max_play_count - 1
         # TODO: zombie
         puts "send_message(play_count = #{play_count}, index = #{index})"
         p moves

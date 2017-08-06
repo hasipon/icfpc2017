@@ -52,7 +52,7 @@ class UndirectedGraph
 end
 
 class Score
-  def initialize(map, num_of_punters, futures)
+  def initialize(map, num_of_punters, futures, splurges)
     @map = map
     @num_of_punters = num_of_punters
 
@@ -75,20 +75,54 @@ class Score
     @num_of_punters.times do
       @claims.push(UndirectedGraph.new)
     end
+
+    @splurges = splurges
+    @pass_counts = Array.new(@num_of_punters, 0)
+  end
+
+  def handle_splurge(move)
+    return false unless @splurges
+
+    punter_id = move["splurge"]["punter"]
+    route = move["splurge"]["route"]
+
+    if @pass_counts[punter_id] >= route.length - 2
+      return false
+    end
+
+    route.each_cons(2) do |source, target|
+      return false if @rivers[[source, target]]
+    end
+
+    route.each_cons(2) do |source, target|
+      @rivers[[source, target]] = punter_id
+      @claims[punter_id].add_edge(source, target)
+    end
+
+    true
   end
 
   def update(move)
-    # update
-    return if move.has_key? 'pass'
+    if move.has_key? 'pass'
+      # increment pass count for splurge
+      @pass_counts[move["pass"]["punter"]] += 1
+    elsif move.has_key? 'claim'
+      punter_id = move["claim"]["punter"]
+      source = move["claim"]["source"]
+      target = move["claim"]["target"]
 
-    punter_id = move["claim"]["punter"]
-    source = move["claim"]["source"]
-    target = move["claim"]["target"]
+      if @rivers[[source, target]].nil?
+        @rivers[[source, target]] = punter_id
+        @claims[punter_id].add_edge(source, target)
+      end
 
-    if @rivers[[source, target]].nil?
-      @rivers[[source, target]] = punter_id
-
-      @claims[punter_id].add_edge(source, target)
+      @pass_counts[punter_id] = 0
+    elsif move.has_key? 'splurge'
+      unless handle_splurge(move)
+        $stderr.puts "WARNING: invalid splurge :#{move}"
+      end
+    else
+      raise "not supported move: #{move}"
     end
   end
 
