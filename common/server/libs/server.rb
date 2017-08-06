@@ -130,6 +130,10 @@ class Server
 
     while true
       break if play_count > @max_play_count
+
+      puts "play_count: #{play_count}"
+      p moves
+
       @punter_paths.each_with_index do |punter_path, index|
         IO.popen(punter_path, "r+") do |io|
           make_handshake(io)
@@ -152,8 +156,7 @@ class Server
               states[index] = move["state"]
             end
           rescue ::Timeout::Error
-            io.send_message({"timeout" => @timeout_gameplay})
-            moves[index] = {"pass" => {"punter" => index}}
+            raise "timeout: client #{index}"
           end
 
           score.update(moves[index])
@@ -161,9 +164,7 @@ class Server
 
           if index == 0
             moves_tmp = moves
-            moves_tmp.each do |m|
-              m.delete("state")
-            end
+            moves_tmp.each { |m| m.delete("state") }
             @logfile.puts JSON.generate({"move"=>{"moves"=>moves_tmp}})
           end
         end
