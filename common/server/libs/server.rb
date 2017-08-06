@@ -160,7 +160,7 @@ class Server
               states[index] = move["state"]
             end
           rescue => e
-            raise "error #{e}: client #{index}/#{punter_path}, message = #{message}"
+            raise "error #{e}: client #{index} = #{punter_path}, message = #{message}"
           end
 
           if index == 0
