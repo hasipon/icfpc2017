@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.lisla": "clojure",
+        "algorithm": "cpp",
+        "sstream": "cpp",
+        "vector": "cpp",
+        "utility": "cpp",
+        "iosfwd": "cpp"
+    }
+}
