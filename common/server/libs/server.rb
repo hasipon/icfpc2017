@@ -1,5 +1,6 @@
 # coding: utf-8
 require 'socket'
+require 'timeout'
 require_relative 'score'
 
 class IO
@@ -9,7 +10,9 @@ class IO
       break if c == ":"
       len = len * 10 + c.to_i
     end
-    JSON.load(self.read(len))
+    message = self.read(len)
+    STDOUT.puts "S <- C: [#{len}:#{message}]"
+    JSON.load(message)
   end
 
   def read_message(retry_count = 5)
@@ -23,7 +26,8 @@ class IO
 
   def send_message(obj)
     message = JSON.generate(obj)
-    self.puts "#{message.length}:#{message}"
+    STDOUT.puts "S -> C: [#{message.length}:#{message}]"
+    self.print "#{message.length}:#{message}"
   end
 end
 
@@ -58,6 +62,99 @@ class Server
     ret.map { |s, t| { "source" => s, "target" => t } }
   end
 
+  # make a handshake via `io` and returns the name
+  def make_handshake(io)
+    hs = io.read_message
+    name = hs["me"]
+    io.send_message({"you" => name})
+    name
+  end
+
+  def run_game_once_offline(punter_paths)
+    @num_of_punters = punter_paths.length
+    puts "Start a game with #{@num_of_punters} punters (offline)."
+
+    futures = {}
+    states = Array.new(@num_of_punters)
+
+    # setup
+    punter_paths.each_with_index do |punter_path, index|
+      IO.popen(punter_path, "r+") do |io|
+        make_handshake(io)
+
+        setup = {
+          "punter" => index,
+          "punters" => @num_of_punters,
+          "map" => @map,
+          "settings" => @settings
+        }
+        io.send_message setup
+        ready = io.read_message
+
+        if ready["futures"]
+          futures[ready["ready"]] = normalize_futures(ready["futures"])
+        end
+        states[index] = ready["state"]
+      end
+    end
+
+    score = Score.new(@map, @num_of_punters, futures)
+
+    # game play
+    play_count = 0
+    moves = []
+
+    # initial move is pass
+    @num_of_punters.times do |idx|
+      moves.push({"pass" => {"punter" => idx}})
+    end
+
+    while true
+      break if play_count >= @max_play_count
+      punter_paths.each_with_index do |punter_path, index|
+        IO.popen(punter_path, "r+") do |io|
+          make_handshake(io)
+
+          begin
+            timeout(@timeout_gameplay) do
+              message = {
+                "move" => {
+                  "moves" => moves
+                },
+                "state" => states[index]
+              }
+              io.send_message message
+              moves[index] = io.read_message
+            end
+          rescue ::Timeout::Error
+            io.send_message({"timeout" => @timeout_gameplay})
+            moves[index] = {"pass" => {"punter" => index}}
+          end
+
+          score.update(moves[index])
+          play_count += 1
+        end
+      end
+    end
+
+    # stop
+    stop = {
+      "stop" => {
+        "moves" => moves,
+        "scores" => score.calc
+      }
+    }
+    p stop
+    punter_paths.each_with_index do |punter_path, index|
+      IO.popen(punter_path, "r+") do |io|
+        make_handshake(io)
+
+        stop["state"] = states[index]
+        io.send_message stop
+      end
+    end
+  end
+
   def run_game_once
     puts "Start a game with #{@num_of_punters} punters."
 
@@ -73,9 +170,7 @@ class Server
     # handshake
     names = []
     sockets.each do |socket|
-      handshake = socket.read_message
-      name = handshake["me"]
-      socket.send_message({"you" => name})
+      name = make_handshake(socket)
       names.push(name)
     end
 
@@ -123,7 +218,7 @@ class Server
             socket.send_message({"move" => {"moves" => moves}})
             moves[index] = socket.read_message
           end
-        rescue Timeout::Error
+        rescue ::Timeout::Error
           socket.send_message({"timeout" => @timeout_gameplay})
           # > If a punter fails to move within the specified time, then
           # > they will be made to pass for that turn.

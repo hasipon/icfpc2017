@@ -11,6 +11,8 @@ map_json = nil
 settings = {}
 timeout_setup = 10
 timeout_gameplay = 1
+mode = :online
+punters = []
 
 opt.on('-n', '--num-of-punters NUM') { |v| num_of_punters = v.to_i }
 opt.on('-p', '--port PORT') { |v| port = v.to_i }
@@ -19,6 +21,8 @@ opt.on('-j', '--map-json MAP_JSON') { |v| map_json = v }
 opt.on('-s', '--settings SETTINGS_JSON') { |v| settings = JSON.load(v) }
 opt.on('--timeout-setup') { |v| timeout_setup = v }
 opt.on('--timeout-gameplay') { |v| timeout_gameplay = v }
+opt.on('--mode MODE') { |v| mode = v.to_sym }
+opt.on('--punters p1,p2,p3') { |v| punters = v.split(",") }
 
 opt.parse!(ARGV)
 
@@ -29,6 +33,11 @@ end
 
 if map_file && map_json
   $stderr.puts "specify map_file or map_json"
+  exit 1
+end
+
+if mode == :offine && punters.length == 0
+  $stderr.puts "specify punter paths when offline mode"
   exit 1
 end
 
@@ -45,4 +54,10 @@ opts = {
 }
 
 app = Server.new(opts)
-app.run_game_once
+
+if mode == :online
+  app.run_game_once
+elsif mode == :offline
+  app.run_game_once_offline(punters)
+end
+  
