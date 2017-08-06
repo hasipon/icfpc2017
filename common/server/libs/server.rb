@@ -129,7 +129,7 @@ class Server
     end
 
     while true
-      break if play_count >= @max_play_count
+      break if play_count > @max_play_count
       @punter_paths.each_with_index do |punter_path, index|
         IO.popen(punter_path, "r+") do |io|
           make_handshake(io)
@@ -143,7 +143,13 @@ class Server
                 "state" => states[index]
               }
               io.send_message message
-              moves[index] = io.read_message
+              move = io.read_message
+              if move["claim"]
+                moves[index] = {"claim" => move["claim"]}
+              else
+                moves[index] = {"pass" => move["pass"]}
+              end
+              states[index] = move["state"]
             end
           rescue ::Timeout::Error
             io.send_message({"timeout" => @timeout_gameplay})
