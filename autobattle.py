@@ -10,7 +10,7 @@ import time
 from subprocess import CalledProcessError
 
 port = 9999
-ai_bin_path = os.path.expanduser('~/LOCAL/autobattle/ai')
+ai_bin_path = os.path.expanduser('~/LOCAL/autobattle/ai3')
 maps_path = os.path.expanduser('~/LOCAL/autobattle/maps')
 simulator_rb = os.path.expanduser('~/LOCAL/autobattle/server/app.rb')
 server_connector_rb = os.path.expanduser('~/LOCAL/autobattle/server_connecter2.rb')
@@ -66,7 +66,7 @@ def run_offline():
     print("Map",  battle_map)
     print("Participants", participants)
 
-    logname = 'AB-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
+    logname = 'AC-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     options = [
       '/usr/bin/ruby',
@@ -109,7 +109,7 @@ def run_old():
     print("Participants", participants)
 
     print(participants)
-    logname = 'AB-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
+    logname = 'AC-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     sim = run_server(n, battle_map)
     time.sleep(1.0)
@@ -152,7 +152,7 @@ def fix_name(name):
     return name.split('@')[0]
 
 def calc_rating():
-    log_files = glob.glob(os.path.join(str(log_path), 'AB-*@[1-9]*.log'))
+    log_files = glob.glob(os.path.join(str(log_path), 'AC-*@[1-9]*.log'))
     log_files.sort(key=lambda x: x.split('@')[1]) 
     users = {}
     rating = {}
