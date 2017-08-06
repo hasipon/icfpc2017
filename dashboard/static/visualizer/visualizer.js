@@ -161,6 +161,9 @@ Main.onKeyDown = function(e) {
 			break;
 		}
 		break;
+	case 76:
+		Main.rootContext.execLog();
+		break;
 	case 83:
 		var _g5 = Main.rootContext.playingState;
 		switch(_g5[1]) {
@@ -173,6 +176,15 @@ Main.onKeyDown = function(e) {
 		}
 		break;
 	case 90:
+		var _g6 = Main.rootContext.playingState;
+		switch(_g6[1]) {
+		case 0:
+			var s5 = _g6[2];
+			s5.playing = true;
+			break;
+		case 1:
+			break;
+		}
 		Main.rootContext.framePerSec = -Main.rootContext.framePerSec;
 		Main.rootContext.updateUi();
 		break;

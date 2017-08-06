@@ -92,8 +92,16 @@ class Main
                 }
                 
             case KeyboardEvent.DOM_VK_Z:
+                switch (rootContext.playingState)
+                {
+                    case Option.Some(s): s.playing = true;
+                    case Option.None:
+                }
                 rootContext.framePerSec = -rootContext.framePerSec;
                 rootContext.updateUi();
+                
+            case KeyboardEvent.DOM_VK_L:
+                rootContext.execLog();
         }
     }
 }
