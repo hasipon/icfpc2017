@@ -81,17 +81,24 @@ class Score
   end
 
   def handle_splurge(move)
-    return false unless @splurges
+    unless @splurges
+      $stderr.puts "splurges is not enabled"
+      return false
+    end
 
     punter_id = move["splurge"]["punter"]
     route = move["splurge"]["route"]
 
     if @pass_counts[punter_id] >= route.length - 2
+      $stderr.puts "pass count is insufficient"
       return false
     end
 
     route.each_cons(2) do |source, target|
-      return false if @rivers[[source, target]]
+      if @rivers[[source, target]]
+        $stderr.puts "already occupied (#{source},#{target})"
+        return false
+      end
     end
 
     route.each_cons(2) do |source, target|

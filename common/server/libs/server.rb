@@ -132,9 +132,9 @@ class Server
     end
 
     while true
-      break if play_count - 1 >= @max_play_count
+      break if play_count >= @max_play_count - 1
       @punter_paths.each_with_index do |punter_path, index|
-        break if play_count - 1 >= @max_play_count
+        break if play_count >= @max_play_count - 1
 
         puts "play_count: #{play_count}"
         p moves
