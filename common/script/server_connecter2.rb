@@ -199,7 +199,7 @@ while msg = client.next_server_message
   client.increment_turn
 end
 
-puts "setup time #{setup_time}[ms]. max think time #{max_ai_time}."
+puts "setup time #{setup_time}[ms]. max think time #{max_ai_time}[ms]."
 puts "logfile: #{client.logfile_name}"
 
 `curl -F 'file=@#{client.logfile_name}' http://13.114.38.186/uploadlog` unless quiet
