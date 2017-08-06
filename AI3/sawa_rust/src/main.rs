@@ -13,6 +13,18 @@ use serde::ser::Serialize;
 use serde::de::Deserialize;
 use serde_json::{Value, Error};
 
+macro_rules! map(
+    { $($key:expr => $value:expr),+ } => {
+        {
+            let mut m = ::serde_json::Map::new();
+            $(
+                m.insert($key.to_owned(), serde_json::to_value($value).unwrap());
+            )+
+            m
+        }
+     };
+);
+
 fn main() 
 {
     let mut stdin = io::stdin();
@@ -109,23 +121,10 @@ struct GameState {
 }
 #[derive(Serialize, Deserialize)]
 struct MovesMessage {
-    moves: Vec<MoveMessage>,
+    moves: Vec<Value>,
     state: GameState,
 }
-#[derive(Serialize, Deserialize)]
-struct MoveMessage {
-    #[serde(skip_serializing)]
-    claim : Option<ClaimMessage>,
 
-    #[serde(skip_serializing)]
-    pass : Option<PassMessage>, 
-    
-    #[serde(skip_serializing)]
-    splurge : Option<SplugeMessage>,
-
-    #[serde(skip_serializing)]
-    state : Option<GameState>,
-}
 #[derive(Serialize, Deserialize)]
 struct PassMessage {
     punter: PunterId,
@@ -141,7 +140,6 @@ struct SplugeMessage {
     punter: PunterId,
     route: Vec<SiteId>, 
 }
-
 #[derive(Serialize, Deserialize, Copy, Clone)]
 struct PunterId(i32);
 #[derive(Serialize, Deserialize, Copy, Clone)]
@@ -150,31 +148,67 @@ struct SiteId(i32);
 struct EdgeId(i32);
 
 enum Move {
-    Claim(SiteId, SiteId),
-    Pass,
+    Claim(PunterId, SiteId, SiteId),
+    Pass(PunterId),
+    Splurge(PunterId, Vec<SiteId>),
 }
 
 impl Move {
-    fn to_message(self, id:PunterId, state:GameState) -> MoveMessage {
-        match self {
-            Move::Claim(a, b) => MoveMessage{
-                claim : Option::Some(ClaimMessage {
-                    punter: id,
-                    source: a,
-                    target: b,
-                }),
-                pass : Option::None, 
-                splurge : Option::None,
-                state : Option::Some(state),
-            },
-            Move::Pass => MoveMessage{
-                claim : Option::None, 
-                pass : Option::Some(PassMessage {
-                    punter: id,
-                }), 
-                splurge : Option::None,
-                state : Option::Some(state),
-            },
+    fn from_value(mut value:Value) -> Move
+    {
+        let mut object = value.as_object_mut().unwrap();
+        if let Option::Some(mut claim) = object.remove("claim") {
+            let mut obj = claim.as_object_mut().unwrap();
+            Move::Claim(
+                serde_json::from_value(obj.remove("punter").unwrap()).unwrap(), 
+                serde_json::from_value(obj.remove("source").unwrap()).unwrap(), 
+                serde_json::from_value(obj.remove("target").unwrap()).unwrap(),
+            )
+        } else if let Option::Some(mut pass) = object.remove("pass") {
+            let mut obj = pass.as_object_mut().unwrap();
+            Move::Pass(
+                serde_json::from_value(obj.remove("punter").unwrap()).unwrap(),
+            )
+        } else if let Option::Some(mut splurge) = object.remove("splurge") {
+            let mut obj = splurge.as_object_mut().unwrap();
+            Move::Splurge(
+                serde_json::from_value(obj.remove("punter").unwrap()).unwrap(), 
+                serde_json::from_value(obj.remove("route").unwrap()).unwrap(),
+            )
+        } else {
+            panic!("unsuppoted move value");
+        }
+    }
+
+    fn to_message(self, state:GameState) -> Value {
+        return match self {
+            Move::Claim(id, a, b) => Value::Object(
+                map! {
+                    "claim" => ClaimMessage {
+                        punter: id,
+                        source: a,
+                        target: b,
+                    },
+                    "state" => state
+                }
+            ),
+            Move::Pass(id) => Value::Object(
+                map!{
+                    "pass" => PassMessage {
+                        punter: id,
+                    },
+                    "state" => state
+                }
+            ),
+            Move::Splurge(id, route) => Value::Object(
+                map!{
+                    "pass" => SplugeMessage {
+                        punter: id,
+                        route: route,
+                    },
+                    "state" => state
+                }
+            ),
         }
     }
 }
@@ -186,7 +220,7 @@ fn setup(message:SetupMessage)->GameState
         punter: message.punter,
     }
 }
-fn think(message:MovesMessage)->MoveMessage
+fn think(message:MovesMessage)->Value
 {
-    return Move::Pass.to_message(message.state.punter, message.state);
+    return Move::Pass(message.state.punter).to_message(message.state);
 }
