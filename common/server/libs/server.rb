@@ -159,6 +159,8 @@ class Server
             end
           rescue ::Timeout::Error
             raise "timeout: client #{index}"
+          rescue => e
+            raise "error #{e}: client #{index}"
           end
 
           score.update(moves[index])
