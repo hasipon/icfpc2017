@@ -82,39 +82,26 @@ def run_offline():
     print("=== Command ===")
     print(' '.join(options))
 
-    with subprocess.Popen(options, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sim:
-        print("=== sim.stdout ===")
-        for line in sim.stdout:
-            print(line.decode('utf-8'), end='', flush=True)
+    subprocess.check_output(options)
 
-        print("=== sim.stderr ===")
-        for line in sim.stderr:
-            print(line.decode('utf-8'), end='')
-
-        sim.wait()
-
-        print("sim.returncode", sim.returncode)
-        if sim.returncode != 0:
-            sys.exit(sim.returncode)
-
-        valid_log = False
-        with open(logname) as f:
-            lines = f.readlines()
-            if 2 <= len(lines):
-                scores = json.loads(lines[-1])
-                if scores and 'stop' in scores:
-                    valid_log = True
-                else:
-                    print("scores.stop is not exist")
+    valid_log = False
+    with open(logname) as f:
+        lines = f.readlines()
+        if 2 <= len(lines):
+            scores = json.loads(lines[-1])
+            if scores and 'stop' in scores:
+                valid_log = True
             else:
-                print("too short log")
-
-        print("valid_log", valid_log)
-        if valid_log:
-            os.chmod(logname, 0o777)
-            os.rename(logname, os.path.join(log_path, logname))
+                print("scores.stop is not exist")
         else:
-            sys.exit(1)
+            print("too short log")
+
+    print("valid_log", valid_log)
+    if valid_log:
+        os.chmod(logname, 0o777)
+        os.rename(logname, os.path.join(log_path, logname))
+    else:
+        sys.exit(1)
 
 def run_old():
     battle_map, participants = prepare()
