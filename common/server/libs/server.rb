@@ -158,10 +158,8 @@ class Server
               end
               states[index] = move["state"]
             end
-          rescue ::Timeout::Error
-            raise "timeout: client #{index}"
           rescue => e
-            raise "error #{e}: client #{index}"
+            raise "error #{e}: client #{index}/#{punter_path}, message = #{message}"
           end
 
           if index == 0
