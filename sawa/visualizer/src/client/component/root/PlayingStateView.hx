@@ -54,7 +54,7 @@ class PlayingStateView extends ReactComponentOfProps<PlayingStateProps>
                     }
                 ), 
                 " / " + context.moves.length, 
-                " FPS:",
+                " 再生速度:",
                 "input".createElement(
                     {
                         onChange: onChangeFps,

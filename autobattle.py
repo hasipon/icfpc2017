@@ -213,17 +213,20 @@ def calc_rating():
             for j in range(i + 1, n):
                 if ranking[i][0] == ranking[j][0]:
                     continue
-                ri = rating[names[i]]
-                rj = rating[names[j]]
+                ri = rating[ranking[i][1]]
+                rj = rating[ranking[j][1]]
 
-                ei = 1 / (1 + 10 ** ((rj - ri) / 400))
-                ej = 1 / (1 + 10 ** ((ri - rj) / 400))
+                ei = 1.0 / (1.0 + 10 ** ((rj - ri) / 400.0))
+                ej = 1.0 / (1.0 + 10 ** ((ri - rj) / 400.0))
 
-                diff[i] += 16 * (1 - ei)
-                diff[j] += 16 + (0 - ej)
+                diff[i] += int(16 * (1 - ei))
+                diff[j] += int(16 * (0 - ej))
 
         for i in range(n):
-            rating[names[i]] += diff[i]
+            name = ranking[i][1]
+            rating[name] += diff[i]
+
+        for i in range(n):
             users[names[i]]['battle'] += 1
 
         users[ranking[0][1]]['win'] += 1
@@ -233,7 +236,7 @@ def calc_rating():
         his['diff'] = {}
 
         for i in range(n):
-            his['diff'][names[i]] = diff[i]
+            his['diff'][ranking[i][1]] = diff[i]
         history.append(his)
 
     output = {}
