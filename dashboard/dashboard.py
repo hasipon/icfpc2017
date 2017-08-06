@@ -14,6 +14,8 @@ app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 
 @app.after_request
 def add_header(response):
+    if 'Expires' in response.headers:
+        del response.headers['Expires']
     response.headers['Cache-Control'] = 'no-store'
     return response
 
