@@ -20,8 +20,6 @@ fn main()
 
     write_json_message(&mut stdout, serde_json::to_string(&mut Me{me: "shohei909".to_owned()}).unwrap());
     read_json_message(&mut stdin);
-
-
 }
 
 fn read_json_message(input: &mut Read) -> Value
@@ -54,6 +52,8 @@ fn write_json_message(output: &mut Write, string:String) {
         string.as_bytes().len(), 
         string
     );
+
+    output.flush();
 }
 
 struct PunterId(i32);
