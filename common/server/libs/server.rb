@@ -11,7 +11,7 @@ class IO
       len = len * 10 + c.to_i
     end
     message = self.read(len)
-    STDOUT.puts "S <- C: [#{len}:#{message}]"
+    STDOUT.puts "S <- C: [#{len}:#{message}]" if $debug and $debug == 1
     JSON.load(message)
   end
 
@@ -26,7 +26,9 @@ class IO
 
   def send_message(obj)
     message = JSON.generate(obj)
-    STDOUT.puts "S -> C: [#{message.length}:#{message}]"
+    if $debug and $debug == 1
+      STDOUT.puts "S -> C: [#{message.length}:#{message}]"
+    end
     self.print "#{message.length}:#{message}"
   end
 end
@@ -40,11 +42,16 @@ class Server
   # }
   def initialize(opts)
     @map = opts[:map]
-    @num_of_punters = opts[:num_of_punters]
-    @server = TCPServer.open(opts[:port])
     @settings = opts[:settings]
     @timeout_setup = opts[:timeout_setup]
     @timeout_gameplay = opts[:timeout_gameplay]
+
+    # online
+    @num_of_punters = opts[:num_of_punters]
+    @port = opts[:port]
+
+    # offline
+    @punter_paths = opts[:punters]
 
     @max_play_count = @map["rivers"].length
   end
@@ -70,15 +77,15 @@ class Server
     name
   end
 
-  def run_game_once_offline(punter_paths)
-    @num_of_punters = punter_paths.length
+  def run_game_once_offline
+    @num_of_punters = @punter_paths.length
     puts "Start a game with #{@num_of_punters} punters (offline)."
 
     futures = {}
     states = Array.new(@num_of_punters)
 
     # setup
-    punter_paths.each_with_index do |punter_path, index|
+    @punter_paths.each_with_index do |punter_path, index|
       IO.popen(punter_path, "r+") do |io|
         make_handshake(io)
 
@@ -111,7 +118,7 @@ class Server
 
     while true
       break if play_count >= @max_play_count
-      punter_paths.each_with_index do |punter_path, index|
+      @punter_paths.each_with_index do |punter_path, index|
         IO.popen(punter_path, "r+") do |io|
           make_handshake(io)
 
@@ -145,7 +152,7 @@ class Server
       }
     }
     p stop
-    punter_paths.each_with_index do |punter_path, index|
+    @punter_paths.each_with_index do |punter_path, index|
       IO.popen(punter_path, "r+") do |io|
         make_handshake(io)
 
@@ -158,11 +165,13 @@ class Server
   def run_game_once
     puts "Start a game with #{@num_of_punters} punters."
 
+    server = TCPServer.open(@port)
+
     # accept clients
     sockets = []
     @num_of_punters.times do |idx|
       puts "accept #{idx}"
-      socket = @server.accept
+      socket = server.accept
       sockets.push socket
       p socket.peeraddr
     end
