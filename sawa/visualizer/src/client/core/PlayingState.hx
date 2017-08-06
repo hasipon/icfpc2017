@@ -130,4 +130,11 @@ class PlayingState
         currentIndex = index;
         parent.updateUi();
     }
+    
+    public function changeYou(you:PunterId):Void
+    {
+        this.you = you;
+        parent.updateUi();
+        parent.updatePixi();
+    }
 }

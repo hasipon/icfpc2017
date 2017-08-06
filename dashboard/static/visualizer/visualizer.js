@@ -729,10 +729,17 @@ component_root_PlayingStateControlView.prototype = $extend(React.Component.proto
 			data += scoreStruct.score;
 			data += ", ";
 			var color = PixiView.getColor(scoreStruct.punter,context.you);
-			_g.push(react_ReactStringTools.createElement("font",{ color : "#" + StringTools.hex(tweenxcore_color_HsvColor.hsvToRgbInt(color.h,color.s,color.v),6)},data));
+			_g.push(react_ReactStringTools.createElement("font",{ color : "#" + StringTools.hex(tweenxcore_color_HsvColor.hsvToRgbInt(color.h,color.s,color.v),6), onClick : (function(a1,f) {
+				return function() {
+					f[0](a1[0]);
+				};
+			})([scoreStruct.punter],[$bind(this,this.onClick)])},data));
 		}
 		var tmp = ["スコア："].concat(_g);
 		return react_ReactStringTools.createElement("div",{ className : "result"},tmp);
+	}
+	,onClick: function(index) {
+		this.props.context.changeYou(index);
 	}
 	,__class__: component_root_PlayingStateControlView
 });
@@ -911,6 +918,11 @@ core_PlayingState.prototype = {
 	,changeIndex: function(index) {
 		this.currentIndex = index;
 		this.parent.updateUi();
+	}
+	,changeYou: function(you) {
+		this.you = you;
+		this.parent.updateUi();
+		this.parent.updatePixi();
 	}
 	,__class__: core_PlayingState
 };

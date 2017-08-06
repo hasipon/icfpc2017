@@ -1,5 +1,6 @@
 package component.root;
 import core.PlayingState;
+import game.PunterId;
 import react.ReactComponent.ReactComponentOfProps;
 import react.ReactComponent.ReactElement;
 
@@ -37,7 +38,8 @@ class PlayingStateControlView extends ReactComponentOfProps<PlayingStateControlP
                                 color : {
                                     var color = PixiView.getColor(scoreStruct.punter, context.you);
                                     "#" + color.toRgbHexString();
-                                }
+                                },
+                                onClick: onClick.bind(scoreStruct.punter),
                             },
                             data
                         );
@@ -45,6 +47,11 @@ class PlayingStateControlView extends ReactComponentOfProps<PlayingStateControlP
                 ]
             )
         );
+    }
+    
+    function onClick(index:PunterId)
+    {
+        props.context.changeYou(index);
     }
 }
 
