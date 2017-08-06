@@ -41,7 +41,7 @@ struct AI {
 	int mode;
 	vector<int> param;
 
-	Move Think(const Moves& moves, const string& state) {
+	vector<int> Think(const Moves& moves, const string& state) {
 		Load(moves, state);
 
 		vector<vector<pair<int,int>>> G(N);
@@ -62,7 +62,7 @@ struct AI {
 			}
 		}
 
-		Move r;
+		vector<int> r;
 		if (mode == 0) {
 			map<pair<int, int>, int> cuts = cut::calcMinCutForThink(G, mines);
 			vector<bool> is_mine(N);
@@ -105,7 +105,7 @@ struct AI {
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
 				calc_dist(src, dst, dist1, dist2, minidist, G);
-				pair<pair<int, int>, Move> kouho = make_pair(make_pair(INF, INF), Move());
+				pair<pair<int, int>, vector<int>> kouho = make_pair(make_pair(INF, INF), vector<int>());
 				int cc = 0;
 				for (auto e : E1) {
 					int x = e.first;
@@ -127,11 +127,11 @@ struct AI {
 						if(hyoka > kouho.first)continue;
                         cc++;
 						if(hyoka < kouho.first){
-							kouho = make_pair(hyoka, Move(rev[x], rev[y]));
+							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
                             continue;
 						}
 						if (rand()%2)
-							kouho = make_pair(hyoka, Move(rev[x], rev[y]));
+							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
 						}
 				}
 				r = kouho.second;
@@ -192,7 +192,7 @@ struct AI {
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
 				calc_dist(src, dst, dist1, dist2, INF, G);
-				pair<pair<int, int>, Move> kouho = make_pair(make_pair(INF, INF), Move());
+				pair<pair<int, int>, vector<int>> kouho = make_pair(make_pair(INF, INF), vector<int>());
 				int cc = 0;
 				int dd = dist1[dst] - 1;
 				for (auto e : E1) {
@@ -214,11 +214,11 @@ struct AI {
 						if(hyoka > kouho.first)continue;
 						cc++;
 						if(hyoka < kouho.first){
-							kouho = make_pair(hyoka, Move(rev[x], rev[y]));
+							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
 							continue;
 						}
 						if (rand()%2)
-							kouho = make_pair(hyoka, Move(rev[x], rev[y]));
+							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
 					}
 				}
 				r = kouho.second;
@@ -230,11 +230,13 @@ struct AI {
 		if (mode == 2) {
 			if (E1.size() > 0) {
 				auto p = E1[rand() % E1.size()];
-				r = Move(rev[p.first], rev[p.second]);
+				r = {rev[p.first], rev[p.second]};
 			}
 		}
 
-		cerr << "move = " << r.source << " " << r.target << endl;
+		cerr << "move =";
+		for (auto x : r) cerr << " " << x;
+		cerr << endl;
 		return r;
 	}
 	void calc_dist(int src, int dst, vector<int>& dist1, vector<int>& dist2, int mindist, const vector<vector<pair<int,int>>>& G) {
@@ -293,7 +295,7 @@ struct AI {
 	vector<pair<int,int>> Future() {
 		return {};
 	}
-	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures) {
+	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures, bool splurges) {
 		map<int,int> idx;
 		this->punter_id = punter_id;
 		N = 0;
@@ -337,7 +339,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "shiota7.6";
+		return "shiota8.6";
 	}
 	int PunterId() {
 		return punter_id;
@@ -373,11 +375,13 @@ struct AI {
 			}
 		}
 
-		for (auto x : moves) if (!x.is_pass) {
-			int a = idx[x.source];
-			int b = idx[x.target];
-			if (a > b) swap(a, b);
-			E[{a, b}] = x.punter_id;
+		for (auto x : moves) {
+			for (int i = 1; i < x.route.size(); ++ i) {
+				int a = idx[x.route[i-1]];
+				int b = idx[x.route[i]];
+				if (a > b) swap(a, b);
+				E[{a, b}] = x.punter_id;
+			}
 		}
 	}
 	string State() {
