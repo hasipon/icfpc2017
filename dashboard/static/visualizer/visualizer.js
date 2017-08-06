@@ -117,62 +117,74 @@ Main.render = function() {
 Main.onKeyDown = function(e) {
 	var _g = e.keyCode;
 	switch(_g) {
-	case 65:
+	case 37:case 83:
 		var _g1 = Main.rootContext.playingState;
 		switch(_g1[1]) {
 		case 0:
 			var s = _g1[2];
-			s.gotoTop();
+			s.undoMove();
+			break;
+		case 1:
+			break;
+		}
+		break;
+	case 39:case 70:
+		var _g2 = Main.rootContext.playingState;
+		switch(_g2[1]) {
+		case 0:
+			var s1 = _g2[2];
+			s1.doMove();
+			break;
+		case 1:
+			break;
+		}
+		break;
+	case 65:
+		var _g3 = Main.rootContext.playingState;
+		switch(_g3[1]) {
+		case 0:
+			var s2 = _g3[2];
+			s2.gotoTop();
 			break;
 		case 1:
 			break;
 		}
 		break;
 	case 68:
-		var _g2 = Main.rootContext.playingState;
-		switch(_g2[1]) {
+		var _g4 = Main.rootContext.playingState;
+		switch(_g4[1]) {
 		case 0:
-			var s1 = _g2[2];
-			s1.togglePlaying();
-			break;
-		case 1:
-			break;
-		}
-		break;
-	case 70:
-		var _g3 = Main.rootContext.playingState;
-		switch(_g3[1]) {
-		case 0:
-			var s2 = _g3[2];
-			s2.doMove();
+			var s3 = _g4[2];
+			s3.togglePlaying();
 			break;
 		case 1:
 			break;
 		}
 		break;
 	case 71:
-		var _g4 = Main.rootContext.playingState;
-		switch(_g4[1]) {
-		case 0:
-			var s3 = _g4[2];
-			s3.gotoEnd();
-			break;
-		case 1:
-			break;
-		}
-		break;
-	case 83:
 		var _g5 = Main.rootContext.playingState;
 		switch(_g5[1]) {
 		case 0:
 			var s4 = _g5[2];
-			s4.undoMove();
+			s4.gotoEnd();
 			break;
 		case 1:
 			break;
 		}
 		break;
+	case 76:
+		Main.rootContext.execLog();
+		break;
 	case 90:
+		var _g6 = Main.rootContext.playingState;
+		switch(_g6[1]) {
+		case 0:
+			var s5 = _g6[2];
+			s5.playing = true;
+			break;
+		case 1:
+			break;
+		}
 		Main.rootContext.framePerSec = -Main.rootContext.framePerSec;
 		Main.rootContext.updateUi();
 		break;
@@ -801,7 +813,7 @@ component_root_RootView.prototype = $extend(React.Component.prototype,{
 		}
 		var tmp8 = react_ReactStringTools.createElement("div",{ },tmp7);
 		var tmp9 = react_ReactStringTools.createElement("div",{ },this.props.context.warning == null ? "" : "エラー：" + this.props.context.warning);
-		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 2.7");
+		var tmp10 = react_ReactStringTools.createElement("div",{ },"version : 3.2");
 		return react_ReactStringTools.createElement("div",{ className : "root"},[tmp2,tmp3,tmp6,tmp8,tmp9,tmp10]);
 	}
 	,onClick: function(e) {

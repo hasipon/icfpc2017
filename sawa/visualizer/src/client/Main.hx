@@ -63,7 +63,7 @@ class Main
                     case Option.None:
                 }
                 
-            case KeyboardEvent.DOM_VK_S:
+            case KeyboardEvent.DOM_VK_S | KeyboardEvent.DOM_VK_LEFT:
                 switch (rootContext.playingState)
                 {
                     case Option.Some(s): s.undoMove();
@@ -77,7 +77,7 @@ class Main
                     case Option.None:
                 }
                 
-            case KeyboardEvent.DOM_VK_F:
+            case KeyboardEvent.DOM_VK_F | KeyboardEvent.DOM_VK_RIGHT:
                 switch (rootContext.playingState)
                 {
                     case Option.Some(s): s.doMove();
@@ -92,8 +92,16 @@ class Main
                 }
                 
             case KeyboardEvent.DOM_VK_Z:
+                switch (rootContext.playingState)
+                {
+                    case Option.Some(s): s.playing = true;
+                    case Option.None:
+                }
                 rootContext.framePerSec = -rootContext.framePerSec;
                 rootContext.updateUi();
+                
+            case KeyboardEvent.DOM_VK_L:
+                rootContext.execLog();
         }
     }
 }

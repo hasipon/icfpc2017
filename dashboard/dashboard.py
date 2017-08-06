@@ -13,6 +13,13 @@ repo_path = pathlib.Path(__file__).resolve().parent.parent
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
+@app.after_request
+def add_header(response):
+    if 'Expires' in response.headers:
+        del response.headers['Expires']
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
 @app.route('/')
 def index():
     logpath = str(static_path / 'logs')
