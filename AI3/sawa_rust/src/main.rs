@@ -44,7 +44,8 @@ fn main()
             write_json_message(&mut stdout, serde_json::to_string(&ReadyMessage{ready:punter, state:state}).unwrap());
         } else if let Option::Some(value) = object.remove("move") {
             let message:MovesMessage = serde_json::from_value(value).unwrap();
-            let mov = think(message);
+            let state:GameState = serde_json::from_value(object.remove("state").unwrap()).unwrap();
+            let mov = think(message, state);
             write_json_message(&mut stdout, serde_json::to_string(&mov).unwrap());
         }
     }
@@ -122,7 +123,6 @@ struct GameState {
 #[derive(Serialize, Deserialize)]
 struct MovesMessage {
     moves: Vec<Value>,
-    state: GameState,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -220,7 +220,7 @@ fn setup(message:SetupMessage)->GameState
         punter: message.punter,
     }
 }
-fn think(message:MovesMessage)->Value
+fn think(message:MovesMessage, state:GameState)->Value
 {
-    return Move::Pass(message.state.punter).to_message(message.state);
+    return Move::Pass(state.punter).to_message(state);
 }
