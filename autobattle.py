@@ -85,7 +85,7 @@ def run_offline():
     with subprocess.Popen(options, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as sim:
         print("=== sim.stdout ===")
         for line in sim.stdout:
-            print(line.decode('utf-8'), end='')
+            print(line.decode('utf-8'), end='', flush=True)
 
         print("=== sim.stderr ===")
         for line in sim.stderr:
@@ -111,6 +111,7 @@ def run_offline():
 
         print("valid_log", valid_log)
         if valid_log:
+            os.chmod(logname, 0o777)
             os.rename(logname, os.path.join(log_path, logname))
         else:
             sys.exit(1)
@@ -221,7 +222,7 @@ def calc_rating():
 
         users[ranking[0][1]]['win'] += 1
         his = {}
-        his['log'] = log
+        his['log'] = os.path.basename(log)
         his['diff'] = {}
 
         for i in range(n):
@@ -229,15 +230,27 @@ def calc_rating():
         history.append(his)
 
     output = {}
+    output['ranking'] = []
+
+    rank = []
+    for name in users.keys():
+        rank.append((rating[name], name))
+    rank.sort(reverse=True)
+    for r in rank:
+        output['ranking'].append(r[1])
+
     output['users'] = users
     for name in users.keys():
         users[name]['rating'] = rating[name]
     output['history'] = history
     output['update'] = str(int(time.time()))
 
+    rating_json = 'rating.json'
     print(json.dumps(output))
-    with open(os.path.join(static_path, 'rating.json'), 'w') as outfile:
+    with open(rating_json, 'w') as outfile:
         json.dump(output, outfile)
+    os.chmod(rating_json, 0o777)
+    os.rename(rating_json, os.path.join(static_path, rating_json))
 
 def main():
     if sys.argv[1] == 'run':
