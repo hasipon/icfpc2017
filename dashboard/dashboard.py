@@ -12,6 +12,11 @@ static_path = pathlib.Path(__file__).resolve().parent / 'static'
 repo_path = pathlib.Path(__file__).resolve().parent.parent
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
 
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
 @app.route('/')
 def index():
     logpath = str(static_path / 'logs')
