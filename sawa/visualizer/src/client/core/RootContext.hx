@@ -1,5 +1,6 @@
 package core;
 import game.Game;
+import game.PunterId;
 import game.command.MapStruct;
 import game.command.MoveStruct;
 import game.command.ScoreStruct;
@@ -122,7 +123,7 @@ class RootContext
             var scores:Array<ScoreStruct> = null;
             for (content in data.slice(2, data.length))
             {
-                trace(content);
+                if (content == "") continue;
                 var data = Json.parse(content);
                 inline function addMoves(moves:Array<MoveStruct>)
                 {
@@ -151,8 +152,15 @@ class RootContext
             
             if (scores == null)
             {
-                throw "stopがありません";
+                scores = [
+                    for (punter in 0...setupData.punters)
+                    {
+                        punter : new PunterId(punter),
+                        score : -1,
+                    }
+                ];
             }
+            
             
             playingState = Option.Some(new PlayingState(this, you, allMoves, scores, punterNames));
         }
@@ -201,4 +209,6 @@ class RootContext
         this.framePerSec = framePerSec;
         updateUi();
     }
+    
+    
 }

@@ -47,6 +47,16 @@ class PlayingState
                     break;
                 }
             }
+            while (rest <= -1)
+            {
+                rest += 1;
+                undoMove();
+                if (!playing)
+                {
+                    rest = 0;
+                    break;
+                }
+            }
         }
     }
     
@@ -68,16 +78,22 @@ class PlayingState
         parent.game.addMove(moves[currentIndex]);
         currentIndex += 1;
         parent.updatePixi();
+        parent.updateUi();
     }
     
     public function undoMove():Void
     {
-        if (currentIndex > 0)
+        if (currentIndex <= 0)
         {
-            parent.game.undoMove();
-            currentIndex -= 1;
-            parent.updatePixi();
+            playing = false;
+            parent.updateUi();
+            return;
         }
+        
+        parent.game.undoMove();
+        currentIndex -= 1;
+        parent.updatePixi();
+        parent.updateUi();
     }
     
     
@@ -107,5 +123,11 @@ class PlayingState
             currentIndex += 1;
             parent.updatePixi();
         }
+    }
+    
+    public function changeIndex(index:Int):Void
+    {
+        currentIndex = index;
+        parent.updateUi();
     }
 }

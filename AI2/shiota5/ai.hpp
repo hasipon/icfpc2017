@@ -6,7 +6,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "cut_info.hpp.h"
+#include "cut_info.hpp"
+#include "common.hpp"
 
 const int INF = 1<<30;
 
@@ -55,12 +56,14 @@ struct AI {
 			}
 		}
 
+
 		Move r;
 		if (mode == 0) {
+			map<pair<int, int>, int> cuts = cut::calcMinCutForThink(G, mines);
 			vector<bool> is_mine(N);
 			for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
 
-			int mindist = INF;
+			int minicost = INF, minidist = INF;
 			int cnt = 1, src = -1, dst = -1;
 			for (int i = 0; i < M; ++ i) {
 				int m = mines[i];
@@ -73,11 +76,14 @@ struct AI {
 					int v = Q.top().second;
 					Q.pop();
 					if (dist[v] != d) continue;
-					if (d > mindist) break;
 					if (d > 0 && is_mine[v]) {
-						if (d < mindist || (d == mindist || rand() % ++cnt == 0)) { src = m; dst = v; }
-						if (d < mindist) cnt = 1;
-						mindist = d;
+						// cut x dist
+						int cut_x_dist = d * cuts[make_pair(m, v)];
+						if (cut_x_dist < minicost) {
+							src = m; dst = v;
+							minicost = cut_x_dist;
+							minidist = d;
+						}
 					}
 					for (auto p : G[v]) {
 						int dd = d + p.second;
@@ -88,18 +94,18 @@ struct AI {
 					}
 				}
 			}
-			if (mindist == INF) {
+			if (minicost == INF) {
 				mode = 1;
 			} else {
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
-				calc_dist(src, dst, dist1, dist2, mindist, G);
+				calc_dist(src, dst, dist1, dist2, minidist, G);
 				int cc = 0;
 				for (auto e : E1) {
 					int x = e.first;
 					int y = e.second;
 					if (dist1[x] == INF || dist1[y] == INF || dist2[x] == INF || dist2[y] == INF) continue;
-					if (dist1[x] + dist2[y] + 1 == mindist || dist1[y] + dist2[x] + 1 == mindist) {
+					if (dist1[x] + dist2[y] + 1 == minidist || dist1[y] + dist2[x] + 1 == minidist) {
 						if (rand() % ++ cc == 0) {
 							r = Move(rev[x], rev[y]);
 						}

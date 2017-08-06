@@ -1,3 +1,4 @@
+require 'logger'
 require 'json'
 require 'optparse'
 require_relative 'libs/server'

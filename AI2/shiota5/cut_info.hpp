@@ -6,7 +6,6 @@
 #define ICFPC2017_CUT_INFO_HPP_H
 
 #include <cassert>
-#include "ai.hpp"
 
 using namespace std;
 
@@ -137,6 +136,10 @@ namespace cut {
 
     map<pair<int, int>, int> calcMinCut(const vector<vector<int> > &G, const vector<int> &mines) {
         map<pair<int, int>, int> ret;
+        if(G.size() >= V){
+            cerr << "min cut calc too large!!" << endl;
+            return ret;
+        }
         MaxFlow initState;
         for(int src =0; src<G.size(); src++){
             for(auto dst : G[src]){
@@ -147,13 +150,43 @@ namespace cut {
             for(int j = i+1; j<mines.size(); j++){
                 MaxFlow now = initState;
                 int cut = now.solve(mines[i], mines[j]);
-                ret[make_pair(i, j)] = cut;
-                ret[make_pair(j, i)] = cut;
+                ret[make_pair(mines[i], mines[j])] = cut;
+                ret[make_pair(mines[j], mines[i])] = cut;
                 // cerr << "cut(" << i <<"," << j << ")" << ' ' << cut <<endl;
             }
         }
         return ret;
     }
+    map<pair<int, int>, int> calcMinCutForThink(const vector<vector<pair<int, int> > > &G, const vector<int> &mines) {
+
+        map<pair<int, int>, int> ret;
+        if(G.size() >= V){
+            cerr << "min cut calc too large!!" << endl;
+            return ret;
+        }
+        MaxFlow initState;
+        set<int> mySite;
+        for(int src =0; src<G.size(); src++){
+            for(auto dst : G[src]){
+                if(dst.second == 0) {
+                    initState.addEdge(src, dst.first, INF / 3);
+                }else{
+                    initState.addEdge(src, dst.first, 1);
+                }
+            }
+        }
+        for(int i =0 ; i< mines.size(); i++){
+            for(int j = i+1; j<mines.size(); j++){
+                MaxFlow now = initState;
+                int cut = now.solve(mines[i], mines[j]);
+                ret[make_pair(mines[i], mines[j])] = cut;
+                ret[make_pair(mines[j], mines[i])] = cut;
+                cerr << "cut(" << i <<"," << j << ")" << ' ' << cut <<endl;
+            }
+        }
+        return ret;
+    }
+    // */
 }
 
 
