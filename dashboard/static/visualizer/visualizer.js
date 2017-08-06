@@ -951,7 +951,9 @@ core_RootContext.prototype = {
 			while(_g < _g1.length) {
 				var content = _g1[_g];
 				++_g;
-				console.log(content);
+				if(content == "") {
+					continue;
+				}
 				var data1 = JSON.parse(content);
 				if(data1.stop != null) {
 					var moves = data1.stop.moves;
@@ -982,7 +984,14 @@ core_RootContext.prototype = {
 				}
 			}
 			if(scores == null) {
-				throw new js__$Boot_HaxeError("stopがありません");
+				var _g4 = [];
+				var _g22 = 0;
+				var _g11 = setupData.punters;
+				while(_g22 < _g11) {
+					var punter = _g22++;
+					_g4.push({ punter : game__$PunterId_PunterId_$Impl_$._new(punter), score : -1});
+				}
+				scores = _g4;
 			}
 			this.playingState = haxe_ds_Option.Some(new core_PlayingState(this,you,allMoves,scores,punterNames));
 		} catch( e ) {
