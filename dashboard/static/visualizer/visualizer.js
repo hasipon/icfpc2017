@@ -107,8 +107,8 @@ Main.main = function() {
 	Main.update();
 };
 Main.update = function() {
-	Main.rootContext.onFrame();
-	haxe_Timer.delay(Main.update,150);
+	Main.rootContext.onFrame(15);
+	haxe_Timer.delay(Main.update,15);
 };
 Main.render = function() {
 	ReactDOM.render(React.createElement(component_root_RootView,{ context : Main.rootContext}),window.document.getElementById("control"));
@@ -662,7 +662,11 @@ component_root_PlayingStateView.prototype = $extend(React.Component.prototype,{
 		var tmp2 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onTogglePlayingClick)},context.playing ? "■" : "▶");
 		var tmp3 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onDoClick)},">");
 		var tmp4 = react_ReactStringTools.createElement("button",{ onClick : $bind(this,this.onGotoEndClick)},">|");
-		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2,tmp3,tmp4]);
+		var tmp5 = react_ReactStringTools.createElement("input",{ onChange : $bind(this,this.onChangeFps), value : context.parent.framePerSec});
+		return react_ReactStringTools.createElement("div",{ className : "result"},[tmp,tmp1,tmp2,tmp3,tmp4," FPS:",tmp5]);
+	}
+	,onChangeFps: function(e) {
+		this.props.context.parent.changeFps(e.target.value);
 	}
 	,onGotoTopClick: function() {
 		this.props.context.gotoTop();
@@ -741,14 +745,22 @@ var core_PlayingState = function(parent,you,moves,scores,punterNames) {
 	this.moves = moves;
 	this.scores = scores;
 	this.punterNames = punterNames;
+	this.rest = 0;
 	this.playing = true;
 };
 core_PlayingState.__name__ = true;
 core_PlayingState.prototype = {
-	update: function() {
-		console.log(this.playing);
+	update: function(frame) {
 		if(this.playing) {
-			this.doMove();
+			this.rest += frame;
+			while(this.rest >= 1) {
+				this.rest -= 1;
+				this.doMove();
+				if(!this.playing) {
+					this.rest = 0;
+					break;
+				}
+			}
 		}
 	}
 	,togglePlaying: function() {
@@ -794,6 +806,7 @@ core_PlayingState.prototype = {
 	,__class__: core_PlayingState
 };
 var core_RootContext = function() {
+	this.framePerSec = 6;
 	this.hash = "";
 	this.mapNames = haxe_Resource.listNames();
 	this.selectedIndex = 0;
@@ -882,18 +895,17 @@ core_RootContext.prototype = {
 		this.updatePixi();
 		this.updateUi();
 	}
-	,onFrame: function() {
+	,onFrame: function(ms) {
 		var _g = this.playingState;
 		switch(_g[1]) {
 		case 0:
 			var _playingState = _g[2];
-			_playingState.update();
+			_playingState.update(ms / 1000 * this.framePerSec);
 			break;
 		case 1:
 			break;
 		}
 		var hash = HxOverrides.substr(window.location.hash,1,null);
-		console.log(hash);
 		if(this.hash != hash) {
 			this.updateHash(hash);
 		}
@@ -909,6 +921,10 @@ core_RootContext.prototype = {
 			_gthis.execLog();
 		};
 		http.request();
+	}
+	,changeFps: function(framePerSec) {
+		this.framePerSec = framePerSec;
+		this.updateUi();
 	}
 	,__class__: core_RootContext
 };

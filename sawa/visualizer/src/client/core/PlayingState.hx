@@ -14,6 +14,7 @@ class PlayingState
     public var you:PunterId;
     public var currentIndex = 0;
     public var playing:Bool;
+    public var rest:Float;
     
     public function new(
         parent:RootContext, 
@@ -27,15 +28,25 @@ class PlayingState
         this.moves = moves;
         this.scores = scores;
         this.punterNames = punterNames;
+        rest = 0;
         playing = true;
     }
     
-    public function update():Void
+    public function update(frame:Float):Void
     {
-        trace(playing);
         if (playing)
         {
-            doMove();
+            rest += frame;
+            while (rest >= 1)
+            {
+                rest -= 1;
+                doMove();
+                if (!playing)
+                {
+                    rest = 0;
+                    break;
+                }
+            }
         }
     }
     

@@ -25,7 +25,8 @@ class RootContext
     public var warning:String;
     public var playingState:Option<PlayingState>;
     public var speed:Float;
-        
+    public var framePerSec:Float = 6;
+    
     public function new()
     {
         hash = "";
@@ -164,18 +165,17 @@ class RootContext
         updateUi();
     }
     
-    public function onFrame():Void
+    public function onFrame(ms:Float):Void
     {
         switch (playingState)
         {
             case Option.None:
                 
             case Option.Some(_playingState):
-                _playingState.update();
+                _playingState.update(ms / 1000 * framePerSec);
         }
         
         var hash = Browser.location.hash.substr(1);
-        trace(hash);
         if (this.hash != hash)
         {
             updateHash(hash);
@@ -194,5 +194,11 @@ class RootContext
             execLog();
         }
         http.request();
+    }
+    
+    public function changeFps(framePerSec:Float):Void
+    {
+        this.framePerSec = framePerSec;
+        updateUi();
     }
 }

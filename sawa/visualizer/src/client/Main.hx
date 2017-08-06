@@ -30,8 +30,8 @@ class Main
     
     private static function update() 
     {
-        rootContext.onFrame();
-        Timer.delay(update, 150);
+        rootContext.onFrame(15);
+        Timer.delay(update, 15);
     }
     
     public static function render():Void

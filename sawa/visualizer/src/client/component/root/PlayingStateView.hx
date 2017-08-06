@@ -1,5 +1,6 @@
 package component.root;
 import core.PlayingState;
+import js.html.Event;
 import react.ReactComponent.ReactComponentOfProps;
 import react.ReactComponent.ReactElement;
 
@@ -46,8 +47,20 @@ class PlayingStateView extends ReactComponentOfProps<PlayingStateProps>
                     },
                     ">|"
                 ), 
+                " FPS:",
+                "input".createElement(
+                    {
+                        onChange: onChangeFps,
+                        value: context.parent.framePerSec,
+                    }
+                ), 
             ]
         );
+    }
+    
+    function onChangeFps(e:Event) 
+    {
+        props.context.parent.changeFps(untyped e.target.value);
     }
     
     function onGotoTopClick() 
