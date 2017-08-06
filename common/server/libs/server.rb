@@ -130,7 +130,7 @@ class Server
           make_handshake(io)
 
           begin
-            timeout(@timeout_gameplay) do
+            Timeout.timeout(@timeout_gameplay) do
               message = {
                 "move" => {
                   "moves" => moves
@@ -235,7 +235,7 @@ class Server
         p moves
 
         begin
-          timeout(@timeout_gameplay) do
+          Timeout.timeout(@timeout_gameplay) do
             socket.send_message({"move" => {"moves" => moves}})
             moves[index] = socket.read_message
           end
