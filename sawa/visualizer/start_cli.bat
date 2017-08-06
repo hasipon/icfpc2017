@@ -1,1 +1,1 @@
-"bin/cli/bin/CliMain.exe" on
+"bin/cli/bin/CliMain.exe"

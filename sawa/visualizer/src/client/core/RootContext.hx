@@ -126,7 +126,7 @@ class RootContext
                 var data = Json.parse(content);
                 inline function addMoves(moves:Array<MoveStruct>)
                 {
-                    var start = if (first) (moves.length - you) else 0;
+                    var start = 0;
                     for (count in start...moves.length)
                     {
                         var index = (count + (you:Int)) % moves.length;
