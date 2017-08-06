@@ -47,12 +47,17 @@ class Server
     @timeout_gameplay = opts[:timeout_gameplay]
     @logfile = File.open(opts[:logfile], 'w')
 
-    # online
-    @num_of_punters = opts[:num_of_punters]
-    @port = opts[:port]
+    @mode = opts[:mode]
 
-    # offline
-    @punter_paths = opts[:punters]
+    if @mode == :online
+      @num_of_punters = opts[:num_of_punters]
+      @port = opts[:port]
+    end
+
+    if @mode == :offline
+      @punter_paths = opts[:punters]
+      @num_of_punters = @punter_paths.length
+    end
 
     @max_play_count = @map["rivers"].length
   end
@@ -79,7 +84,6 @@ class Server
   end
 
   def run_game_once_offline
-    @num_of_punters = @punter_paths.length
     puts "Start a game with #{@num_of_punters} punters (offline)."
 
     futures = {}
@@ -110,6 +114,7 @@ class Server
     setup["punter"] = 0
     setup["punter_names"] = punter_names
     @logfile.puts(JSON.generate({"you" => punter_names[0]}))
+    setup.delete("state")
     @logfile.puts(JSON.generate(setup))
 
     score = Score.new(@map, @num_of_punters, futures)
@@ -148,7 +153,13 @@ class Server
           score.update(moves[index])
           play_count += 1
 
-          @logfile.puts(JSON.generate(moves)) if index == 0
+          if index == 0
+            moves_tmp = moves
+            moves_tmp.each do |m|
+              m.delete("state")
+            end
+            @logfile.puts JSON.generate({"move"=>{"moves"=>moves_tmp}})
+          end
         end
       end
     end
@@ -161,7 +172,13 @@ class Server
       }
     }
     p stop
-    @logfile.puts(JSON.generate(stop))
+
+    stop_tmp = stop
+    stop_tmp["stop"]["moves"].each do |s|
+      s.delete("state")
+    end
+    @logfile.puts(JSON.generate(stop_tmp))
+
     @punter_paths.each_with_index do |punter_path, index|
       IO.popen(punter_path, "r+") do |io|
         make_handshake(io)
