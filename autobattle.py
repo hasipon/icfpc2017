@@ -213,7 +213,7 @@ def calc_rating():
             for j in range(i + 1, n):
                 if ranking[i][0] == ranking[j][0]:
                     continue
-                rd = (rating[names[j]] - rating[names[i]]) * 0.04
+                rd = int((rating[names[j]] - rating[names[i]]) * 0.04)
                 diff[i] += 16 + rd
                 diff[j] -= 16 + rd
 
@@ -224,6 +224,7 @@ def calc_rating():
         users[ranking[0][1]]['win'] += 1
         his = {}
         his['log'] = os.path.basename(log)
+        his['ranking'] = ranking
         his['diff'] = {}
 
         for i in range(n):
