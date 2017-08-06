@@ -10,6 +10,7 @@ class IO
       break if c == ":"
       len = len * 10 + c.to_i
     end
+    raise "len shoud be a positive integer" if len == 0
     message = self.read(len)
     STDOUT.puts "S <- C: [#{len}:#{message}]" if $debug and $debug == 1
     JSON.load(message)
@@ -129,7 +130,11 @@ class Server
     end
 
     while true
-      break if play_count >= @max_play_count
+      break if play_count > @max_play_count
+
+      puts "play_count: #{play_count}"
+      p moves
+
       @punter_paths.each_with_index do |punter_path, index|
         IO.popen(punter_path, "r+") do |io|
           make_handshake(io)
@@ -143,11 +148,16 @@ class Server
                 "state" => states[index]
               }
               io.send_message message
-              moves[index] = io.read_message
+              move = io.read_message
+              if move["claim"]
+                moves[index] = {"claim" => move["claim"]}
+              else
+                moves[index] = {"pass" => move["pass"]}
+              end
+              states[index] = move["state"]
             end
           rescue ::Timeout::Error
-            io.send_message({"timeout" => @timeout_gameplay})
-            moves[index] = {"pass" => {"punter" => index}}
+            raise "timeout: client #{index}"
           end
 
           score.update(moves[index])
@@ -155,9 +165,7 @@ class Server
 
           if index == 0
             moves_tmp = moves
-            moves_tmp.each do |m|
-              m.delete("state")
-            end
+            moves_tmp.each { |m| m.delete("state") }
             @logfile.puts JSON.generate({"move"=>{"moves"=>moves_tmp}})
           end
         end

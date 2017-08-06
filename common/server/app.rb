@@ -78,7 +78,12 @@ elsif mode == :offline
   end
   opts[:punters] = punters
 
-  Server.new(opts).run_game_once_offline
+  begin
+    Server.new(opts).run_game_once_offline
+  rescue => e
+    $stderr.puts e
+    exit 1
+  end
 else
   $stderr.puts "mode is online or offline"
   exit 1
