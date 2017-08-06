@@ -68,8 +68,9 @@ struct AI {
 
   int mode;
 
-  string Name() {
-    return "Volvic";
+  string Name()
+  {
+    return "bfs2";
   }
 
   // return num of reachable nodes
@@ -133,13 +134,13 @@ struct AI {
     }
 
     if (ret.is_pass) {
-      mode= OTHER;
-      return UnusedEdge();
+      mode = OTHER;
+      return FreeEdge();
     }
     return ret;
   }
 
-  Move UnusedEdge(void)
+  Move FreeEdge(void)
   {
     each (src, mines) {
       each (dst, g[src]) {
@@ -166,8 +167,12 @@ struct AI {
 
     Move ret;
     switch (mode) {
-      case SCORE_GREEDY:    ret = ScoreGreedy();
-      default:              ret = UnusedEdge();
+      case SCORE_GREEDY:
+        ret = ScoreGreedy();
+        break;
+      default:
+        ret = FreeEdge();
+        break;
     }
 
     assert(!ret.is_pass);
