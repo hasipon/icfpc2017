@@ -216,14 +216,17 @@ def calc_rating():
                 ri = rating[names[i]]
                 rj = rating[names[j]]
 
-                ei = 1 / (1 + 10 ** ((rj - ri) / 400))
-                ej = 1 / (1 + 10 ** ((ri - rj) / 400))
+                ei = 1.0 / (1.0 + 10 ** ((rj - ri) / 400.0))
+                ej = 1.0 / (1.0 + 10 ** ((ri - rj) / 400.0))
 
                 diff[i] += 16 * (1 - ei)
-                diff[j] += 16 + (0 - ej)
+                diff[j] += 16 * (0 - ej)
 
         for i in range(n):
-            rating[names[i]] += diff[i]
+            name = ranking[i][1]
+            rating[name] += diff[i]
+
+        for i in range(n):
             users[names[i]]['battle'] += 1
 
         users[ranking[0][1]]['win'] += 1
