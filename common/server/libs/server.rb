@@ -10,6 +10,7 @@ class IO
       break if c == ":"
       len = len * 10 + c.to_i
     end
+    raise "len shoud be a positive integer" if len == 0
     message = self.read(len)
     STDOUT.puts "S <- C: [#{len}:#{message}]" if $debug and $debug == 1
     JSON.load(message)
