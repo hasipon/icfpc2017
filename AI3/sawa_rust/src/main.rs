@@ -12,6 +12,8 @@ use std::ops::Add;
 use serde::ser::Serialize;
 use serde::de::Deserialize;
 use serde_json::{Value, Error};
+use std::collections::HashSet;
+use std::collections::HashMap;
 
 macro_rules! map(
     { $($key:expr => $value:expr),+ } => {
@@ -93,7 +95,7 @@ struct You { you : String }
 #[derive(Serialize, Deserialize)]
 pub struct SetupMessage {
     punter: PunterId,
-    punters: i64,
+    punters: i32,
     map: MapMessage,
 }
 #[derive(Serialize, Deserialize)]
@@ -117,10 +119,6 @@ struct ReadyMessage {
     state: GameState,
 }
 #[derive(Serialize, Deserialize)]
-struct GameState {
-    punter: PunterId,
-}
-#[derive(Serialize, Deserialize)]
 struct MovesMessage {
     moves: Vec<Value>,
 }
@@ -140,17 +138,57 @@ struct SplugeMessage {
     punter: PunterId,
     route: Vec<SiteId>, 
 }
-#[derive(Serialize, Deserialize, Copy, Clone)]
+#[derive(Serialize, Deserialize, Copy, Clone, Hash, Eq, PartialEq)]
 struct PunterId(i32);
-#[derive(Serialize, Deserialize, Copy, Clone)]
+#[derive(Serialize, Deserialize, Copy, Clone, Hash, Eq, PartialEq)]
 struct SiteId(i32);
-#[derive(Serialize, Deserialize, Copy, Clone)]
-struct EdgeId(i32);
+#[derive(Serialize, Deserialize, Copy, Clone, Hash, Eq, PartialEq)]
+struct RiverId(i32);
+#[derive(Serialize, Deserialize, Copy, Clone, Hash, Eq, PartialEq)]
+struct GroupId(i32);
 
 enum Move {
     Claim(PunterId, SiteId, SiteId),
     Pass(PunterId),
     Splurge(PunterId, Vec<SiteId>),
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct GameState {
+    punter_id: PunterId,
+    punters: Vec<Punter>,
+    sites: HashMap<SiteId, Site>,
+    rivers: HashMap<RiverId, River>,
+    mines: Vec<SiteId>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Site {
+    id: SiteId,
+    is_mine: bool,
+    rivers: Vec<RiverId>,
+    group_ids: HashMap<PunterId, GroupId>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct River {
+    owner: Option<PunterId>,
+    id: RiverId,
+    a:SiteId, 
+    b:SiteId,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Punter {
+    id: PunterId,
+    groups: HashMap<GroupId, Group>,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Group {
+    id: GroupId,
+    has_mine: bool,
+    sites: HashSet<SiteId>,
 }
 
 impl Move {
@@ -213,14 +251,100 @@ impl Move {
     }
 }
 
+impl GameState {
+    fn do_move(&mut self, mov:&Move) {
+        //
+    }
+}
+
 // AI
 fn setup(message:SetupMessage)->GameState
 {
+    let mut punters = Vec::new();
+    for i in 0..message.punters
+    {
+        punters.push(
+            Punter {
+                id: PunterId(i),
+                groups: HashMap::new(),
+            }
+        );
+    };
+
+    let mut sites = HashMap::new();
+    for site in &message.map.sites {
+        let id = site.id;
+        let mut group_ids = HashMap::new();
+        let SiteId(id_num) = id;
+        let group_id = GroupId(id_num);
+
+        for punter in &mut punters 
+        {
+            let mut sites = HashSet::new();
+            sites.insert(id);
+            punter.groups.insert(
+                group_id, 
+                Group{
+                    id: group_id,
+                    has_mine: false,
+                    sites: sites, 
+                }
+            );
+            group_ids.insert(punter.id, group_id);
+        }
+
+        sites.insert(
+            id, 
+            Site{
+                id: id,
+                is_mine: false,
+                rivers: Vec::new(),
+                group_ids: group_ids,
+            }
+        );
+    }
+
+    let mut rivers = HashMap::new();
+    let mut index = 0;
+    for river in &message.map.rivers {
+        let id = RiverId(index);
+        rivers.insert(
+            RiverId(index),
+            River {
+                owner: Option::None,
+                id: id,
+                a: river.target,
+                b: river.source,
+            }
+        );
+
+        sites.get_mut(&river.target).unwrap().rivers.push(id);
+        sites.get_mut(&river.source).unwrap().rivers.push(id);
+        
+        index += 1;
+    }
+
+    for mine in &message.map.mines {
+        let site = sites.get_mut(&mine).unwrap();
+        site.is_mine = true;
+        for punter in &mut punters 
+        {
+            let group_id = site.group_ids.get(&punter.id).unwrap();
+            let group = punter.groups.get_mut(&group_id).unwrap();
+            group.has_mine = true;
+        }
+    }
+
     return GameState{
-        punter: message.punter,
+        punter_id: message.punter,
+        punters: punters,
+        sites: sites,
+        rivers: rivers,
+        mines: message.map.mines,
     }
 }
+
 fn think(message:MovesMessage, state:GameState)->Value
 {
-    return Move::Pass(state.punter).to_message(state);
+    return Move::Pass(state.punter_id).to_message(state);
 }
