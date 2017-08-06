@@ -274,7 +274,7 @@ struct io_Main {
 		for (; !s->end_object(); s->read_separator()) {
 			auto k = s->read_key();
 			if (k == "claim") {
-				vector<int> route(2, -1);
+				route = vector<int>(2, -1);
 				s->start_object();
 				for (; !s->end_object(); s->read_separator()) {
 					auto kk = s->read_key();
