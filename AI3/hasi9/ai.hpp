@@ -335,11 +335,13 @@ struct AI {
 			}
 		}
 
-		for (auto x : moves) if (!x.is_pass) {
-			int a = idx[x.source];
-			int b = idx[x.target];
-			if (a > b) swap(a, b);
-			E[{a, b}] = x.punter_id;
+		for (auto x : moves) {
+			for (int i = 1; i < x.route.size(); ++ i) {
+				int a = idx[x.route[i-1]];
+				int b = idx[x.route[i]];
+				if (a > b) swap(a, b);
+				E[{a, b}] = x.punter_id;
+			}
 		}
 	}
 	string State() {

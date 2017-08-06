@@ -268,32 +268,47 @@ struct io_Main {
 	}
 
 	Move read_move(io_Json* s) {
-		Move r;
+		int punter_id = -1;
+		vector<int> route;
 		s->start_object();
 		for (; !s->end_object(); s->read_separator()) {
 			auto k = s->read_key();
 			if (k == "claim") {
-				r.is_pass = false;
+				vector<int> route(2, -1);
 				s->start_object();
 				for (; !s->end_object(); s->read_separator()) {
 					auto kk = s->read_key();
 					if (kk == "punter") {
-						r.punter_id = s->read_number();
+						punter_id = s->read_number();
 					} else if (kk == "source") {
-						r.source = s->read_number();
+						route[0] = s->read_number();
 					} else if (kk == "target") {
-						r.target = s->read_number();
+						route[1] = s->read_number();
 					} else {
 						s->read_value();
 					}
 				}
 			} else if (k == "pass") {
-				r.is_pass = true;
 				s->start_object();
 				for (; !s->end_object(); s->read_separator()) {
 					auto kk = s->read_key();
 					if (kk == "punter") {
-						r.punter_id = s->read_number();
+						punter_id = s->read_number();
+					} else {
+						s->read_value();
+					}
+				}
+			} else if (k == "splurge") {
+				s->start_object();
+				for (; !s->end_object(); s->read_separator()) {
+					auto kk = s->read_key();
+					if (kk == "punter") {
+						punter_id = s->read_number();
+					} else if (kk == "route") {
+						s->start_array();
+						for (; !s->end_array(); s->read_separator()) {
+							route.push_back(s->read_number());
+						}
 					} else {
 						s->read_value();
 					}
@@ -302,7 +317,7 @@ struct io_Main {
 				s->read_value();
 			}
 		}
-		return r;
+		return Move(punter_id, route);
 	}
 
 	void run() {
