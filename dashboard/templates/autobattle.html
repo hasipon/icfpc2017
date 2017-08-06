@@ -1,8 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
 
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  google.charts.load('current', {'packages':['corechart']});
+  google.charts.setOnLoadCallback(drawChart);
+
+  function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+      {% for line in csv %} {{line|safe}} {% endfor %}
+    ]);
+
+    var options = {
+      title: 'Rating History',
+    };
+
+    var chart = new google.visualization.LineChart(document.getElementById('rating_chart'));
+    chart.draw(data, options);
+  }
+</script>
+
 <div class="container">
 <h2>レーティング</h2>
+
+<div id="rating_chart" style="width: 800px; height: 500px"></div>
 
 <table class="table table-condensed table-striped">
 <tr>
