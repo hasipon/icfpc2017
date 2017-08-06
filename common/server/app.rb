@@ -9,12 +9,16 @@ port = nil
 map_file = nil
 map_json = nil
 settings = {}
+timeout_setup = 10
+timeout_gameplay = 1
 
 opt.on('-n', '--num-of-punters NUM') { |v| num_of_punters = v.to_i }
 opt.on('-p', '--port PORT') { |v| port = v.to_i }
 opt.on('-m', '--map-file FILENAME') { |v| map_file = v }
 opt.on('-j', '--map-json MAP_JSON') { |v| map_json = v }
 opt.on('-s', '--settings SETTINGS_JSON') { |v| settings = JSON.load(v) }
+opt.on('--timeout-setup') { |v| timeout_setup = v }
+opt.on('--timeout-gameplay') { |v| timeout_gameplay = v }
 
 opt.parse!(ARGV)
 
@@ -35,8 +39,10 @@ opts = {
   map: map,
   num_of_punters: num_of_punters,
   port: port,
+  settings: settings,
+  timeout_setup: timeout_setup,
+  timeout_gameplay: timeout_gameplay
 }
-opts[:settings] = settings if settings
 
 app = Server.new(opts)
 app.run_game_once

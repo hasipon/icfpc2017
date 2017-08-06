@@ -39,6 +39,8 @@ class Server
     @num_of_punters = opts[:num_of_punters]
     @server = TCPServer.open(opts[:port])
     @settings = opts[:settings]
+    @timeout_setup = opts[:timeout_setup]
+    @timeout_gameplay = opts[:timeout_gameplay]
 
     @max_play_count = @map["rivers"].length
   end
@@ -87,11 +89,12 @@ class Server
         "map" => @map,
         "settings" => @settings
       }
+
+      # TODO: timeout
       socket.send_message setup
-
       puts "setup: #{setup}"
-
       ready = socket.read_message
+
       if ready["futures"]
         futures[ready["ready"]] = normalize_futures(ready["futures"])
       end
@@ -111,14 +114,20 @@ class Server
     while true
       break if play_count >= @max_play_count
       sockets.each_with_index do |socket, index|
-        # TODO: timeout, zombie
+        # TODO: zombie
         puts "send_message(play_count = #{play_count}, index = #{index})"
         p moves
-        socket.send_message({"move" => {"moves" => moves}})
-        moves[index] = socket.read_message
 
-        unless moves[index]
-          puts "illformed moves[#{index}] = #{moves[index]} is send"
+        begin
+          timeout(@timeout_gameplay) do
+            socket.send_message({"move" => {"moves" => moves}})
+            moves[index] = socket.read_message
+          end
+        rescue Timeout::Error
+          socket.send_message({"timeout" => @timeout_gameplay})
+          # > If a punter fails to move within the specified time, then
+          # > they will be made to pass for that turn.
+          moves[index] = {"pass" => {"punter" => index}}
         end
 
         score.update(moves[index])
