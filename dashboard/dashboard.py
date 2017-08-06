@@ -11,6 +11,7 @@ from werkzeug.utils import secure_filename
 static_path = pathlib.Path(__file__).resolve().parent / 'static'
 repo_path = pathlib.Path(__file__).resolve().parent.parent
 app = Flask(__name__, static_folder = str(static_path), static_url_path='')
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 @app.route('/')
 def index():
