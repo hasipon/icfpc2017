@@ -39,7 +39,7 @@ struct AI {
 	vector<vector<int>> D;
 	map<pair<int,int>, int> E;
 	map<pair<int,int>, int> E_opt;
-	bool options;
+	bool splurges, options;
 	bool use_option;
 
 	int mode;
@@ -50,7 +50,10 @@ struct AI {
 
 		vector<vector<pair<int,int>>> G(N);
 		vector<pair<int,int>> E1;
-		set<int> mySite;
+		set<int> mySite, myMine;
+		vector<bool> is_mine(N);
+		for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
+
 		for (auto p : E) {
 			int x = p.first.first;
 			int y = p.first.second;
@@ -59,6 +62,8 @@ struct AI {
 				G[y].push_back({x, 0});
 				mySite.insert(y);
 				mySite.insert(x);
+				if(is_mine[y]) myMine.insert(y);
+				if(is_mine[x]) myMine.insert(x);
 			} else if (p.second == -1) {
 				G[x].push_back({y, 1});
 				G[y].push_back({x, 1});
@@ -66,11 +71,11 @@ struct AI {
 			}
 		}
 
+
+
 		vector<int> r;
 		if (mode == 0) {
 			map<pair<int, int>, int> cuts = cut::calcMinCutForThink(G, mines);
-			vector<bool> is_mine(N);
-			for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
 
 			int minicost = INF, minidist = INF;
 			int cnt = 1, src = -1, dst = -1;
@@ -119,7 +124,7 @@ struct AI {
 						// 小さいほどよい
 						pair<int, int> hyoka = make_pair(INF, 0);
 
-                        if(mySite.count(x) == 0){
+						if(mySite.count(x) == 0){
 							hyoka.first = min(hyoka.first, (int)G[x].size());
 							hyoka.second++;
 						}
@@ -129,14 +134,14 @@ struct AI {
 						}
 
 						if(hyoka > kouho.first)continue;
-                        cc++;
+						cc++;
 						if(hyoka < kouho.first){
 							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
-                            continue;
+							continue;
 						}
 						if (rand()%2)
 							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
-						}
+					}
 				}
 				r = kouho.second;
 				cerr << "(mode=0) cc = " << cc << endl;
@@ -243,6 +248,31 @@ struct AI {
 		cerr << endl;
 		return r;
 	}
+
+	void calc_dist_from_my_mine(vector<int>& dist, set<int> myMine, const vector<vector<pair<int,int>>>& G) {
+		{
+			priority_queue<pair<int, int>> Q;
+			for(auto src : myMine){
+				dist[src] = 0;
+				Q.push({0, src});
+			}
+			while (!Q.empty()) {
+				int d = -Q.top().first;
+				int v = Q.top().second;
+				Q.pop();
+				if (dist[v] != d) continue;
+				if (d > remain_turn) break;
+				for (auto p : G[v]) {
+					int dd = d + p.second;
+					if (dd < dist[p.first]) {
+						dist[p.first] = dd;
+						Q.push({-dd, p.first});
+					}
+				}
+			}
+		}
+	}
+
 	void calc_dist(int src, int dst, vector<int>& dist1, vector<int>& dist2, int mindist, const vector<vector<pair<int,int>>>& G) {
 		dist1[src] = 0;
 		{
@@ -288,11 +318,11 @@ struct AI {
 		for (int i = 0; i < M; ++ i) {
 			int m = mines[i];
 			for (int j = 0; j < N; ++ j) if (D[i][j] != INF) {
-				if (uf.root(m) == uf.root(j)) {
-					int x = D[i][j];
-					r += x*x;
+					if (uf.root(m) == uf.root(j)) {
+						int x = D[i][j];
+						r += x*x;
+					}
 				}
-			}
 		}
 		return r;
 	}
@@ -303,6 +333,7 @@ struct AI {
 		remain_turn = g.edges.size() / num_of_punters + 2;
 		map<int,int> idx;
 		this->punter_id = punter_id;
+		this->splurges = splurges;
 		N = 0;
 		for (auto x : g.edges) {
 			if (!idx.count(x.first)) { idx[x.first] = N++; rev.push_back(x.first); }
@@ -325,7 +356,7 @@ struct AI {
 			mines.push_back(idx[x]);
 		}
 		M = mines.size();
-		
+
 
 		D.resize(M, vector<int>(N, INF));
 		for (int i = 0; i < M; ++ i) {
@@ -336,23 +367,30 @@ struct AI {
 				int x = Q.front(); Q.pop();
 				int dx = D[i][x];
 				for (int y : G[x]) if (D[i][y] == INF) {
-					D[i][y] = dx+1;
-					Q.push(y);
-				}
+						D[i][y] = dx+1;
+						Q.push(y);
+					}
 			}
 		}
 		mode = 0;
 	}
+
 	string Name() {
 		return "shiota8.6";
 	}
+
 	int PunterId() {
 		return punter_id;
 	}
+
 	void Load(const Moves& moves, const string& state) {
 		map<int,int> idx;
 		istringstream iss(state);
 		iss >> punter_id >> N >> M;
+		int spl, opt;
+		iss >> punter_id >> N >> M >> spl >> opt;
+		splurges = (spl != 0);
+		options = (opt != 0);
 		mines = vector<int>(M);
 		for (int i = 0; i < M; ++ i) iss >> mines[i];
 		rev = vector<int>(N);
@@ -401,12 +439,14 @@ struct AI {
 				}
 			}
 		}
-
 		iss >> remain_turn;
 	}
+
 	string State() {
 		ostringstream oss;
 		oss << punter_id << " " << N << " " << M << " ";
+		oss << (splurges ? 1 : 0) << " ";
+		oss << (options ? 1 : 0) << " ";
 		for (int i = 0; i < M; ++ i) oss << mines[i] << " ";
 		for (int i = 0; i < N; ++ i) oss << rev[i] << " ";
 		for (int i = 0; i < M; ++ i) for (int j = 0; j < N; ++ j) oss << D[i][j] << " ";
@@ -421,7 +461,7 @@ struct AI {
 		oss << mode << " ";
 		oss << param.size() << " ";
 		for (int x : param) oss << x << " ";
-		oss << remain_turn << " ";
+		oss << remain_turn - 1 << " ";
 		return oss.str();
 	}
 };
