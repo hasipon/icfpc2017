@@ -40,7 +40,7 @@ struct AI {
 	map<pair<int,int>, int> E;
 	map<pair<int,int>, int> E_opt;
 	bool splurges, options;
-	bool use_option;
+	bool use_option = false;
 
 	int mode;
 	vector<int> param;
