@@ -208,6 +208,7 @@ struct io_Main {
 	string state;
 	bool futures = false;
 	bool splurges = false;
+	bool options = false;
 
 	void write(const string& s) {
 		ostringstream ss;
@@ -261,6 +262,8 @@ struct io_Main {
 				futures = s->read_bool();
 			} else if (k == "splurges") {
 				splurges = s->read_bool();
+			} else if (k == "options") {
+				options = s->read_bool();
 			} else {
 				s->read_value();
 			}
@@ -273,7 +276,7 @@ struct io_Main {
 		s->start_object();
 		for (; !s->end_object(); s->read_separator()) {
 			auto k = s->read_key();
-			if (k == "claim") {
+			if (k == "claim" || k == "option") {
 				route = vector<int>(2, -1);
 				s->start_object();
 				for (; !s->end_object(); s->read_separator()) {
@@ -371,6 +374,7 @@ struct io_Main {
 		}
 		if (mode == 3) return;
 		if (mode == 1) {
+			ai.options = options;
 			ai.Init(punter_id, num_of_punters, g, futures, splurges);
 			ostringstream ss;
 			if (futures) {
@@ -393,9 +397,15 @@ struct io_Main {
 				ss << "{\"pass\":{\"punter\":" << ai.PunterId() << "},\"state\":\"" << ai.State() << "\"}";
 				write(ss.str());
 			} else if (move.size() == 2) {
-				ostringstream ss;
-				ss << "{\"claim\":{\"punter\":" << ai.PunterId() << ",\"source\":" << move[0] << ",\"target\":" << move[1] << "},\"state\":\"" << ai.State() << "\"}";
-				write(ss.str());
+				if (ai.use_option) {
+					ostringstream ss;
+					ss << "{\"option\":{\"punter\":" << ai.PunterId() << ",\"source\":" << move[0] << ",\"target\":" << move[1] << "},\"state\":\"" << ai.State() << "\"}";
+					write(ss.str());
+				} else {
+					ostringstream ss;
+					ss << "{\"claim\":{\"punter\":" << ai.PunterId() << ",\"source\":" << move[0] << ",\"target\":" << move[1] << "},\"state\":\"" << ai.State() << "\"}";
+					write(ss.str());
+				}
 			} else {
 				ostringstream ss;
 				ss << "{\"splurge\":{\"punter\":" << ai.PunterId() << ",\"route\":[";
