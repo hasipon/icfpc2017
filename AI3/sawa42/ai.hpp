@@ -20,8 +20,8 @@ public:
     }
 
     int turn = context.node.size() / context.num_punters - state.owned.size();
-    queue<Edge> q;
 
+    queue<Edge> q;
     for (; turn && q.size(); q.pop()) {
       const int src = q.front().second;
       if (turn == 0) break;
