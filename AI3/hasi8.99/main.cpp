@@ -5,10 +5,10 @@
 #include <sstream>
 using namespace std;
 
-int io_get_n() {
-	int n = 0;
+int64_t io_get_n() {
+	int64_t n = 0;
 	for (;;) {
-		int c = getchar();
+		int64_t c = getchar();
 		if (c == ':') break;
 		if (!('0' <= c && c <= '9')) { cerr << "io_get_n " << c << " " << n << endl; throw 1; }
 		n = n * 10 + (c - '0');
@@ -18,7 +18,7 @@ int io_get_n() {
 
 struct io_Json {
 	char* buf;
-	int p, n;
+	int64_t p, n;
 	io_Json() {
 		n = io_get_n();
 		buf = new char[n+1];
@@ -30,7 +30,7 @@ struct io_Json {
 	virtual ~io_Json() {
 		delete[] buf;
 	}
-	int peek() {
+	int64_t peek() {
 		if (p >= n) return -1;
 		return buf[p];
 	}
@@ -57,7 +57,7 @@ struct io_Json {
 		}
 		return r;
 	}
-	int read_number() {
+	int64_t read_number() {
 		read_ws();
 		bool minus = false;
 		{
@@ -68,7 +68,7 @@ struct io_Json {
 				++p;
 			}
 		}
-		int r = 0;
+		int64_t r = 0;
 		for (;;) {
 			auto c = peek();
 			if ('0' <= c && c <= '9') {
@@ -103,7 +103,7 @@ struct io_Json {
 		read_ws();
 		if (peek() != '"') { cerr << "read_string 1" << endl; throw 1; }
 		++p;
-		int s = p;
+		int64_t s = p;
 		for (;;) {
 			auto c = peek(); ++p;
 			if (c == -1) { cerr << "read_string 2" << endl; throw 1; }
@@ -195,13 +195,13 @@ struct io_Json {
 			return "";
 		}
 	}
-	bool is_ws(int c) {
+	bool is_ws(int64_t c) {
 		return c == ' ' || c == '\t' || c == '\r' || c == '\n';
 	}
 };
 
 struct io_Main {
-	int punter_id, num_of_punters;
+	int64_t punter_id, num_of_punters;
 	AI ai;
 	Graph g;
 	Moves moves;
@@ -225,8 +225,8 @@ struct io_Main {
 			if (k == "rivers") {
 				s->start_array();
 				for (; !s->end_array(); s->read_separator()) {
-					int c = 0;
-					int source, target;
+					int64_t c = 0;
+					int64_t source, target;
 					s->start_object();
 					for (; !s->end_object(); s->read_separator()) {
 						auto kk = s->read_key();
@@ -271,13 +271,13 @@ struct io_Main {
 	}
 
 	Move read_move(io_Json* s) {
-		int punter_id = -1;
-		vector<int> route;
+		int64_t punter_id = -1;
+		vector<int64_t> route;
 		s->start_object();
 		for (; !s->end_object(); s->read_separator()) {
 			auto k = s->read_key();
 			if (k == "claim" || k == "option") {
-				route = vector<int>(2, -1);
+				route = vector<int64_t>(2, -1);
 				s->start_object();
 				for (; !s->end_object(); s->read_separator()) {
 					auto kk = s->read_key();
@@ -333,7 +333,7 @@ struct io_Main {
 			auto s = new io_Json();
 			delete s;
 		}
-		int mode = 1;
+		int64_t mode = 1;
 		{
 			auto s = new io_Json();
 			s->start_object();
@@ -409,7 +409,7 @@ struct io_Main {
 			} else {
 				ostringstream ss;
 				ss << "{\"splurge\":{\"punter\":" << ai.PunterId() << ",\"route\":[";
-				for (int i = 0; i < move.size(); ++ i) {
+				for (int64_t i = 0; i < move.size(); ++ i) {
 					if (i) ss << ",";
 					ss << move[i];
 				}
