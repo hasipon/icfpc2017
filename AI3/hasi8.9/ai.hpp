@@ -98,7 +98,7 @@ struct AI {
 					if (dist[v] != d) continue;
 					if (d > 0 && is_mine[v]) {
 						// cut x dist
-						int cut_x_dist = d * cuts[make_pair(m, v)];
+						int cut_x_dist = d * min(5, cuts[make_pair(m, v)]);
 						if (cut_x_dist < minicost) {
 							src = m; dst = v;
 							minicost = cut_x_dist;
@@ -385,7 +385,7 @@ struct AI {
 	}
 
 	string Name() {
-		return "shiota8.9";
+		return "hasi8.9";
 	}
 
 	int PunterId() {
