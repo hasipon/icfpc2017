@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+<h2>フィルタ</h2>
+<form role="form" action="/autobattle" method="GET">
+  <div class="form-group form-inline">
+    <label>Punters</label>
+    <input type="text" placeholder="1" name="punter-min" class="form-control">
+    <label>～</label>
+    <input type="text" placeholder="999" name="punter-max" class="form-control">
+  </div>
+
+  <div class="form-group form-inline">
+    <label>Sites</label>
+    <input type="text" placeholder="1" name="site-min" class="form-control">
+    <label>～</label>
+    <input type="text" placeholder="999" name="site-max" class="form-control">
+  </div>
+
+  <div class="form-group form-inline">
+    <label>Rivers</label>
+    <input type="text" placeholder="1" name="river-min" class="form-control">
+    <label>～</label>
+    <input type="text" placeholder="999" name="river-max" class="form-control">
+  </div>
+
+  <div class="form-group form-inline">
+    <label>Mines</label>
+    <input type="text" placeholder="1" name="mine-min" class="form-control">
+    <label>～</label>
+    <input type="text" placeholder="999" name="mine-max" class="form-control">
+  </div>
+
+  <div class="form-group form-inline">
+    <label>Futures</label>
+    <label class="checkbox-inline"><input type="checkbox" checked="checked" name="futures-off" value="1">無</label>
+    <label class="checkbox-inline"><input type="checkbox" checked="checked" name="futures-on" value="1">有</label>
+  </div>
+
+  <div class="form-group form-inline">
+    <label>Splurges</label>
+    <label class="checkbox-inline"><input type="checkbox" checked="checked" name="splurges-off" value="1">無</label>
+    <label class="checkbox-inline"><input type="checkbox" checked="checked" name="splurges-on" value="1">有</label>
+  </div>
+
+  <div class="form-group form-inline">
+    <label>Options</label>
+    <label class="checkbox-inline"><input type="checkbox" checked="checked" name="options-off" value="1">無</label>
+    <label class="checkbox-inline"><input type="checkbox" checked="checked" name="options-on" value="1">有</label>
+  </div>
+
+  <input type="hidden" name="search" value="1">
+  <button class="btn btn-default"><span class="glyphicon glyphicon-search">検索</button>
+</form>
+</div>
+
+{% endblock %}
+

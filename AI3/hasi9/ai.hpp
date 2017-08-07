@@ -38,8 +38,11 @@ struct AI {
 	vector<int> rev;
 	vector<vector<int>> D;
 	map<pair<int,int>, int> E;
+	map<pair<int,int>, int> E_opt;
 	int mode;
 	vector<int> param;
+	bool options;
+	bool use_option = false;
 
 	vector<int> Think(const Moves& moves, const string& state) {
 		Load(moves, state);
@@ -325,6 +328,14 @@ struct AI {
 				E[{x,y}] = z;
 			}
 		}
+		{
+			int n; iss >> n;
+			for (int i = 0; i < n; ++ i) {
+				int x, y, z;
+				iss >> x >> y >> z;
+				E_opt[{x,y}] = z;
+			}
+		}
 		iss >> mode;
 		{
 			int n; iss >> n;
@@ -340,7 +351,11 @@ struct AI {
 				int a = idx[x.route[i-1]];
 				int b = idx[x.route[i]];
 				if (a > b) swap(a, b);
-				E[{a, b}] = x.punter_id;
+				if (E[{a,b}] == -1) {
+					E[{a, b}] = x.punter_id;
+				} else {
+					E_opt[{a, b}] = x.punter_id;
+				}
 			}
 		}
 	}
@@ -352,6 +367,10 @@ struct AI {
 		for (int i = 0; i < M; ++ i) for (int j = 0; j < N; ++ j) oss << D[i][j] << " ";
 		oss << E.size() << " ";
 		for (const auto& x : E) {
+			oss << x.first.first << " " << x.first.second << " " << x.second << " ";
+		}
+		oss << E_opt.size() << " ";
+		for (const auto& x : E_opt) {
 			oss << x.first.first << " " << x.first.second << " " << x.second << " ";
 		}
 		oss << mode << " ";

@@ -1,0 +1,43 @@
+# option success (small_map)
+#
+# [0] -- 1 -- 2 -- 3
+#
+12:{"me":"bob"}
+12:{"me":"aaa"}
+11:{"ready":0}
+11:{"ready":1}
+44:{"claim":{"punter":0,"source":0,"target":1}}
+45:{"option":{"punter":1,"source":0,"target":1}}
+21:{"pass":{"punter":0}}
+
+punter 0: score = 1
+punter 1: score = 1
+
+# splurge success with option (small_map)
+#
+# [0] -- 1 -- 2 -- 3
+#
+12:{"me":"bob"}
+12:{"me":"aaa"}
+11:{"ready":0}
+11:{"ready":1}
+21:{"pass":{"punter":0}}
+44:{"claim":{"punter":1,"source":0,"target":1}}
+40:{"splurge":{"punter":0,"route":[0,1,2]}}
+
+punter 0: score = 5
+punter 1: score = 1
+
+# splurge fails with option (small_map5)
+#
+# [0] -- 1 -- 2 -- 3 -- 4 -- 5
+#
+12:{"me":"bob"}
+12:{"me":"aaa"}
+11:{"ready":0}
+11:{"ready":1}
+21:{"pass":{"punter":0}}
+44:{"claim":{"punter":1,"source":0,"target":1}}
+21:{"pass":{"punter":0}}
+44:{"claim":{"punter":1,"source":1,"target":2}}
+40:{"splurge":{"punter":0,"route":[0,1,2]}}

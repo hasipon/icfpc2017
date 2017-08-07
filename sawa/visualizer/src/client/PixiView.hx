@@ -88,6 +88,21 @@ class PixiView extends Application
         
         for (river in game.rivers)
         {
+            
+            switch river.option {
+                case Option.Some(opt):
+                    var ax = resolveX(game.sites[river.a].x);
+                    var ay = resolveY(game.sites[river.a].y);
+                    var bx = resolveX(game.sites[river.b].x);
+                    var by = resolveY(game.sites[river.b].y);
+                    _graphic.lineStyle(1, getColor(opt, you).toRgbInt(), 0.4);
+                    
+                    _graphic.moveTo(ax, ay);
+                    _graphic.lineTo(bx, by);
+                        
+                case Option.None:
+            }
+            
             var ax = resolveX(game.sites[river.a].x);
             var ay = resolveY(game.sites[river.a].y);
             var bx = resolveX(game.sites[river.b].x);

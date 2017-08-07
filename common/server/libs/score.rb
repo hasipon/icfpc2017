@@ -52,7 +52,7 @@ class UndirectedGraph
 end
 
 class Score
-  def initialize(map, num_of_punters, futures, splurges)
+  def initialize(map, num_of_punters, futures, settings)
     @map = map
     @num_of_punters = num_of_punters
 
@@ -67,17 +67,15 @@ class Score
     @graph = UndirectedGraph.new
     @graph.load_paths @map["rivers"]
 
-    # @map["rivers"].each do |river|
-    #   @graph.add_edge(river["source"], river["target"])
-    # end
-
     @claims = []
     @num_of_punters.times do
       @claims.push(UndirectedGraph.new)
     end
 
-    @splurges = splurges
+    @splurges = settings["splurges"]
     @pass_counts = Array.new(@num_of_punters, 0)
+    @options = settings["options"]
+    @option_counts = Array.new(@num_of_punters, @map["mines"].length)
   end
 
   def handle_splurge(move)
@@ -94,15 +92,42 @@ class Score
       return false
     end
 
+    option_count = 0
+
     route.each_cons(2) do |source, target|
-      if @rivers[[source, target]]
-        $stderr.puts "already occupied (#{source},#{target})"
-        return false
+      if @options
+        if @rivers[[source, target]].is_a?(Array)
+          $stderr.puts "already occupied (#{source},#{target}) by #{@rivers[[source, target]]}"
+          return false
+        end
+
+        option_count += 1 if @rivers[[source, target]]
+      else
+        if @rivers[[source, target]]
+          $stderr.puts "already occupied (#{source},#{target})"
+          return false
+        end
       end
     end
 
+    if @options
+      if option_count > @option_counts[punter_id]
+        $stderr.puts "insufficient option count in splurge move"
+        return false
+      end
+
+      @option_counts[punter_id] -= option_count
+    end
+
     route.each_cons(2) do |source, target|
-      @rivers[[source, target]] = punter_id
+      if @rivers[[source, target]].nil?
+        @rivers[[source, target]] = punter_id
+        @rivers[[target, source]] = punter_id
+      else
+        raise "not option mode" unless @options
+        @rivers[[source, target]] = [@rivers[[source, target]], punter_id]
+        @rivers[[target, source]] = [@rivers[[target, source]], punter_id]
+      end
       @claims[punter_id].add_edge(source, target)
     end
 
@@ -120,14 +145,39 @@ class Score
 
       if @rivers[[source, target]].nil?
         @rivers[[source, target]] = punter_id
+        @rivers[[target, source]] = punter_id
         @claims[punter_id].add_edge(source, target)
       end
 
       @pass_counts[punter_id] = 0
     elsif move.has_key? 'splurge'
       unless handle_splurge(move)
-        $stderr.puts "WARNING: invalid splurge :#{move}"
+        raise "invalid splurge move:#{move}"
       end
+    elsif move.has_key? "option"
+      punter_id = move["option"]["punter"]
+      source = move["option"]["source"]
+      target = move["option"]["target"]
+
+      if !@options
+        raise "options is not enabled but option claimed: #{move}"
+      end
+      if @rivers[[source, target]].nil?
+        raise "the river is not claimed but option claimed: #{move}"
+      end
+      if @rivers[[source, target]].is_a?(Array)
+        raise "the river cannot afford anymore but option claimed: #{move}"
+      end
+      if @option_counts[punter_id] <= 0
+        raise "the punter cannot afford to option but option claimed: #{move}"
+      end
+
+      @rivers[[source, target]] = [@rivers[[source, target]], punter_id]
+      @rivers[[target, source]] = [@rivers[[target, source]], punter_id]
+
+      @claims[punter_id].add_edge(source, target)
+
+      @option_counts[punter_id] -= 1
     else
       raise "not supported move: #{move}"
     end
@@ -175,6 +225,8 @@ class Score
   end
 
   def calc
+    p @claims
+
     scores = [0] * @num_of_punters
     @map["mines"].each do |mine|
       s = self.calc_for_mine(mine)

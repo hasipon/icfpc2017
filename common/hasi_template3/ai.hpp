@@ -4,6 +4,8 @@
 
 struct AI {
 	string state;
+	bool options;
+	bool use_option;
 
 	string Name() {
 		return "hoge";

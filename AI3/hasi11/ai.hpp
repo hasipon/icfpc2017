@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "cut_info.hpp"
+
 const int INF = 1<<30;
 
 struct UnionFind {
@@ -26,6 +28,10 @@ struct UnionFind {
 	}
 };
 
+enum ParamHeader {
+	DST0,
+};
+
 struct AI {
 	int punter_id, N, M;
 	vector<int> mines;
@@ -35,7 +41,7 @@ struct AI {
 	map<pair<int,int>, int> E_opt;
 	int mode;
 	vector<int> param;
-	bool options;
+	bool splurges, options;
 	bool use_option = false;
 
 	vector<int> Think(const Moves& moves, const string& state) {
@@ -58,10 +64,11 @@ struct AI {
 
 		vector<int> r;
 		if (mode == 0) {
+			map<pair<int, int>, int> cuts = cut::calcMinCutForThink(G, mines);
 			vector<bool> is_mine(N);
 			for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
 
-			int mindist = INF;
+			int minicost = INF, minidist = INF;
 			int cnt = 1, src = -1, dst = -1;
 			for (int i = 0; i < M; ++ i) {
 				int m = mines[i];
@@ -74,11 +81,14 @@ struct AI {
 					int v = Q.top().second;
 					Q.pop();
 					if (dist[v] != d) continue;
-					if (d > mindist) break;
 					if (d > 0 && is_mine[v]) {
-						if (d < mindist || (d == mindist || rand() % ++cnt == 0)) { src = m; dst = v; }
-						if (d < mindist) cnt = 1;
-						mindist = d;
+						// cut x dist
+						int cut_x_dist = d * cuts[make_pair(m, v)];
+						if (cut_x_dist < minicost) {
+							src = m; dst = v;
+							minicost = cut_x_dist;
+							minidist = d;
+						}
 					}
 					for (auto p : G[v]) {
 						int dd = d + p.second;
@@ -89,18 +99,18 @@ struct AI {
 					}
 				}
 			}
-			if (mindist == INF) {
+			if (minicost == INF) {
 				mode = 1;
 			} else {
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
-				calc_dist(src, dst, dist1, dist2, mindist, G);
+				calc_dist(src, dst, dist1, dist2, minidist, G);
 				int cc = 0;
 				for (auto e : E1) {
 					int x = e.first;
 					int y = e.second;
 					if (dist1[x] == INF || dist1[y] == INF || dist2[x] == INF || dist2[y] == INF) continue;
-					if (dist1[x] + dist2[y] + 1 == mindist || dist1[y] + dist2[x] + 1 == mindist) {
+					if (dist1[x] + dist2[y] + 1 == minidist || dist1[y] + dist2[x] + 1 == minidist) {
 						if (rand() % ++ cc == 0) {
 							r = {rev[x], rev[y]};
 						}
@@ -137,17 +147,28 @@ struct AI {
 				}
 			}
 			int max_gain = -1, cnt = 1, dst = -1;
-			for (int i = 0; i < N; ++ i) {
-				if (gain[i] > max_gain || (gain[i] == max_gain && rand() % ++cnt == 0)) {
-					dst = i;
-					if (gain[i] > max_gain) cnt = 1;
-					max_gain = gain[i];
+			if (param.size() >= 1 && param[0] == DST0) {
+				int max_gain0 = param[1];
+				int dst0 = param[2];
+				if (gain[dst0] == max_gain0) {
+					max_gain = max_gain0;
+					dst = dst0;
+				}
+			}
+			if (max_gain == -1) {
+				for (int i = 0; i < N; ++ i) {
+					if (gain[i] > max_gain || (gain[i] == max_gain && rand() % ++cnt == 0)) {
+						dst = i;
+						if (gain[i] > max_gain) cnt = 1;
+						max_gain = gain[i];
+					}
 				}
 			}
 			cerr << "max_gain = " << max_gain << endl;
 			if (max_gain <= 0) {
 				mode = 2;
 			} else {
+				param = {DST0, max_gain, dst};
 				int src = base[dst];
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
@@ -239,6 +260,7 @@ struct AI {
 	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures, bool splurges) {
 		map<int,int> idx;
 		this->punter_id = punter_id;
+		this->splurges = splurges;
 		N = 0;
 		for (auto x : g.edges) {
 			if (!idx.count(x.first)) { idx[x.first] = N++; rev.push_back(x.first); }
@@ -261,6 +283,9 @@ struct AI {
 			mines.push_back(idx[x]);
 		}
 		M = mines.size();
+		
+		cut::calcMinCut(G, mines);
+		
 		D.resize(M, vector<int>(N, INF));
 		for (int i = 0; i < M; ++ i) {
 			queue<int> Q;
@@ -278,7 +303,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi10";
+		return "hasi9";
 	}
 	int PunterId() {
 		return punter_id;
@@ -286,7 +311,10 @@ struct AI {
 	void Load(const Moves& moves, const string& state) {
 		map<int,int> idx;
 		istringstream iss(state);
-		iss >> punter_id >> N >> M;
+		int spl, opt;
+		iss >> punter_id >> N >> M >> spl >> opt;
+		splurge = (spl != 0);
+		options = (opt != 0);
 		mines = vector<int>(M);
 		for (int i = 0; i < M; ++ i) iss >> mines[i];
 		rev = vector<int>(N);
@@ -338,6 +366,8 @@ struct AI {
 	string State() {
 		ostringstream oss;
 		oss << punter_id << " " << N << " " << M << " ";
+		oss << (splurges ? 1 : 0) << " ";
+		oss << (options ? 1 : 0) << " ";
 		for (int i = 0; i < M; ++ i) oss << mines[i] << " ";
 		for (int i = 0; i < N; ++ i) oss << rev[i] << " ";
 		for (int i = 0; i < M; ++ i) for (int j = 0; j < N; ++ j) oss << D[i][j] << " ";

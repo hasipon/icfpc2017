@@ -33,11 +33,15 @@ enum ParamHeader {
 };
 
 struct AI {
-	int punter_id, N, M;
+	int punter_id, N, M, remain_turn;
 	vector<int> mines;
 	vector<int> rev;
 	vector<vector<int>> D;
 	map<pair<int,int>, int> E;
+	map<pair<int,int>, int> E_opt;
+	bool options;
+	bool use_option;
+
 	int mode;
 	vector<int> param;
 
@@ -296,6 +300,7 @@ struct AI {
 		return {};
 	}
 	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures, bool splurges) {
+		remain_turn = g.edges.size() / num_of_punters + 2;
 		map<int,int> idx;
 		this->punter_id = punter_id;
 		N = 0;
@@ -365,6 +370,14 @@ struct AI {
 				E[{x,y}] = z;
 			}
 		}
+		{
+			int n; iss >> n;
+			for (int i = 0; i < n; ++ i) {
+				int x, y, z;
+				iss >> x >> y >> z;
+				E_opt[{x,y}] = z;
+			}
+		}
 		iss >> mode;
 		{
 			int n; iss >> n;
@@ -381,8 +394,15 @@ struct AI {
 				int b = idx[x.route[i]];
 				if (a > b) swap(a, b);
 				E[{a, b}] = x.punter_id;
+				if (E[{a,b}] == -1) {
+					E[{a, b}] = x.punter_id;
+				} else {
+					E_opt[{a, b}] = x.punter_id;
+				}
 			}
 		}
+
+		iss >> remain_turn;
 	}
 	string State() {
 		ostringstream oss;
@@ -394,9 +414,14 @@ struct AI {
 		for (const auto& x : E) {
 			oss << x.first.first << " " << x.first.second << " " << x.second << " ";
 		}
+		oss << E_opt.size() << " ";
+		for (const auto& x : E_opt) {
+			oss << x.first.first << " " << x.first.second << " " << x.second << " ";
+		}
 		oss << mode << " ";
 		oss << param.size() << " ";
 		for (int x : param) oss << x << " ";
+		oss << remain_turn << " ";
 		return oss.str();
 	}
 };
