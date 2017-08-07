@@ -118,7 +118,7 @@ struct _Move : public vector<SiteID>
 {
   int punter_id = NULL_PUNTER_ID;
 
-  _Move(Move move)
+  _Move(Move move) : punter_id(move.punter_id)
   {
     each (i, move.route) push_back(i);
   }
@@ -127,7 +127,7 @@ struct _Move : public vector<SiteID>
   {
   }
 
-  _Move(int punter_id, Edge e) : punter_id(punter_id)
+  _Move(int punter_id, Edge e) : _Move(punter_id)
   {
     Add(e);
   }
