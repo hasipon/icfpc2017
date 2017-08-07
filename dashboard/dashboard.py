@@ -260,6 +260,9 @@ def calc_rating(max_log, log_filter):
         for i in range(len(names)):
             names[i] = fix_name(names[i])
 
+        if len(set(names)) != len(names):
+            continue
+
         for name in names:
             if name not in rating:
                 rating[name] = 1500
