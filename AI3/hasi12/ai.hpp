@@ -176,7 +176,7 @@ struct AI {
 					if (dist1[x] == INF || dist1[y] == INF || dist2[x] == INF || dist2[y] == INF) continue;
 					if (dist1[x] + dist2[y] + 1 == minidist || dist1[y] + dist2[x] + 1 == minidist) {
 						if (rand() % ++ cc == 0) {
-							r = {rev[x], rev[y]};
+							r = {x, y};
 						}
 					}
 				}
@@ -375,7 +375,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi12";
+		return "hasi12.1";
 	}
 	int PunterId() {
 		return punter_id;
