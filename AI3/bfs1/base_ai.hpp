@@ -199,6 +199,7 @@ public:
 
   virtual void Init(int _punter_id, int num_of_punters, const Graph& g, bool futures, bool splurges)
   {
+    ios_base::sync_with_stdio(0);
     context.punter_id = _punter_id;
     context.num_punters = num_of_punters;
     context.options = options;
