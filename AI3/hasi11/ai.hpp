@@ -41,7 +41,7 @@ struct AI {
 	map<pair<int,int>, int> E_opt;
 	int mode;
 	vector<int> param;
-	bool options;
+	bool splurges, options;
 	bool use_option = false;
 
 	vector<int> Think(const Moves& moves, const string& state) {
@@ -260,6 +260,7 @@ struct AI {
 	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures, bool splurges) {
 		map<int,int> idx;
 		this->punter_id = punter_id;
+		this->splurges = splurges;
 		N = 0;
 		for (auto x : g.edges) {
 			if (!idx.count(x.first)) { idx[x.first] = N++; rev.push_back(x.first); }
@@ -310,7 +311,10 @@ struct AI {
 	void Load(const Moves& moves, const string& state) {
 		map<int,int> idx;
 		istringstream iss(state);
-		iss >> punter_id >> N >> M;
+		int spl, opt;
+		iss >> punter_id >> N >> M >> spl >> opt;
+		splurge = (spl != 0);
+		options = (opt != 0);
 		mines = vector<int>(M);
 		for (int i = 0; i < M; ++ i) iss >> mines[i];
 		rev = vector<int>(N);
@@ -362,6 +366,8 @@ struct AI {
 	string State() {
 		ostringstream oss;
 		oss << punter_id << " " << N << " " << M << " ";
+		oss << (splurges ? 1 : 0) << " ";
+		oss << (options ? 1 : 0) << " ";
 		for (int i = 0; i < M; ++ i) oss << mines[i] << " ";
 		for (int i = 0; i < N; ++ i) oss << rev[i] << " ";
 		for (int i = 0; i < M; ++ i) for (int j = 0; j < N; ++ j) oss << D[i][j] << " ";
