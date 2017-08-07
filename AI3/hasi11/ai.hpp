@@ -313,7 +313,7 @@ struct AI {
 		istringstream iss(state);
 		int spl, opt;
 		iss >> punter_id >> N >> M >> spl >> opt;
-		splurge = (spl != 0);
+		splurges = (spl != 0);
 		options = (opt != 0);
 		mines = vector<int>(M);
 		for (int i = 0; i < M; ++ i) iss >> mines[i];
