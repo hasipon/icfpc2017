@@ -53,7 +53,7 @@ struct GameContext
   map<int, vector<int>> g;
   vector<int> node;
   set<int> mines;
-  int options;
+  int options = 0;
 };
 
 ostream& operator << (ostream& os, const GameContext& context)
