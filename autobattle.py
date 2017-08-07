@@ -55,7 +55,7 @@ def run_offline():
     print("Map",  battle_map)
     print("Participants", participants)
 
-    logname = 'AC-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
+    logname = 'AC-' os.path.basename(battle_map) + '-' + '-'.join(list(map(os.path.basename, participants))) + '@' + str(int(time.time())) + '.log'
 
     options = [
       '/usr/bin/ruby',
