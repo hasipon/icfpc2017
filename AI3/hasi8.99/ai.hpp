@@ -82,23 +82,17 @@ struct AI {
 		}
 
 		if (score >= 0) {
-			cerr << "score = " << score << endl;
 			if (E[sel] != -1) {
 				use_option = true;
-				cerr << "[M] option =";
 			} else {
-				cerr << "[M] move =";
 			}
 			vector<int64_t> r = {rev[sel.first], rev[sel.second]};
-			for (auto x : r) cerr << " " << x;
-			cerr << endl;
 			return r;
 		}
 		return {};
 	}
 	vector<int64_t> Think(const Moves& moves, const string& state) {
 		Load(moves, state);
-		cerr << "remain: " << remain_turn << endl;
 
 		if (options && 0 <= remain_turn && remain_turn < M) {
 			return ThinkM();
@@ -203,7 +197,6 @@ struct AI {
 					}
 				}
 				r = kouho.second;
-				cerr << "(mode=0) cc = " << cc << endl;
 				if (cc == 0) throw 1;
 			}
 		}
@@ -249,9 +242,6 @@ struct AI {
 						if(dist_from_mine[i] == INF){
 							continue;
 						}
-						if(gain[i] == max_gain && dist_from_mine[i] < mini_dist) {
-                            cerr << "tie break by dist" << endl;
-						}
 						dst = i;
 						if (gain[i] > max_gain) cnt = 1;
 						max_gain = gain[i];
@@ -259,7 +249,6 @@ struct AI {
 					}
 				}
 			}
-			cerr << "max_gain = " << max_gain << endl;
 			if (max_gain <= 0) {
 				mode = 2;
 			} else {
@@ -296,7 +285,6 @@ struct AI {
 					}
 				}
 				r = kouho.second;
-				cerr << "(mode=1) cc = " << cc << endl;
 				if (cc == 0) throw 1;
 			}
 		}
@@ -308,9 +296,6 @@ struct AI {
 			}
 		}
 
-		cerr << "move =";
-		for (auto x : r) cerr << " " << x;
-		cerr << endl;
 		return r;
 	}
 

@@ -137,7 +137,6 @@ namespace cut {
     map<pair<int64_t, int64_t>, int64_t> calcMinCut(const vector<vector<int64_t> > &G, const vector<int64_t> &mines) {
         map<pair<int64_t, int64_t>, int64_t> ret;
         if(G.size() >= V){
-            cerr << "min cut calc too large!!" << endl;
             return ret;
         }
         MaxFlow initState;
@@ -152,7 +151,6 @@ namespace cut {
                 int64_t cut = now.solve(mines[i], mines[j]);
                 ret[make_pair(mines[i], mines[j])] = cut;
                 ret[make_pair(mines[j], mines[i])] = cut;
-                // cerr << "cut(" << i <<"," << j << ")" << ' ' << cut <<endl;
             }
         }
         return ret;
@@ -161,7 +159,6 @@ namespace cut {
 
         map<pair<int64_t, int64_t>, int64_t> ret;
         if(G.size() >= V){
-            cerr << "min cut calc too large!!" << endl;
             return ret;
         }
         MaxFlow initState;
@@ -181,7 +178,6 @@ namespace cut {
                 int64_t cut = now.solve(mines[i], mines[j]);
                 ret[make_pair(mines[i], mines[j])] = cut;
                 ret[make_pair(mines[j], mines[i])] = cut;
-                // cerr << "cut(" << i <<"," << j << ")" << ' ' << cut <<endl;
             }
         }
         return ret;
