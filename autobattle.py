@@ -84,17 +84,25 @@ def run_offline():
 
     subprocess.check_output(options)
 
-    valid_log = False
+    valid_log = True
     with open(logname) as f:
         lines = f.readlines()
         if 2 <= len(lines):
+            info = json.loads(lines[1])
             scores = json.loads(lines[-1])
-            if scores and 'stop' in scores:
-                valid_log = True
-            else:
-                print("scores.stop is not exist")
+            if not info or not scores:
+                valid_log = False
+            if valid_log and 'punter_names' not in info or 'stop' not in scores:
+                valid_log = False
+            if valid_log:
+                names = info['punter_names']
+                if len(set(names)) != len(names):
+                    valid_log = False
+                    print("same name punters", names)
+                    print("Participants", participants)
         else:
             print("too short log")
+            valid_log = False
 
     print("valid_log", valid_log)
     if valid_log:
