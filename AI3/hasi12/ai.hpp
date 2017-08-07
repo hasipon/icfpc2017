@@ -182,6 +182,7 @@ struct AI {
 				}
 				cerr << "(mode=0) cc = " << cc << endl;
 				if (cc == 0) throw 1;
+				return r;
 			}
 
 			mode = 1;
@@ -375,7 +376,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi12.1";
+		return "hasi12.2";
 	}
 	int PunterId() {
 		return punter_id;
