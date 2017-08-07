@@ -8,16 +8,16 @@
 
 #include "cut_info.hpp"
 
-const int INF = 1<<30;
+const int64_t INF = 1LL<<60;
 
 struct UnionFind {
-	vector<int> data;
+	vector<int64_t> data;
 	UnionFind() {}
-	UnionFind(int n) : data(n, -1) {}
-	int root(int x) {
+	UnionFind(int64_t n) : data(n, -1) {}
+	int64_t root(int64_t x) {
 		return data[x] < 0 ? x : data[x] = root(data[x]);
 	}
-	bool merge(int x, int y) {
+	bool merge(int64_t x, int64_t y) {
 		x = root(x);
 		y = root(y);
 		if (x == y) return false;
@@ -33,27 +33,27 @@ enum ParamHeader {
 };
 
 struct AI {
-	int punter_id, N, M, remain_turn;
-	vector<int> mines;
-	vector<int> rev;
-	vector<vector<int>> D;
-	map<pair<int,int>, int> E;
-	map<pair<int,int>, int> E_opt;
+	int64_t punter_id, N, M, remain_turn;
+	vector<int64_t> mines;
+	vector<int64_t> rev;
+	vector<vector<int64_t>> D;
+	map<pair<int64_t,int64_t>, int64_t> E;
+	map<pair<int64_t,int64_t>, int64_t> E_opt;
 	bool splurges, options;
 	bool use_option = false;
 
-	int mode;
-	vector<int> param;
+	int64_t mode;
+	vector<int64_t> param;
 
-	vector<int> ThinkM() {
+	vector<int64_t> ThinkM() {
 		vector<bool> is_mine_or_mine(N);
-		for (int i = 0; i < M; ++ i) is_mine_or_mine[mines[i]] = true;
+		for (int64_t i = 0; i < M; ++ i) is_mine_or_mine[mines[i]] = true;
 
 		UnionFind uf0(N);
-		vector<pair<int,int>> E1;
+		vector<pair<int64_t,int64_t>> E1;
 		for (auto p : E) {
-			int x = p.first.first;
-			int y = p.first.second;
+			int64_t x = p.first.first;
+			int64_t y = p.first.second;
 			if (p.second == punter_id) {
 				uf0.merge(x, y);
 				is_mine_or_mine[x] = true;
@@ -68,8 +68,8 @@ struct AI {
 		}
 
 		long long score = -1;
-		int cnt = 1;
-		pair<int,int> sel;
+		int64_t cnt = 1;
+		pair<int64_t,int64_t> sel;
 		for (auto p : E1) if (is_mine_or_mine[p.first] || is_mine_or_mine[p.second]) {
 			auto uf = uf0;
 			uf.merge(p.first, p.second);
@@ -89,14 +89,14 @@ struct AI {
 			} else {
 				cerr << "[M] move =";
 			}
-			vector<int> r = {rev[sel.first], rev[sel.second]};
+			vector<int64_t> r = {rev[sel.first], rev[sel.second]};
 			for (auto x : r) cerr << " " << x;
 			cerr << endl;
 			return r;
 		}
 		return {};
 	}
-	vector<int> Think(const Moves& moves, const string& state) {
+	vector<int64_t> Think(const Moves& moves, const string& state) {
 		Load(moves, state);
 		cerr << "remain: " << remain_turn << endl;
 
@@ -104,17 +104,17 @@ struct AI {
 			return ThinkM();
 		}
 
-		vector<vector<pair<int,int>>> G(N);
-		map<int, int> site_panter_count;
-		vector<pair<int,int>> E1;
-		set<int> mySite, myMine;
+		vector<vector<pair<int64_t,int64_t>>> G(N);
+		map<int64_t, int64_t> site_panter_count;
+		vector<pair<int64_t,int64_t>> E1;
+		set<int64_t> mySite, myMine;
 
 		vector<bool> is_mine(N);
-		for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
+		for (int64_t i = 0; i < M; ++ i) is_mine[mines[i]] = true;
 
 		for (auto p : E) {
-			int x = p.first.first;
-			int y = p.first.second;
+			int64_t x = p.first.first;
+			int64_t y = p.first.second;
 			if (p.second == punter_id) {
 				G[x].push_back({y, 0});
 				G[y].push_back({x, 0});
@@ -131,29 +131,29 @@ struct AI {
 				site_panter_count[y]++;
 			}
 		}
-		vector<int> dist_from_mine(N, INF);
+		vector<int64_t> dist_from_mine(N, INF);
 		calc_dist_from_my_mine(dist_from_mine, mines, G);
 
-		vector<int> r;
+		vector<int64_t> r;
 		if (mode == 0) {
-			map<pair<int, int>, int> cuts = cut::calcMinCutForThink(G, mines);
+			map<pair<int64_t, int64_t>, int64_t> cuts = cut::calcMinCutForThink(G, mines);
 
-			int minicost = INF, minidist = INF;
-			int cnt = 1, src = -1, dst = -1;
-			for (int i = 0; i < M; ++ i) {
-				int m = mines[i];
-				vector<int> dist(N, INF);
-				priority_queue<pair<int,int>> Q;
+			int64_t minicost = INF, minidist = INF;
+			int64_t cnt = 1, src = -1, dst = -1;
+			for (int64_t i = 0; i < M; ++ i) {
+				int64_t m = mines[i];
+				vector<int64_t> dist(N, INF);
+				priority_queue<pair<int64_t,int64_t>> Q;
 				dist[m] = 0;
 				Q.push({0,m});
 				while (!Q.empty()) {
-					int d = -Q.top().first;
-					int v = Q.top().second;
+					int64_t d = -Q.top().first;
+					int64_t v = Q.top().second;
 					Q.pop();
 					if (dist[v] != d) continue;
 					if (d > 0 && is_mine[v]) {
 						// cut x dist
-						int cut_x_dist = d * cuts[make_pair(m, v)];
+						int64_t cut_x_dist = d * cuts[make_pair(m, v)];
 						if (cut_x_dist < minicost) {
 							src = m; dst = v;
 							minicost = cut_x_dist;
@@ -161,7 +161,7 @@ struct AI {
 						}
 					}
 					for (auto p : G[v]) {
-						int dd = d + p.second;
+						int64_t dd = d + p.second;
 						if (dd < dist[p.first]) {
 							dist[p.first] = dd;
 							Q.push({-dd, p.first});
@@ -172,18 +172,18 @@ struct AI {
 			if (minicost == INF) {
 				mode = 1;
 			} else {
-				vector<int> dist1(N, INF);
-				vector<int> dist2(N, INF);
+				vector<int64_t> dist1(N, INF);
+				vector<int64_t> dist2(N, INF);
 				calc_dist(src, dst, dist1, dist2, minidist, G);
-				pair<pair<int, int>, vector<int>> kouho = make_pair(make_pair(INF, INF), vector<int>());
-				int cc = 0;
+				pair<pair<int64_t, int64_t>, vector<int64_t>> kouho = make_pair(make_pair(INF, INF), vector<int64_t>());
+				int64_t cc = 0;
 				for (auto e : E1) {
-					int x = e.first;
-					int y = e.second;
+					int64_t x = e.first;
+					int64_t y = e.second;
 					if (dist1[x] == INF || dist1[y] == INF || dist2[x] == INF || dist2[y] == INF) continue;
 					if (dist1[x] + dist2[y] + 1 == minidist || dist1[y] + dist2[x] + 1 == minidist) {
 						// 小さいほどよい
-						pair<int, int> hyoka = make_pair(0, 0);
+						pair<int64_t, int64_t> hyoka = make_pair(0, 0);
 
 						if(is_mine[x] || is_mine[y]){
 							hyoka.first = -INF;
@@ -195,11 +195,11 @@ struct AI {
 						if(hyoka > kouho.first)continue;
 						cc++;
 						if(hyoka < kouho.first){
-							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
+							kouho = make_pair(hyoka, vector<int64_t>{rev[x], rev[y]});
 							continue;
 						}
 						if (rand()%2)
-							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
+							kouho = make_pair(hyoka, vector<int64_t>{rev[x], rev[y]});
 					}
 				}
 				r = kouho.second;
@@ -212,8 +212,8 @@ struct AI {
 			UnionFind uf1(N);
 			UnionFind uf2(N);
 			for (auto p : E) {
-				int x = p.first.first;
-				int y = p.first.second;
+				int64_t x = p.first.first;
+				int64_t y = p.first.second;
 				if (p.second == punter_id) {
 					uf1.merge(x, y);
 					uf2.merge(x, y);
@@ -222,29 +222,29 @@ struct AI {
 				}
 			}
 			vector<long long> gain(N);
-			vector<int> base(N);
-			for (int i = 0; i < N; ++ i) {
-				for (int j = 0; j < M; ++ j) {
+			vector<int64_t> base(N);
+			for (int64_t i = 0; i < N; ++ i) {
+				for (int64_t j = 0; j < M; ++ j) {
 					if (uf2.root(mines[j]) == uf2.root(i)) continue;
 					if (uf1.root(mines[j]) == uf1.root(i)) {
-						int x = D[j][i];
+						int64_t x = D[j][i];
 						gain[i] += x*x;
 						base[i] = mines[j];
 					}
 				}
 			}
-			int max_gain = -1, cnt = 1, dst = -1, mini_dist = INF;
+			int64_t max_gain = -1, cnt = 1, dst = -1, mini_dist = INF;
 			/*
 			if (param.size() >= 1 && param[0] == DST0) {
-				int max_gain0 = param[1];
-				int dst0 = param[2];
+				int64_t max_gain0 = param[1];
+				int64_t dst0 = param[2];
 				if (gain[dst0] == max_gain0) {
 					max_gain = max_gain0;
 					dst = dst0;
 				}
 			}*/
 			if (max_gain == -1) {
-				for (int i = 0; i < N; ++ i) {
+				for (int64_t i = 0; i < N; ++ i) {
 					if (gain[i] > max_gain || (gain[i] == max_gain && dist_from_mine[i] < mini_dist)){
 						if(dist_from_mine[i] == INF){
 							continue;
@@ -264,19 +264,19 @@ struct AI {
 				mode = 2;
 			} else {
 				param = {DST0, max_gain, dst};
-				int src = base[dst];
-				vector<int> dist1(N, INF);
-				vector<int> dist2(N, INF);
+				int64_t src = base[dst];
+				vector<int64_t> dist1(N, INF);
+				vector<int64_t> dist2(N, INF);
 				calc_dist(src, dst, dist1, dist2, INF, G);
-				pair<pair<int, int>, vector<int>> kouho = make_pair(make_pair(INF, INF), vector<int>());
-				int cc = 0;
-				int dd = dist1[dst] - 1;
+				pair<pair<int64_t, int64_t>, vector<int64_t>> kouho = make_pair(make_pair(INF, INF), vector<int64_t>());
+				int64_t cc = 0;
+				int64_t dd = dist1[dst] - 1;
 				for (auto e : E1) {
-					int x = e.first;
-					int y = e.second;
+					int64_t x = e.first;
+					int64_t y = e.second;
 					if ((dist1[x] == 0 && dist2[y] == dd) || (dist1[y] == 0 && dist2[x] == dd)) {
 						// 小さいほどよい
-						pair<int, int> hyoka = make_pair(0, 0);
+						pair<int64_t, int64_t> hyoka = make_pair(0, 0);
 
 						if(is_mine[x] || is_mine[y]){
 							hyoka.first = -INF;
@@ -288,11 +288,11 @@ struct AI {
 						if(hyoka > kouho.first)continue;
 						cc++;
 						if(hyoka < kouho.first){
-							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
+							kouho = make_pair(hyoka, vector<int64_t>{rev[x], rev[y]});
 							continue;
 						}
 						if (rand()%2)
-							kouho = make_pair(hyoka, vector<int>{rev[x], rev[y]});
+							kouho = make_pair(hyoka, vector<int64_t>{rev[x], rev[y]});
 					}
 				}
 				r = kouho.second;
@@ -314,21 +314,21 @@ struct AI {
 		return r;
 	}
 
-	void calc_dist_from_my_mine(vector<int>& dist, vector<int> myMine, const vector<vector<pair<int,int>>>& G) {
+	void calc_dist_from_my_mine(vector<int64_t>& dist, vector<int64_t> myMine, const vector<vector<pair<int64_t,int64_t>>>& G) {
 		{
-			priority_queue<pair<int, int>> Q;
+			priority_queue<pair<int64_t, int64_t>> Q;
 			for(auto src : myMine){
 				dist[src] = 0;
 				Q.push({0, src});
 			}
 			while (!Q.empty()) {
-				int d = -Q.top().first;
-				int v = Q.top().second;
+				int64_t d = -Q.top().first;
+				int64_t v = Q.top().second;
 				Q.pop();
 				if (dist[v] != d) continue;
 				if (d > remain_turn) break;
 				for (auto p : G[v]) {
-					int dd = d + p.second;
+					int64_t dd = d + p.second;
 					if (dd < dist[p.first]) {
 						dist[p.first] = dd;
 						Q.push({-dd, p.first});
@@ -338,19 +338,19 @@ struct AI {
 		}
 	}
 
-	void calc_dist(int src, int dst, vector<int>& dist1, vector<int>& dist2, int mindist, const vector<vector<pair<int,int>>>& G) {
+	void calc_dist(int64_t src, int64_t dst, vector<int64_t>& dist1, vector<int64_t>& dist2, int64_t mindist, const vector<vector<pair<int64_t,int64_t>>>& G) {
 		dist1[src] = 0;
 		{
-			priority_queue<pair<int,int>> Q;
+			priority_queue<pair<int64_t,int64_t>> Q;
 			Q.push({0,src});
 			while (!Q.empty()) {
-				int d = -Q.top().first;
-				int v = Q.top().second;
+				int64_t d = -Q.top().first;
+				int64_t v = Q.top().second;
 				Q.pop();
 				if (dist1[v] != d) continue;
 				if (d > mindist) break;
 				for (auto p : G[v]) {
-					int dd = d + p.second;
+					int64_t dd = d + p.second;
 					if (dd < dist1[p.first]) {
 						dist1[p.first] = dd;
 						Q.push({-dd, p.first});
@@ -360,16 +360,16 @@ struct AI {
 		}
 		dist2[dst] = 0;
 		{
-			priority_queue<pair<int,int>> Q;
+			priority_queue<pair<int64_t,int64_t>> Q;
 			Q.push({0,dst});
 			while (!Q.empty()) {
-				int d = -Q.top().first;
-				int v = Q.top().second;
+				int64_t d = -Q.top().first;
+				int64_t v = Q.top().second;
 				Q.pop();
 				if (dist2[v] != d) continue;
 				if (d > mindist) break;
 				for (auto p : G[v]) {
-					int dd = d + p.second;
+					int64_t dd = d + p.second;
 					if (dd < dist2[p.first]) {
 						dist2[p.first] = dd;
 						Q.push({-dd, p.first});
@@ -380,38 +380,38 @@ struct AI {
 	}
 	long long get_score(UnionFind& uf) {
 		long long r = 0;
-		for (int i = 0; i < M; ++ i) {
-			int m = mines[i];
-			for (int j = 0; j < N; ++ j) if (D[i][j] != INF) {
+		for (int64_t i = 0; i < M; ++ i) {
+			int64_t m = mines[i];
+			for (int64_t j = 0; j < N; ++ j) if (D[i][j] != INF) {
 					if (uf.root(m) == uf.root(j)) {
-						int x = D[i][j];
+						int64_t x = D[i][j];
 						r += x*x;
 					}
 				}
 		}
 		return r;
 	}
-	vector<pair<int,int>> Future() {
+	vector<pair<int64_t,int64_t>> Future() {
 		return {};
 	}
-	void Init(int punter_id, int num_of_punters, const Graph& g, bool futures, bool splurges) {
+	void Init(int64_t punter_id, int64_t num_of_punters, const Graph& g, bool futures, bool splurges) {
 		remain_turn = g.edges.size() / num_of_punters;
-		map<int,int> idx;
+		map<int64_t,int64_t> idx;
 		this->punter_id = punter_id;
 		this->splurges = splurges;
 		N = 0;
 		for (auto x : g.edges) {
 			if (!idx.count(x.first)) { idx[x.first] = N++; rev.push_back(x.first); }
 			if (!idx.count(x.second)) { idx[x.second] = N++; rev.push_back(x.second); }
-			int a = idx[x.first];
-			int b = idx[x.second];
+			int64_t a = idx[x.first];
+			int64_t b = idx[x.second];
 			if (a > b) swap(a, b);
 			E[{a, b}] = -1;
 		}
-		vector<vector<int>> G(N);
+		vector<vector<int64_t>> G(N);
 		for (auto x : g.edges) {
-			int a = idx[x.first];
-			int b = idx[x.second];
+			int64_t a = idx[x.first];
+			int64_t b = idx[x.second];
 			if (a > b) swap(a, b);
 			G[a].push_back(b);
 			G[b].push_back(a);
@@ -422,15 +422,15 @@ struct AI {
 		}
 		M = mines.size();
 
-		D.resize(M, vector<int>(N, INF));
-		for (int i = 0; i < M; ++ i) {
-			queue<int> Q;
+		D.resize(M, vector<int64_t>(N, INF));
+		for (int64_t i = 0; i < M; ++ i) {
+			queue<int64_t> Q;
 			D[i][mines[i]] = 0;
 			Q.push(mines[i]);
 			while (!Q.empty()) {
-				int x = Q.front(); Q.pop();
-				int dx = D[i][x];
-				for (int y : G[x]) if (D[i][y] == INF) {
+				int64_t x = Q.front(); Q.pop();
+				int64_t dx = D[i][x];
+				for (int64_t y : G[x]) if (D[i][y] == INF) {
 						D[i][y] = dx+1;
 						Q.push(y);
 					}
@@ -443,56 +443,56 @@ struct AI {
 		return "hasi8.99";
 	}
 
-	int PunterId() {
+	int64_t PunterId() {
 		return punter_id;
 	}
 
 	void Load(const Moves& moves, const string& state) {
-		map<int,int> idx;
+		map<int64_t,int64_t> idx;
 		istringstream iss(state);
-		int spl, opt;
+		int64_t spl, opt;
 		iss >> punter_id >> N >> M >> spl >> opt;
 		splurges = (spl != 0);
 		options = (opt != 0);
-		mines = vector<int>(M);
-		for (int i = 0; i < M; ++ i) iss >> mines[i];
-		rev = vector<int>(N);
-		for (int i = 0; i < N; ++ i) {
+		mines = vector<int64_t>(M);
+		for (int64_t i = 0; i < M; ++ i) iss >> mines[i];
+		rev = vector<int64_t>(N);
+		for (int64_t i = 0; i < N; ++ i) {
 			iss >> rev[i];
 			idx[rev[i]] = i;
 		}
-		D.resize(M, vector<int>(N));
-		for (int i = 0; i < M; ++ i) for (int j = 0; j < N; ++ j) iss >> D[i][j];
+		D.resize(M, vector<int64_t>(N));
+		for (int64_t i = 0; i < M; ++ i) for (int64_t j = 0; j < N; ++ j) iss >> D[i][j];
 		{
-			int n; iss >> n;
-			for (int i = 0; i < n; ++ i) {
-				int x, y, z;
+			int64_t n; iss >> n;
+			for (int64_t i = 0; i < n; ++ i) {
+				int64_t x, y, z;
 				iss >> x >> y >> z;
 				E[{x,y}] = z;
 			}
 		}
 		{
-			int n; iss >> n;
-			for (int i = 0; i < n; ++ i) {
-				int x, y, z;
+			int64_t n; iss >> n;
+			for (int64_t i = 0; i < n; ++ i) {
+				int64_t x, y, z;
 				iss >> x >> y >> z;
 				E_opt[{x,y}] = z;
 			}
 		}
 		iss >> mode;
 		{
-			int n; iss >> n;
-			for (int i = 0; i < n; ++ i) {
-				int x;
+			int64_t n; iss >> n;
+			for (int64_t i = 0; i < n; ++ i) {
+				int64_t x;
 				iss >> x;
 				param.push_back(x);
 			}
 		}
 
 		for (auto x : moves) {
-			for (int i = 1; i < x.route.size(); ++ i) {
-				int a = idx[x.route[i-1]];
-				int b = idx[x.route[i]];
+			for (int64_t i = 1; i < x.route.size(); ++ i) {
+				int64_t a = idx[x.route[i-1]];
+				int64_t b = idx[x.route[i]];
 				if (a > b) swap(a, b);
 				if (E[{a,b}] == -1) {
 					E[{a, b}] = x.punter_id;
@@ -509,9 +509,9 @@ struct AI {
 		oss << punter_id << " " << N << " " << M << " ";
 		oss << (splurges ? 1 : 0) << " ";
 		oss << (options ? 1 : 0) << " ";
-		for (int i = 0; i < M; ++ i) oss << mines[i] << " ";
-		for (int i = 0; i < N; ++ i) oss << rev[i] << " ";
-		for (int i = 0; i < M; ++ i) for (int j = 0; j < N; ++ j) oss << D[i][j] << " ";
+		for (int64_t i = 0; i < M; ++ i) oss << mines[i] << " ";
+		for (int64_t i = 0; i < N; ++ i) oss << rev[i] << " ";
+		for (int64_t i = 0; i < M; ++ i) for (int64_t j = 0; j < N; ++ j) oss << D[i][j] << " ";
 		oss << E.size() << " ";
 		for (const auto& x : E) {
 			oss << x.first.first << " " << x.first.second << " " << x.second << " ";
@@ -522,7 +522,7 @@ struct AI {
 		}
 		oss << mode << " ";
 		oss << param.size() << " ";
-		for (int x : param) oss << x << " ";
+		for (int64_t x : param) oss << x << " ";
 		oss << remain_turn - 1 << " ";
 		return oss.str();
 	}
