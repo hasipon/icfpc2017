@@ -421,6 +421,7 @@ struct io_Main {
 };
 
 int main() {
+    ios::sync_with_stdio(false);
 	io_Main hoge;
 	hoge.run();
 }
