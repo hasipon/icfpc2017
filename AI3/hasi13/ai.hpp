@@ -103,38 +103,10 @@ struct AI {
 				}
 			}
 
-			map<pair<int, int>, int> cuts = cut::calcMinCutForThink(G, mines);
-
-			map<pair<int,int>, int> one_map;
-			for (int i = 0; i < M; ++ i) for (int j = i+1; j < M; ++ j) {
-				int x = mines[i], y = mines[j];
-				if (uf1.root(x) != uf1.root(y) || uf2.root(x) == uf2.root(y)) continue;
-				cerr << "cut " << x << " " << y << " " << cuts[{x,y}] << endl;
-				if (cuts[{x, y}] == 1) {
-					for (auto p : get_ones(x, y, G, E1)) {
-						++ one_map[p];
-					}
-				}
-			}
-			if (one_map.size() > 0) {
-				pair<int,int> sel;
-				int cnt = 1;
-				int max_score = -1;
-				for (auto p : one_map) {
-					if (p.second > max_score || (p.second == max_score && rand() % ++cnt == 0)) {
-						sel = p.first;
-						if (p.second > max_score) cnt = 1;
-						max_score = p.second;
-					}
-				}
-				cerr << "[hasi] rule 1" << endl;
-				return {sel.first, sel.second};
-			}
-
 			vector<bool> is_mine(N);
 			for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
 
-			int minicost = INF, minidist = INF;
+			int mindist = INF;
 			int cnt = 1, src = -1, dst = -1;
 			for (int i = 0; i < M; ++ i) {
 				int m = mines[i];
@@ -147,14 +119,11 @@ struct AI {
 					int v = Q.top().second;
 					Q.pop();
 					if (dist[v] != d) continue;
+					if (d > mindist) break;
 					if (d > 0 && is_mine[v]) {
-						// cut x dist
-						int cut_x_dist = d * cuts[make_pair(m, v)];
-						if (cut_x_dist < minicost) {
-							src = m; dst = v;
-							minicost = cut_x_dist;
-							minidist = d;
-						}
+						if (d < mindist || (d == mindist || rand() % ++cnt == 0)) { src = m; dst = v; }
+						if (d < mindist) cnt = 1;
+						mindist = d;
 					}
 					for (auto p : G[v]) {
 						int dd = d + p.second;
@@ -165,16 +134,18 @@ struct AI {
 					}
 				}
 			}
-			if (minicost != INF) {
+			if (mindist == INF) {
+				mode = 1;
+			} else {
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
-				calc_dist(src, dst, dist1, dist2, minidist, G);
+				calc_dist(src, dst, dist1, dist2, mindist, G);
 				int cc = 0;
 				for (auto e : E1) {
 					int x = e.first;
 					int y = e.second;
 					if (dist1[x] == INF || dist1[y] == INF || dist2[x] == INF || dist2[y] == INF) continue;
-					if (dist1[x] + dist2[y] + 1 == minidist || dist1[y] + dist2[x] + 1 == minidist) {
+					if (dist1[x] + dist2[y] + 1 == mindist || dist1[y] + dist2[x] + 1 == mindist) {
 						if (rand() % ++ cc == 0) {
 							r = {x, y};
 						}
@@ -376,7 +347,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi12.2";
+		return "hasi13";
 	}
 	int PunterId() {
 		return punter_id;
