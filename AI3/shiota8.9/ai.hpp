@@ -133,7 +133,7 @@ struct AI {
 						if(is_mine[x] || is_mine[y]){
 							hyoka.first = -INF;
 						}else{
-							hyoka.first = site_panter_count[x] + site_panter_count[y];
+							hyoka.first -= site_panter_count[x] + site_panter_count[y];
 						}
 						hyoka.second = min(dist_from_mine[x], dist_from_mine[y]);
 
@@ -226,7 +226,7 @@ struct AI {
 						if(is_mine[x] || is_mine[y]){
 							hyoka.first = -INF;
 						}else{
-							hyoka.first = site_panter_count[x] + site_panter_count[y];
+							hyoka.first -= site_panter_count[x] + site_panter_count[y];
 						}
 						hyoka.second = min(dist_from_mine[x], dist_from_mine[y]);
 
