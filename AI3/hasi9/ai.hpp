@@ -42,7 +42,7 @@ struct AI {
 	int mode;
 	vector<int> param;
 	bool options;
-	bool use_option;
+	bool use_option = false;
 
 	vector<int> Think(const Moves& moves, const string& state) {
 		Load(moves, state);
