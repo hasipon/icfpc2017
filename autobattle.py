@@ -68,12 +68,16 @@ def run_offline():
     ]
 
     options.append('-s')
-    options.append(random.choice((
-      '{}',
-      '{"futures": true}',
-      '{"splurges": true}',
-      '{"futures": true, "splurges": true}'
-    )))
+
+    settings = {}
+    if bool(random.getrandbits(1)):
+        settings['futures'] = True
+    if bool(random.getrandbits(1)):
+        settings['splurges'] = True
+    if bool(random.getrandbits(1)):
+        settings['options'] = True
+
+    options.append(json.dumps(settings))
 
     print("=== Command ===")
     print(' '.join(options))
@@ -195,7 +199,6 @@ def calc_rating():
 
     history.reverse()
     output['history'] = history
-
     output['update'] = str(int(time.time()))
 
     rating_json = 'rating.json'
