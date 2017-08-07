@@ -42,10 +42,6 @@ ostream& operator << (ostream& os, const UnionFind& x)
 }
 
 
-constexpr int NULL_PUNTER_ID = -38;
-constexpr int NULL_NODE_ID = -39;
-constexpr int NULL_EDGE_ID = -34;
-
 constexpr int MINE_CONNECTION = 0;
 constexpr int SCORE_GREEDY = 1;
 constexpr int OTHER = 2;
@@ -118,7 +114,7 @@ struct GameState
     return used.count(e) == 0;
   }
 
-  bool Adjacence(GameContext context, Edge e) const
+  bool IsAdjacence(GameContext context, Edge e) const
   {
     if (connected.count(e.first) != connected.count(e.second)) {
       return true;
@@ -293,7 +289,7 @@ public:
 
     each (dst, context.g[src]) {
       const Edge e(src, dst);
-      if (state.IsFree(e) && state.Adjacence(context, e)) {
+      if (state.IsFree(e) && state.IsAdjacence(context, e)) {
         es.push_back(e);
       }
     }
@@ -308,7 +304,7 @@ public:
     each (src, context.node) {
       each (dst, context.g[src]) {
         const Edge e(src, dst);
-        if (state.IsFree(e) && state.Adjacence(context, e)) {
+        if (state.IsFree(e) && state.IsAdjacence(context, e)) {
           es.push_back(e);
         }
       }

@@ -4,6 +4,10 @@
 
 // --------------------------------------------------------
 
+constexpr int NULL_PUNTER_ID = -148048032;
+constexpr int NULL_NODE_ID = -148048031;
+constexpr int NULL_EDGE_ID = -148048030;
+
 using Edges = vector<Edge>;
 
 #include <sstream>
@@ -112,7 +116,7 @@ using SiteID = int;
 
 struct _Move : public vector<SiteID>
 {
-  int punter_id = -1;
+  int punter_id = NULL_PUNTER_ID;
 
   _Move(Move move)
   {
@@ -123,6 +127,24 @@ struct _Move : public vector<SiteID>
   {
   }
 
+  _Move(int punter_id, Edge e) : punter_id(punter_id)
+  {
+    Add(e);
+  }
+
+  void Add(Edge e)
+  {
+    if (empty()) {
+      push_back(e.first);
+      push_back(e.second);
+    } else {
+      if (0) ;
+      else if (back() == e.first) push_back(e.second);
+      else if (back() == e.second) push_back(e.first);
+      else assert(false);
+    }
+  }
+  
   Move toMove() const
   {
     return Move(punter_id, *this);
