@@ -46,8 +46,11 @@ fn main()
             write_json_message(&mut stdout, serde_json::to_string(&ReadyMessage{ready:punter, state:state}).unwrap());
         } else if let Option::Some(value) = object.remove("move") {
             let message:MovesMessage = serde_json::from_value(value).unwrap();
-            let state:GameState = serde_json::from_value(object.remove("state").unwrap()).unwrap();
-            let mov = think(message, state);
+            let mut state:GameState = serde_json::from_value(object.remove("state").unwrap()).unwrap();
+            for mov in message.moves {
+                state.do_move(&Move::from_value(mov));
+            }
+            let mov = think(state.clone()).to_message(state);
             write_json_message(&mut stdout, serde_json::to_string(&mov).unwrap());
         }
     }
@@ -148,15 +151,16 @@ struct RiverId(i32);
 struct GroupId(i32);
 
 enum Move {
-    Claim(PunterId, SiteId, SiteId),
-    Pass(PunterId),
-    Splurge(PunterId, Vec<SiteId>),
+    Claim(ClaimMessage),
+    Pass(PassMessage),
+    Splurge(SplugeMessage),
+    Option(ClaimMessage),
 }
 
 #[derive(Serialize, Deserialize, Clone)]
 struct GameState {
     punter_id: PunterId,
-    punters: Vec<Punter>,
+    punters: HashMap<PunterId, Punter>,
     sites: HashMap<SiteId, Site>,
     rivers: HashMap<RiverId, River>,
     mines: Vec<SiteId>,
@@ -174,6 +178,7 @@ struct Site {
 #[derive(Serialize, Deserialize, Clone)]
 struct River {
     owner: Option<PunterId>,
+    option_owner: Option<PunterId>,
     id: RiverId,
     a:SiteId, 
     b:SiteId,
@@ -192,15 +197,22 @@ struct Group {
     has_mine: bool,
     sites: HashSet<SiteId>,
 }
+
+enum MoveMode {
+    Claim,
+    Option,
+    Auto,
+}
+
 impl Group {
-    fn merge(mut self, smaller:Group, punter:&Punter, state:&mut GameState)->Group {
+    fn merge(mut self, smaller:Group, punter:&Punter, sites:&mut HashMap<SiteId, Site>)->Group {
         if self.sites.len() < smaller.sites.len() {
-            return smaller.merge(self, punter, state);
+            return smaller.merge(self, punter, sites);
         }
 
         self.has_mine = self.has_mine || smaller.has_mine;
         for site_id in smaller.sites {
-            let mut site = state.sites.get_mut(&site_id).unwrap();
+            let mut site = sites.get_mut(&site_id).unwrap();
             self.sites.insert(site_id);
             site.group_ids.insert(punter.id, self.id);
         }
@@ -213,23 +225,13 @@ impl Move {
     {
         let mut object = value.as_object_mut().unwrap();
         if let Option::Some(mut claim) = object.remove("claim") {
-            let mut obj = claim.as_object_mut().unwrap();
-            Move::Claim(
-                serde_json::from_value(obj.remove("punter").unwrap()).unwrap(), 
-                serde_json::from_value(obj.remove("source").unwrap()).unwrap(), 
-                serde_json::from_value(obj.remove("target").unwrap()).unwrap(),
-            )
+            Move::Claim(serde_json::from_value(claim).unwrap())
         } else if let Option::Some(mut pass) = object.remove("pass") {
-            let mut obj = pass.as_object_mut().unwrap();
-            Move::Pass(
-                serde_json::from_value(obj.remove("punter").unwrap()).unwrap(),
-            )
+            Move::Pass(serde_json::from_value(pass).unwrap())
         } else if let Option::Some(mut splurge) = object.remove("splurge") {
-            let mut obj = splurge.as_object_mut().unwrap();
-            Move::Splurge(
-                serde_json::from_value(obj.remove("punter").unwrap()).unwrap(), 
-                serde_json::from_value(obj.remove("route").unwrap()).unwrap(),
-            )
+            Move::Splurge(serde_json::from_value(splurge).unwrap())
+        } else if let Option::Some(mut option) = object.remove("option") {
+            Move::Splurge(serde_json::from_value(option).unwrap())
         } else {
             panic!("unsuppoted move value");
         }
@@ -237,30 +239,27 @@ impl Move {
 
     fn to_message(self, state:GameState) -> Value {
         return match self {
-            Move::Claim(id, a, b) => Value::Object(
+            Move::Claim(data) => Value::Object(
                 map! {
-                    "claim" => ClaimMessage {
-                        punter: id,
-                        source: a,
-                        target: b,
-                    },
+                    "claim" => data,
                     "state" => state
                 }
             ),
-            Move::Pass(id) => Value::Object(
+            Move::Pass(data) => Value::Object(
                 map!{
-                    "pass" => PassMessage {
-                        punter: id,
-                    },
+                    "pass" => data,
                     "state" => state
                 }
             ),
-            Move::Splurge(id, route) => Value::Object(
+            Move::Splurge(data) => Value::Object(
                 map!{
-                    "pass" => SplugeMessage {
-                        punter: id,
-                        route: route,
-                    },
+                    "spluge" => data,
+                    "state" => state
+                }
+            ),
+            Move::Option(data) => Value::Object(
+                map!{
+                    "pass" => data,
                     "state" => state
                 }
             ),
@@ -281,20 +280,62 @@ impl River {
 
 impl GameState {
     fn do_move(&mut self, mov:&Move) {
-        //
+        match mov {
+            &Move::Pass(_) => (),
+            &Move::Claim(ref data) => 
+                self.own_river(data.punter, data.target, data.source),
+
+            &Move::Option(ref data) => 
+                self.own_river(data.punter, data.target, data.source),
+
+            &Move::Splurge(ref data) => 
+                for i in 1..data.route.len() {
+                    let previous = data.route[i - 1];
+                    let current = data.route[i];
+                    self.own_river(data.punter, current, previous);
+                }
+        }
+    }
+
+    fn own_river(&mut self, punter_id:PunterId, a:SiteId, b:SiteId) {
+        let (group_a_id, group_b_id) = {
+            let site_a = self.sites.get(&a).unwrap();
+            let site_b = self.sites.get(&b).unwrap();
+            let river_id = site_a.rivers.get(&b).unwrap();
+            let river = self.rivers.get_mut(&river_id).unwrap();
+            if river.owner.is_none() {
+                river.owner = Option::Some(punter_id)
+            } else {
+                river.option_owner = Option::Some(punter_id)
+            }
+
+            (
+                site_a.group_ids.get(&punter_id).unwrap().clone(),
+                site_b.group_ids.get(&punter_id).unwrap().clone()
+            )
+        };
         
+        if group_a_id != group_b_id {
+            let mut punter = self.punters.get_mut(&punter_id).unwrap();
+            let mut group_a = punter.groups.remove(&group_a_id).unwrap();
+            let mut group_b = punter.groups.remove(&group_b_id).unwrap();
+            let new_group = group_a.merge(group_b, &punter, &mut self.sites);
+            punter.groups.insert(new_group.id, new_group);
+        }
     }
 }
 
 // AI
 fn setup(message:SetupMessage)->GameState
 {
-    let mut punters = Vec::new();
+    let mut punters = HashMap::new();
     for i in 0..message.punters
     {
-        punters.push(
+        let id = PunterId(i);
+        punters.insert(
+            id,
             Punter {
-                id: PunterId(i),
+                id: id,
                 groups: HashMap::new(),
             }
         );
@@ -307,7 +348,7 @@ fn setup(message:SetupMessage)->GameState
         let SiteId(id_num) = id;
         let group_id = GroupId(id_num);
 
-        for punter in &mut punters 
+        for (_, punter) in &mut punters 
         {
             let mut sites = HashSet::new();
             sites.insert(id);
@@ -341,6 +382,7 @@ fn setup(message:SetupMessage)->GameState
             RiverId(index),
             River {
                 owner: Option::None,
+                option_owner: Option::None,
                 id: id,
                 a: river.target,
                 b: river.source,
@@ -357,7 +399,7 @@ fn setup(message:SetupMessage)->GameState
     for mine in &message.map.mines {
         let site = sites.get_mut(&mine).unwrap();
         site.is_mine = true;
-        for punter in &mut punters 
+        for (_, punter) in &mut punters 
         {
             let group_id = site.group_ids.get(&punter.id).unwrap();
             let group = punter.groups.get_mut(&group_id).unwrap();
@@ -404,10 +446,10 @@ fn setup(message:SetupMessage)->GameState
     }
 }
 
-fn think(message:MovesMessage, state:GameState)->Value
+fn think(state:GameState)->Move
 {
     let mut distances:HashMap<PunterId, HashMap<GroupId, HashMap<GroupId, i32>>> = HashMap::new();
-    for punter in &state.punters {
+    for (_, punter) in &state.punters {
         let mut groups = &punter.groups;
         let mut punter_distances = HashMap::new();
 
@@ -449,7 +491,7 @@ fn think(message:MovesMessage, state:GameState)->Value
         }
     }
 
-    return Move::Pass(state.punter_id).to_message(state);
+    return Move::Pass(PassMessage{punter:state.punter_id});
 }
 
 fn think_random() {

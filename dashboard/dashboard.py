@@ -59,12 +59,77 @@ def upload_log():
         f.save(str(static_path / 'logs' / f.filename))
         return ('', 204)
 
+@app.route('/search')
+def get_search():
+    return render_template('search.html')
+
 @app.route('/autobattle')
 def get_autobattle():
-    filepath = os.path.join(str(static_path), 'rating.json')
-    rating_json = None
-    with open(filepath) as f:
-        rating_json = json.load(f)
+    search = request.args.get("search")
+    punter_min = request.args.get("punter-min")
+    punter_max = request.args.get("punter-max")
+    site_min = request.args.get("site-min")
+    site_max = request.args.get("site-max")
+    river_min = request.args.get("river-min")
+    river_max = request.args.get("river-max")
+    mine_min = request.args.get("mine-min")
+    mine_max = request.args.get("mine-max")
+    futures_on = request.args.get("futures-on")
+    futures_off = request.args.get("futures-off")
+    splurges_on = request.args.get("splurges-on")
+    splurges_off = request.args.get("splurges-off")
+    options_on = request.args.get("options-on")
+    options_off = request.args.get("options-off")
+
+    def log_filter(info):
+        punter_count = info['punters']
+        site_count = len(info['map']['sites'])
+        river_count = len(info['map']['rivers'])
+        mine_count = len(info['map']['mines'])
+
+        futures_enabled = False
+        splurges_enabled = False
+        options_enabled = False
+
+        if 'settings' in info:
+            if 'futures' in info['settings'] and info['settings']['futures']:
+                futures_enabled = True
+            if 'splurges' in info['settings'] and info['settings']['splurges']:
+                splurges_enabled = True
+            if 'options' in info['settings'] and info['settings']['options']:
+                options_enabled = True
+
+        if punter_min and int(punter_min) > punter_count:
+            return False
+        if punter_max and int(punter_max) < punter_count:
+            return False
+        if site_min and int(site_min) > site_count:
+            return False
+        if site_max and int(site_max) < site_count:
+            return False
+        if river_min and int(river_min) > river_count:
+            return False
+        if river_max and int(river_max) < river_count:
+            return False
+        if mine_min and int(mine_min) > mine_count:
+            return False
+        if mine_max and int(mine_max) < mine_count:
+            return False
+        if futures_enabled and not futures_on:
+            return False
+        if not futures_enabled and not futures_off:
+            return False
+        if splurges_enabled and not splurges_on:
+            return False
+        if not splurges_enabled and not splurges_off:
+            return False
+        if options_enabled and not options_on:
+            return False
+        if not options_enabled and not options_off:
+            return False
+        return True
+
+    rating_json = calc_rating(log_filter) if search else calc_rating(None)
 
     rating_csv = []
     if rating_json:
@@ -132,30 +197,131 @@ def run_server():
         
         return render_template('run_server.html', message=message)
 
-"""
-@route('/submit-solution', method='POST')
-def solution_submit_post():
-    problem_id = request.forms.get('problem_id')
-    solution = request.forms.get('solution')
-    solution.replace('\r\n','\n')
-    filename = "/tmp/" + problem_id + "-" + str(time.time())
-    with open(filename, 'w') as f:
-        f.write(solution)
-    output = subprocess.check_output([repo + "/solution-submit", problem_id, filename])
-    os.remove(filename)
-    return template('output', output=output)
+##
+## Rating Calculation
+##
+def fix_name(name):
+    if '@' not in name:
+        return name
+    return name.split('@')[0]
 
-@route('/submit-problem/<publish_time>', method='POST')
-def problem_submit_post(publish_time):
-    solution = request.forms.get('solution')
-    solution.replace('\r\n','\n')
-    filename = "/tmp/" + publish_time + "-" + str(time.time())
-    with open(filename, 'w') as f:
-        f.write(solution)
-    output = subprocess.check_output([repo + "/problem-submit", publish_time, filename])
-    os.remove(filename)
-    return template('output', output=output)
-"""
+def test_log_filter(info):
+    punter_count = info['punters']
+    site_count = len(info['map']['sites'])
+    river_count = len(info['map']['rivers'])
+    mine_count = len(info['map']['mines'])
+
+    futures = False
+    splurges = False
+    options = False
+
+    if 'settings' in info:
+        if 'futures' in info['settings'] and info['settings']['futures']:
+            futures = True
+        if 'splurges' in info['settings'] and info['settings']['splurges']:
+            splurges = True
+        if 'options' in info['settings'] and info['settings']['options']:
+            options = True
+
+    return(4 <= info['punters'])
+
+def calc_rating(log_filter):
+    log_path = str(static_path / 'logs')
+    log_files = glob.glob(os.path.join(str(log_path), 'AC-*@[1-9]*.log'))
+    log_files.sort(key=lambda x: x.split('@')[1]) 
+    users = {}
+    rating = {}
+    history = []
+
+    for log in log_files:
+        info = None
+        scores = None
+        with open(log) as f:
+            lines = f.readlines()
+            if len(lines) < 2:
+                continue
+            info = json.loads(lines[1])
+            scores = json.loads(lines[-1])
+
+        if not info or not scores:
+            continue
+        if 'punter_names' not in info or 'stop' not in scores:
+            continue
+
+        if log_filter and not log_filter(info):
+            continue
+
+        ranking = []
+        names = info['punter_names']
+
+        for i in range(len(names)):
+            names[i] = fix_name(names[i])
+
+        for name in names:
+            if name not in rating:
+                rating[name] = 1500
+                users[name] = {}
+                users[name]['battle'] = 0
+                users[name]['win'] = 0
+
+        for kv in scores['stop']['scores']:
+            name = names[kv['punter']]
+            score = kv['score']
+            ranking.append((score, name))
+
+        ranking.sort(reverse=True)
+
+        n = len(ranking)
+        diff = [0] * n
+
+        for i in range(n):
+            for j in range(i + 1, n):
+                if ranking[i][0] == ranking[j][0]:
+                    continue
+                ri = rating[ranking[i][1]]
+                rj = rating[ranking[j][1]]
+
+                ei = 1.0 / (1.0 + 10 ** ((rj - ri) / 400.0))
+                ej = 1.0 / (1.0 + 10 ** ((ri - rj) / 400.0))
+
+                diff[i] += int(16 * (1 - ei))
+                diff[j] += int(16 * (0 - ej))
+
+        for i in range(n):
+            name = ranking[i][1]
+            rating[name] += diff[i]
+
+        for i in range(n):
+            users[names[i]]['battle'] += 1
+
+        users[ranking[0][1]]['win'] += 1
+        his = {}
+        his['log'] = os.path.basename(log)
+        his['ranking'] = ranking
+        his['diff'] = {}
+
+        for i in range(n):
+            his['diff'][ranking[i][1]] = diff[i]
+        history.append(his)
+
+    output = {}
+    output['ranking'] = []
+
+    rank = []
+    for name in users.keys():
+        rank.append((rating[name], name))
+    rank.sort(reverse=True)
+    for r in rank:
+        output['ranking'].append(r[1])
+
+    output['users'] = users
+    for name in users.keys():
+        users[name]['rating'] = rating[name]
+
+    history.reverse()
+    output['history'] = history
+    output['update'] = str(int(time.time()))
+    return output
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, threaded=True, debug=True)
