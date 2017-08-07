@@ -10,17 +10,24 @@ sites = []
 rivers = []
 mines = set()
 
+id_idx_set = set()
+while len(id_idx_set) < len(G):
+    id_idx_set.add(random.randint(-2 ** 63, 2 ** 63 - 1))
+
+id_idx = list(id_idx_set)
+random.shuffle(id_idx)
+
 for n in G.nodes():
     node = {}
-    node['id'] = n
+    node['id'] = id_idx[n]
     node['x'] = pos[n][0]
     node['y'] = pos[n][1]
     sites.append(node)
 
 for e in G.edges():
     river = {}
-    river['source'] = e[0]
-    river['target'] = e[1]
+    river['source'] = id_idx[e[0]]
+    river['target'] = id_idx[e[1]]
     rivers.append(river)
 
 random.seed()
@@ -31,7 +38,11 @@ while len(mines) < m:
 out = {}
 out['sites'] = sites
 out['rivers'] = rivers
-out['mines'] = sorted(list(mines))
+out['mines'] = [id_idx[m] for m in mines]
+
+random.shuffle(out['sites'])
+random.shuffle(out['rivers'])
+random.shuffle(out['mines'])
 
 with open("map.json", 'w') as f:
     json.dump(out, f)
