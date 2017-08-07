@@ -52,7 +52,7 @@ public:
   {
   }
 
-  Edge MonteCarlo(int num_exam = 4000)
+  Edge MonteCarlo(int num_exam = 500)
   {
     map<Edge, double> scores;
     map<Edge, int> cnt;
