@@ -9,12 +9,13 @@ public:
 
   virtual _Move _Think(const _Moves& moves) override
   {
+    map<int, int> memo;
     Edge best(NULL_NODE_ID, NULL_NODE_ID);
     lli mx = -1;
     each (src, context.node) {
       each (dst, context.g[src]) {
         const Edge e(src, dst);
-        const lli point = GetPoint(e);
+        const lli point = GetPoint(e, memo);
         if (state.IsAdjacence(context, e) && mx < point) {
           mx = point;
           best = e;
@@ -61,10 +62,10 @@ public:
     return mn;
   }
   
-  lli GetPoint(Edge e)
+  lli GetPoint(Edge e, map<int, int>& memo)
   {
     UnionFind uf = state.uf;
-    const int h = GetH(e.second);
+    const int h = memo.count(e.second) ? memo[e.second] : GetH(e.second);
     lli sum = 0;
     uf.merge(e.first, e.second);
     each (mine, context.mines) {
