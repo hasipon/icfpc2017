@@ -36,12 +36,6 @@ class IO
 end
 
 class Server
-  # opts = {
-  #   map: mapのオブジェクト,
-  #   num_of_punters: パンターの数,
-  #   port: ポート,
-  #   settings: セッティング
-  # }
   def initialize(opts)
     @map = opts[:map]
     @settings = opts[:settings]
@@ -120,7 +114,7 @@ class Server
     setup.delete("state")
     @logfile.puts(JSON.generate(setup))
 
-    score = Score.new(@map, @num_of_punters, futures, @settings["splurges"])
+    score = Score.new(@map, @num_of_punters, futures, @settings)
 
     # game play
     play_count = 0
@@ -143,6 +137,7 @@ class Server
           make_handshake(io)
 
           message = nil
+          move = nil
           begin
             Timeout.timeout(@timeout_gameplay) do
               message = {
@@ -153,18 +148,14 @@ class Server
               }
               io.send_message message
               move = io.read_message
-              if move["claim"]
-                moves[index] = {"claim" => move["claim"]}
-              elsif move["pass"]
-                moves[index] = {"pass" => move["pass"]}
-              elsif move["splurge"]
-                moves[index] = {"splurge" => move["splurge"]}
-              end
-              states[index] = move["state"]
             end
           rescue => e
             raise "error #{e}: client #{index} = #{punter_path}, message = #{message}"
           end
+          state = move["state"]
+          move.delete("state")
+          moves[index] = move
+          state[index] = state
 
           if index == 0
             moves_tmp = moves
@@ -247,7 +238,7 @@ class Server
       end
     end
 
-    score = Score.new(@map, @num_of_punters, futures, @settings["splurges"])
+    score = Score.new(@map, @num_of_punters, futures, @settings)
 
     # game play
     play_count = 0
@@ -259,9 +250,9 @@ class Server
     end
 
     while true
-      break if play_count >= @max_play_count - 1
+      break if play_count >= @max_play_count
       sockets.each_with_index do |socket, index|
-        break if play_count >= @max_play_count - 1
+        break if play_count >= @max_play_count
         # TODO: zombie
         puts "send_message(play_count = #{play_count}, index = #{index})"
         p moves

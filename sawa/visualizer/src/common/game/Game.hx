@@ -6,6 +6,7 @@ import game.command.MapStruct;
 import game.command.MoveStruct;
 import game.command.SetupStruct;
 import game.command.SplurgeStruct;
+import haxe.ds.Option;
 
 
 class Game 
@@ -141,6 +142,10 @@ class Game
         {
             splurge(move.splurge);
         }
+        else if (move.option != null)
+        {
+            option(move.option);
+        }
         else 
         {
             pass(move.pass.punter);
@@ -159,6 +164,10 @@ class Game
         else if (move.splurge != null)
         {
             undoSplurge(move.splurge);
+        }
+        else if (move.option != null)
+        {
+            undoOption(move.option);
         }
         else 
         {
@@ -191,7 +200,11 @@ class Game
             var target = move.route[i];
             
             var river = sites[source].rivers[target];
-            river.owner = move.punter;
+            if (river.owner == PunterId.NotFound) {
+                river.owner = move.punter;
+            } else {
+                river.option = Option.Some(move.punter);
+            }
         }
         trace(move);
     }
@@ -204,8 +217,24 @@ class Game
             var target = move.route[i];
             
             var river = sites[source].rivers[target];
-            river.owner = PunterId.NotFound;
+            if (river.owner == move.punter) {
+                river.owner = PunterId.NotFound;
+            } else {
+                river.option = Option.None;
+            }
         }
+    }
+    
+    private function option(move:ClaimStruct):Void
+    {
+        var river = sites[move.source].rivers[move.target];
+        river.option = Option.Some(move.punter);
+    }
+    
+    private function undoOption(move:ClaimStruct):Void
+    {
+        var river = sites[move.source].rivers[move.target];
+        river.option = Option.None;
     }
     
     public function pass(punter:PunterId):Void
