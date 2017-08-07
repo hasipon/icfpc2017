@@ -11,7 +11,19 @@ public:
   {
     Edge best(NULL_NODE_ID, NULL_NODE_ID);
     lli mx = -1;
-    each (src, context.node) {
+    each (src, context.mines) {
+      each (dst, context.g[src]) {
+        const Edge e(src, dst);
+        unless (state.IsFree(e)) continue;
+        const lli point = GetPoint(e);
+        if (state.IsAdjacence(context, e) && mx < point) {
+          mx = point;
+          best = e;
+        }
+      }
+    }
+
+    each (src, state.connected) {
       each (dst, context.g[src]) {
         const Edge e(src, dst);
         unless (state.IsFree(e)) continue;
