@@ -46,8 +46,13 @@ public:
         }
       }
     }
-    
+
     return _Move(context.punter_id, best);
+  }
+
+  bool Reachable(int src, int dst)
+  {
+    return true;
   }
 
   lli GetH(int v)
@@ -55,15 +60,16 @@ public:
     int mn = 1 << 29;
     each (mine, context.mines) {
       if (state.connected.count(mine)) continue;
+      if (!Reachable(mine, v)) continue;
       const pair<int, int> key = make_pair(mine, v);
       if (state.cost.count(key)) {
         mn = min(mn, state.cost[key]);
       }
     }
-    
+
     return mn;
   }
-  
+
   lli GetPoint(Edge e)
   {
     UnionFind uf = state.uf;

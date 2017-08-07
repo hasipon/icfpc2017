@@ -152,10 +152,9 @@ class Server
           rescue => e
             raise "error #{e}: client #{index} = #{punter_path}, message = #{message}"
           end
-          state = move["state"]
+          states[index] = move["state"]
           move.delete("state")
           moves[index] = move
-          state[index] = state
 
           if index == 0
             moves_tmp = moves
