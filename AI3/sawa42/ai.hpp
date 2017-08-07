@@ -13,68 +13,34 @@ public:
     context = ParentContext;
   }
 
-  void run(map<Edge, int>& scores)
+  void run(map<Edge, double>& scores, map<Edge, int>& cnt)
   {
-    Edges unused;
-    each (src, context.node) {
-      each (dst, context.g[src]) {
-        const Edge e(src, dst);
-        if (state.IsFree(e)) unused.push_back(e);
-      }
+    each (n, context.node) {
+      random_shuffle(context.g[n].begin(), context.g[n].end());
     }
-    random_shuffle(unused.begin(), unused.end());
 
-    Edges adj = Adjacence();
-    if (adj.empty()) return ;
-    
-    while (unused.size() && adj.size()) {
-      {
-        random_shuffle(adj.begin(), adj.end());
-        while (adj.size() && !state.IsFree(adj.back())) adj.pop_back();
-        if (adj.empty()) break;
-        const Edge e = adj.back();
-        adj.pop_back();
-        _Move move(context.punter_id);
-        move.push_back(e.first);
-        move.push_back(e.second);
-        Edges more = state.connected.count(e.first) ? Adjacence(e.second) : Adjacence(e.first);
-        adj.insert(adj.end(), more.begin(), more.end());
-        state.Update(move, context.punter_id);
-      }
-      for (int i = 1, j; i < context.num_punters; ++i) {
-        for (j = 0; j < unused.size(); ++j) {
-          if (state.IsFree(unused[j])) {
-            _Move move(context.punter_id);
-            move.push_back(adj.back().first);
-            move.push_back(adj.back().second);
-            state.Update(move, NULL_PUNTER_ID);
-            break;
-          }
+    int turn = context.node.size() / context.num_punters - state.owned.size();
+    queue<Edge> q;
+
+    for (; turn && q.size(); q.pop()) {
+      const int src = q.front().second;
+      if (turn == 0) break;
+      each (dst, context.g[src]) {
+        Edge e(src, dst);
+        if (context.mines.count(dst)) continue;
+        if (state.IsFree(e)) {
+          q.push(e);
+          state.Update(_Move(context.punter_id, e), context.punter_id);
         }
-      }
-      auto itr = remove_if(unused.begin(), unused.end(), [&] (Edge e) { return !state.IsFree(e); });
-      if (itr != unused.end()) {
-        unused.erase(itr);
       }
     }
 
     const lli score = GetCurrentScore();
     each (e, state.owned) {
-      UnionFind uf;
-      each (f, state.owned) {
-        if (e != f) {
-          uf.merge(f.first, f.second);
-        }
-      }
-      const UnionFind tmp = state.uf;
-      state.uf = uf;
-      scores[e] += score - GetCurrentScore();
-      state.uf = tmp;
+      scores[e] += score;
+      ++cnt[e];
     }
 
-    // cerr << "---------------------" << endl;
-    // each (e, state.owned) cerr << e << endl;
-    
     return ;
   }
 };
@@ -86,17 +52,21 @@ public:
   {
   }
 
-  Edge MonteCarlo(int num_exam = 50)
+  Edge MonteCarlo(int num_exam = 4000)
   {
-    map<Edge, int> scores;
+    map<Edge, double> scores;
+    map<Edge, int> cnt;
     while (num_exam--) {
-      MonteCarloExam(state, context).run(scores);
+      MonteCarloExam(state, context).run(scores, cnt);
     }
 
     Edge mx(NULL_NODE_ID, NULL_NODE_ID);
     each (i, scores) {
-      if (scores[mx] < i.second) {
-        mx = i.first;
+      const Edge& e = i.first;
+      const double a = scores[mx] / max(1, cnt[mx]);
+      const double b = scores[e] / cnt[e];
+      if (state.IsFree(e) && state.IsAdjacence(context, e) && a < b) {
+        mx = e;
       }
     }
     if (mx.first == mx.second) {

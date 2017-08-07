@@ -42,10 +42,6 @@ ostream& operator << (ostream& os, const UnionFind& x)
 }
 
 
-constexpr int NULL_PUNTER_ID = -38;
-constexpr int NULL_NODE_ID = -39;
-constexpr int NULL_EDGE_ID = -34;
-
 constexpr int MINE_CONNECTION = 0;
 constexpr int SCORE_GREEDY = 1;
 constexpr int OTHER = 2;
@@ -57,6 +53,7 @@ struct GameContext
   map<int, vector<int>> g;
   vector<int> node;
   set<int> mines;
+  int options;
 };
 
 ostream& operator << (ostream& os, const GameContext& context)
@@ -66,6 +63,7 @@ ostream& operator << (ostream& os, const GameContext& context)
   assert(os << context.g);           os << ' ';
   assert(os << context.node);        os << ' ';
   assert(os << context.mines);       os << ' ';
+  assert(os << context.options);     os << ' ';
   return os;
 }
 
@@ -76,6 +74,7 @@ istream& operator >> (istream& is, GameContext& context)
   assert(is >> context.g);
   assert(is >> context.node);
   assert(is >> context.mines);
+  assert(is >> context.options);
   return is;
 }
 
@@ -118,7 +117,7 @@ struct GameState
     return used.count(e) == 0;
   }
 
-  bool Adjacence(GameContext context, Edge e) const
+  bool IsAdjacence(GameContext context, Edge e) const
   {
     if (connected.count(e.first) != connected.count(e.second)) {
       return true;
@@ -161,6 +160,11 @@ public:
 
   GameState state;
   GameContext context;
+
+  // server -> me
+  bool options;
+  // me -> server
+  bool use_option = false;
 
   const string punter_name = "bfs3";
 
@@ -209,6 +213,8 @@ public:
     context.mines = set<int>(g.mines.begin(), g.mines.end());
     each (mine, context.mines) BFS(mine);
     state.mode = SCORE_GREEDY;
+
+    context.options = options;
   }
 
   Edge FreeEdge(void)
@@ -293,7 +299,7 @@ public:
 
     each (dst, context.g[src]) {
       const Edge e(src, dst);
-      if (state.IsFree(e) && state.Adjacence(context, e)) {
+      if (state.IsFree(e) && state.IsAdjacence(context, e)) {
         es.push_back(e);
       }
     }
@@ -308,7 +314,7 @@ public:
     each (src, context.node) {
       each (dst, context.g[src]) {
         const Edge e(src, dst);
-        if (state.IsFree(e) && state.Adjacence(context, e)) {
+        if (state.IsFree(e) && state.IsAdjacence(context, e)) {
           es.push_back(e);
         }
       }
