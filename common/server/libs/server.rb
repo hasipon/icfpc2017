@@ -1,7 +1,9 @@
 # coding: utf-8
 require 'socket'
 require 'timeout'
+require 'time'
 require_relative 'score'
+
 
 class IO
   def _read_message
@@ -138,6 +140,7 @@ class Server
 
           message = nil
           move = nil
+          before = Time.now
           begin
             Timeout.timeout(@timeout_gameplay) do
               message = {
@@ -150,7 +153,8 @@ class Server
               move = io.read_message
             end
           rescue => e
-            raise "error #{e}: client #{index} = #{punter_path}, message = #{message}"
+            after = Time.now
+            raise "error #{e}: (ellapsed #{after - before} s) client #{index} = #{punter_path}, message = #{message}"
           end
           states[index] = move["state"]
           move.delete("state")
