@@ -9,13 +9,25 @@ public:
 
   virtual _Move _Think(const _Moves& moves) override
   {
-    map<int, int> memo;
     Edge best(NULL_NODE_ID, NULL_NODE_ID);
     lli mx = -1;
-    each (src, context.node) {
+    each (src, context.mines) {
       each (dst, context.g[src]) {
         const Edge e(src, dst);
-        const lli point = GetPoint(e, memo);
+        unless (state.IsFree(e)) continue;
+        const lli point = GetPoint(e);
+        if (state.IsAdjacence(context, e) && mx < point) {
+          mx = point;
+          best = e;
+        }
+      }
+    }
+
+    each (src, state.connected) {
+      each (dst, context.g[src]) {
+        const Edge e(src, dst);
+        unless (state.IsFree(e)) continue;
+        const lli point = GetPoint(e);
         if (state.IsAdjacence(context, e) && mx < point) {
           mx = point;
           best = e;
@@ -24,59 +36,26 @@ public:
     }
 
     if (best.first == best.second) {
-      each (src, context.mines) {
-        each (dst, context.g[src]) {
-          Edge e(src, dst);
-          if (state.IsFree(e)) {
-            best = e;
-          }
-        }
-      }
+      best = FreeEdge();
     }
-
-    if (best.first == best.second) {
-      each (src, context.node) {
-        each (dst, context.g[src]) {
-          Edge e(src, dst);
-          if (state.IsFree(e)) {
-            best = e;
-          }
-        }
-      }
-    }
-    
     return _Move(context.punter_id, best);
   }
-
-  lli GetH(int v)
-  {
-    int mn = 1 << 29;
-    each (mine, context.mines) {
-      if (state.connected.count(mine)) continue;
-      const pair<int, int> key = make_pair(mine, v);
-      if (state.cost.count(key)) {
-        mn = min(mn, state.cost[key]);
-      }
-    }
-    
-    return mn;
-  }
   
-  lli GetPoint(Edge e, map<int, int>& memo)
+  lli GetPoint(Edge e)
   {
     UnionFind uf = state.uf;
-    const int h = memo.count(e.second) ? memo[e.second] : GetH(e.second);
-    lli sum = 0;
+    lli sum_c = 0;
+    int mn_h = 1 << 29;
     uf.merge(e.first, e.second);
     each (mine, context.mines) {
+      const pair<int, int> key = make_pair(mine, e.second);
+      unless (state.cost.count(key)) continue;
       if (uf.is_same_set(mine, e.second)) {
-        const pair<int, int> key = make_pair(mine, e.second);
-        if (state.cost.count(key)) {
-          const int c = state.cost[key];
-          sum += c * c - h;
-        }
+          sum_c += state.cost[key];
+      } else {
+        mn_h = min(mn_h, state.cost[key]);
       }
     }
-    return sum;
+    return sum_c * sum_c - mn_h;
   }
 };
