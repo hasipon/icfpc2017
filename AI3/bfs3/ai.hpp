@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../sawa42/base_ai.hpp"
+#include "./base_ai.hpp"
 
 class AI : public BaseAI
 {
