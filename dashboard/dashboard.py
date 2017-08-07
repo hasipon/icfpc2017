@@ -65,6 +65,7 @@ def get_search():
 
 @app.route('/autobattle')
 def get_autobattle():
+    max_log = request.args.get("max-log", type=int, default=300)
     search = request.args.get("search")
     punter_min = request.args.get("punter-min")
     punter_max = request.args.get("punter-max")
@@ -129,7 +130,7 @@ def get_autobattle():
             return False
         return True
 
-    rating_json = calc_rating(log_filter) if search else calc_rating(None)
+    rating_json = calc_rating(max_log, log_filter) if search else calc_rating(max_log, None)
 
     rating_csv = []
     if rating_json:
@@ -160,7 +161,7 @@ def get_autobattle():
             for name in rating_json['ranking']:
                 line.append(rate[name])
             rating_csv.append("%r,\n" % line)
-    return render_template('autobattle.html', json=rating_json, csv=rating_csv)
+    return render_template('autobattle.html', json=rating_json, csv=rating_csv, max_log=max_log)
 
 def invoke_server(port, num_of_punters, map_json):
     print("invoke server")
@@ -225,10 +226,12 @@ def test_log_filter(info):
 
     return(4 <= info['punters'])
 
-def calc_rating(log_filter):
+def calc_rating(max_log, log_filter):
     log_path = str(static_path / 'logs')
     log_files = glob.glob(os.path.join(str(log_path), 'AC-*@[1-9]*.log'))
-    log_files.sort(key=lambda x: x.split('@')[1]) 
+    log_files.sort(key=lambda x: x.split('@')[1])
+    if max_log < len(log_files):
+        log_files = log_files[-max_log:]
     users = {}
     rating = {}
     history = []
