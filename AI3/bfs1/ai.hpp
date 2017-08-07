@@ -15,21 +15,12 @@ public:
       each (dst, context.g[src]) {
         const Edge e(src, dst);
         const lli point = GetPoint(e);
-        if (state.IsAdjacence(context, e) && mx < point) {
-          mx = point;
-          best = e;
-        }
-        if (mx == point && GetH(best.second) < GetH(dst)) {
-          best = e;
-        }
-      }
-    }
-
-    if (best.first == best.second) {
-      each (src, context.mines) {
-        each (dst, context.g[src]) {
-          Edge e(src, dst);
-          if (state.IsFree(e)) {
+        if (state.IsFree(e) && state.IsAdjacence(context, e)) {
+          if (mx < point) {
+            mx = point;
+            best = e;
+          }
+          if (mx == point && GetH(best.second) < GetH(dst)) {
             best = e;
           }
         }
@@ -37,16 +28,9 @@ public:
     }
 
     if (best.first == best.second) {
-      each (src, context.node) {
-        each (dst, context.g[src]) {
-          Edge e(src, dst);
-          if (state.IsFree(e)) {
-            best = e;
-          }
-        }
-      }
+      best = FreeEdge();
     }
-
+    assert(best.first != best.second);
     return _Move(context.punter_id, best);
   }
 

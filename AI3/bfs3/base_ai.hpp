@@ -99,18 +99,18 @@ struct GameState
         owned.insert(b);
       }
     }
-    each (site, move) {
-      connected.insert(site);
-      uf.merge(site, move.front());
+    if (move.punter_id == my_punter_id) {
+      each (site, move) {
+        connected.insert(site);
+        uf.merge(site, move.front());
+      }
     }
-    return ;
-  }
+   }
 
   void Update(const _Moves& moves, int my_punter_id)
   {
     each (move, moves) Update(move, my_punter_id);
-    return ;
-  }
+   }
 
   bool IsFree(Edge e) const
   {
@@ -189,6 +189,7 @@ public:
           vis.insert(next);
           q.push(next);
           state.cost[make_pair(src, next)] = state.cost[make_pair(src, curr)] + 1;
+          state.cost[make_pair(next, src)] = state.cost[make_pair(src, curr)] + 1;
         }
       }
     }
@@ -198,9 +199,11 @@ public:
 
   virtual void Init(int _punter_id, int num_of_punters, const Graph& g, bool futures, bool splurges)
   {
-    context.punter_id = _punter_id;
+    ios_base::sync_with_stdio(0);
 
+    context.punter_id = _punter_id;
     context.num_punters = num_of_punters;
+    context.options = options;
 
     each (e, g.edges) {
       context.g[e.first].push_back(e.second);
@@ -209,12 +212,9 @@ public:
 
     each (i, context.g) context.node.push_back(i.first);
 
-    map<int, int> reachables;
     context.mines = set<int>(g.mines.begin(), g.mines.end());
     each (mine, context.mines) BFS(mine);
     state.mode = SCORE_GREEDY;
-
-    context.options = options;
   }
 
   Edge FreeEdge(void)
@@ -222,13 +222,13 @@ public:
     each (src, context.mines) {
       each (dst, context.g[src]) {
         const Edge e(src, dst);
-        unless (state.used.count(e)) return e;
+        if (state.IsFree(e)) return e;
       }
     }
     each (src, context.node) {
       each (dst, context.g[src]) {
         const Edge e(src, dst);
-        unless (state.used.count(e)) return e;
+        if (state.IsFree(e)) return e;
       }
     }
     return Edge(-1, -1);
@@ -242,10 +242,7 @@ public:
     assert(move.isValid());
 
     vector<SiteID> v;
-    each (i, move) {
-      cerr << i << endl;
-      v.push_back(i);
-    }
+    each (i, move) v.push_back(i);
     return v;
   }
 
