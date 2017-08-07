@@ -44,9 +44,35 @@ struct AI {
 	bool splurges, options;
 	bool use_option = false;
 
-	vector<int> Think(const Moves& moves, const string& state) {
-		Load(moves, state);
+	vector<pair<int,int>> get_ones(int src, int dst, const vector<vector<pair<int,int>>>& G, const vector<pair<int,int>>& E1) {
+		vector<int> dist1(N, INF);
+		vector<int> dist2(N, INF);
+		calc_dist(src, dst, dist1, dist2, INF, G);
+		int cc = 0;
+		int dd = dist1[dst] - 1;
+		UnionFind uf0(N);
+		vector<pair<int,int>> e0;
+		for (auto e : E1) {
+			int x = e.first;
+			int y = e.second;
+			if ((dist1[x] + dist2[y] == dd) || (dist1[y] + dist2[x] == dd)) {
+				e0.push_back(e);
+			} else {
+				uf0.merge(x, y);
+			}
+		}
 
+		vector<pair<int,int>> r;
+		for (int i = 0; i < e0.size(); ++ i) {
+			auto uf = uf0;
+			for (int j = 0; j < e0.size(); ++ j) if (i != j) uf.merge(e0[j].first, e0[j].second);
+			if (uf.root(src) != uf.root(dst)) r.push_back(e0[i]);
+		}
+		cerr << "get_ones" << " " << src << " " << dst << " " << r.size() << " " << e0.size() << endl;
+
+		return r;
+	}
+	vector<int> ThinkMain() {
 		vector<vector<pair<int,int>>> G(N);
 		vector<pair<int,int>> E1;
 		for (auto p : E) {
@@ -64,7 +90,47 @@ struct AI {
 
 		vector<int> r;
 		if (mode == 0) {
+			UnionFind uf1(N);
+			UnionFind uf2(N);
+			for (auto p : E) {
+				int x = p.first.first;
+				int y = p.first.second;
+				if (p.second == punter_id) {
+					uf1.merge(x, y);
+					uf2.merge(x, y);
+				} else if (p.second == -1) {
+					uf1.merge(x, y);
+				}
+			}
+
 			map<pair<int, int>, int> cuts = cut::calcMinCutForThink(G, mines);
+
+			map<pair<int,int>, int> one_map;
+			for (int i = 0; i < M; ++ i) for (int j = i+1; j < M; ++ j) {
+				int x = mines[i], y = mines[j];
+				if (uf1.root(x) != uf1.root(y) || uf2.root(x) == uf2.root(y)) continue;
+				cerr << "cut " << x << " " << y << " " << cuts[{x,y}] << endl;
+				if (cuts[{x, y}] == 1) {
+					for (auto p : get_ones(x, y, G, E1)) {
+						++ one_map[p];
+					}
+				}
+			}
+			if (one_map.size() > 0) {
+				pair<int,int> sel;
+				int cnt = 1;
+				int max_score = -1;
+				for (auto p : one_map) {
+					if (p.second > max_score || (p.second == max_score && rand() % ++cnt == 0)) {
+						sel = p.first;
+						if (p.second > max_score) cnt = 1;
+						max_score = p.second;
+					}
+				}
+				cerr << "[hasi] rule 1" << endl;
+				return {sel.first, sel.second};
+			}
+
 			vector<bool> is_mine(N);
 			for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
 
@@ -99,9 +165,7 @@ struct AI {
 					}
 				}
 			}
-			if (minicost == INF) {
-				mode = 1;
-			} else {
+			if (minicost != INF) {
 				vector<int> dist1(N, INF);
 				vector<int> dist2(N, INF);
 				calc_dist(src, dst, dist1, dist2, minidist, G);
@@ -119,6 +183,8 @@ struct AI {
 				cerr << "(mode=0) cc = " << cc << endl;
 				if (cc == 0) throw 1;
 			}
+
+			mode = 1;
 		}
 
 		if (mode == 1) {
@@ -165,9 +231,7 @@ struct AI {
 				}
 			}
 			cerr << "max_gain = " << max_gain << endl;
-			if (max_gain <= 0) {
-				mode = 2;
-			} else {
+			if (max_gain > 0) {
 				param = {DST0, max_gain, dst};
 				int src = base[dst];
 				vector<int> dist1(N, INF);
@@ -180,21 +244,31 @@ struct AI {
 					int y = e.second;
 					if ((dist1[x] == 0 && dist2[y] == dd) || (dist1[y] == 0 && dist2[x] == dd)) {
 						if (rand() % ++ cc == 0) {
-							r = {rev[x], rev[y]};
+							r = {x, y};
 						}
 					}
 				}
 				cerr << "(mode=1) cc = " << cc << endl;
 				if (cc == 0) throw 1;
+				return r;
 			}
+
+			mode = 2;
 		}
 
-		if (mode == 2) {
-			if (E1.size() > 0) {
-				auto p = E1[rand() % E1.size()];
-				r = {rev[p.first], rev[p.second]};
-			}
+		// mode == 2
+		if (E1.size() > 0) {
+			auto p = E1[rand() % E1.size()];
+			return {p.first, p.second};
 		}
+		return {};
+	}
+
+	vector<int> Think(const Moves& moves, const string& state) {
+		Load(moves, state);
+
+		auto r = ThinkMain();
+		for (auto& x : r) x = rev[x];
 
 		cerr << "move =";
 		for (auto x : r) cerr << " " << x;
@@ -284,8 +358,6 @@ struct AI {
 		}
 		M = mines.size();
 		
-		cut::calcMinCut(G, mines);
-		
 		D.resize(M, vector<int>(N, INF));
 		for (int i = 0; i < M; ++ i) {
 			queue<int> Q;
@@ -303,7 +375,7 @@ struct AI {
 		mode = 0;
 	}
 	string Name() {
-		return "hasi9";
+		return "hasi12";
 	}
 	int PunterId() {
 		return punter_id;
