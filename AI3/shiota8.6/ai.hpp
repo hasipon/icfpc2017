@@ -51,6 +51,7 @@ struct AI {
 		vector<vector<pair<int,int>>> G(N);
 		vector<pair<int,int>> E1;
 		set<int> mySite, myMine;
+
 		vector<bool> is_mine(N);
 		for (int i = 0; i < M; ++ i) is_mine[mines[i]] = true;
 
@@ -70,8 +71,6 @@ struct AI {
 				E1.push_back(p.first);
 			}
 		}
-
-
 
 		vector<int> r;
 		if (mode == 0) {
@@ -357,7 +356,6 @@ struct AI {
 		}
 		M = mines.size();
 
-
 		D.resize(M, vector<int>(N, INF));
 		for (int i = 0; i < M; ++ i) {
 			queue<int> Q;
@@ -386,7 +384,6 @@ struct AI {
 	void Load(const Moves& moves, const string& state) {
 		map<int,int> idx;
 		istringstream iss(state);
-		iss >> punter_id >> N >> M;
 		int spl, opt;
 		iss >> punter_id >> N >> M >> spl >> opt;
 		splurges = (spl != 0);
