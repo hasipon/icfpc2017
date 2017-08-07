@@ -53,6 +53,7 @@ struct GameContext
   map<int, vector<int>> g;
   vector<int> node;
   set<int> mines;
+  int options;
 };
 
 ostream& operator << (ostream& os, const GameContext& context)
@@ -62,6 +63,7 @@ ostream& operator << (ostream& os, const GameContext& context)
   assert(os << context.g);           os << ' ';
   assert(os << context.node);        os << ' ';
   assert(os << context.mines);       os << ' ';
+  assert(os << context.options);     os << ' ';
   return os;
 }
 
@@ -72,6 +74,7 @@ istream& operator >> (istream& is, GameContext& context)
   assert(is >> context.g);
   assert(is >> context.node);
   assert(is >> context.mines);
+  assert(is >> context.options);
   return is;
 }
 
@@ -158,6 +161,11 @@ public:
   GameState state;
   GameContext context;
 
+  // server -> me
+  bool options;
+  // me -> server
+  bool use_option = false;
+
   const string punter_name = "bfs3";
 
   BaseAI (string name) : punter_name(name) {}
@@ -205,6 +213,8 @@ public:
     context.mines = set<int>(g.mines.begin(), g.mines.end());
     each (mine, context.mines) BFS(mine);
     state.mode = SCORE_GREEDY;
+
+    context.options = options;
   }
 
   Edge FreeEdge(void)
