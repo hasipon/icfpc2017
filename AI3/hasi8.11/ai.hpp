@@ -385,7 +385,7 @@ struct AI {
 	}
 
 	string Name() {
-		return "shiota8.9";
+		return "hasi8.11";
 	}
 
 	int PunterId() {
